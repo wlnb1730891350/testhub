@@ -1,0 +1,8 @@
+﻿python : C:\Users\a\AppData\Local\Programs\Python\Python313\python.exe: can't open file 'C:\\Users\\a\\.qclaw\\workspac
+e\\testhub_platform\\_update_prompt.py': [Errno 2] No such file or directory
+所在位置 行:1 字符: 282
++ ... ivate base; python C:\Users\a\.qclaw\workspace\testhub_platform\_upda ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\a\AppD...le or directory:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

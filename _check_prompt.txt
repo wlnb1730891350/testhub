@@ -1,0 +1,14 @@
+﻿python : Traceback (most recent call last):
+所在位置 行:1 字符: 147
++ ... ing]::UTF8; python -c "import sys; sys.path.insert(0, 'backend'); imp ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "<string>", line 1, in <module>
+    import sys; sys.path.insert(0, 'backend'); import os; os.environ['DJANGO_SETTINGS_MODULE']='settings'; import djang
+o; django.setup(); from apps.requirement_analysis.models import PromptConfig; p = PromptConfig.objects.filter(role='wri
+ter').first(); print(p.content[:200] if p else 'NOT FOUND')
+                                                                                                           ^^^^^^^^^^^^
+^
+ModuleNotFoundError: No module named 'django'

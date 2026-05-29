@@ -1,0 +1,1677 @@
+WARNING 2026-05-25 12:21:15,449 log 13116 11140 Bad Request: /api/auth/login/
+WARNING 2026-05-25 12:21:15,449 log 13116 11140 Bad Request: /api/auth/login/
+WARNING 2026-05-25 12:21:15,450 basehttp 13116 11140 "POST /api/auth/login/ HTTP/1.1" 400 107
+WARNING 2026-05-25 12:21:15,450 basehttp 13116 11140 "POST /api/auth/login/ HTTP/1.1" 400 107
+INFO 2026-05-25 12:21:22,510 basehttp 13116 2556 "POST /api/auth/login/ HTTP/1.1" 200 831
+INFO 2026-05-25 12:21:22,510 basehttp 13116 2556 "POST /api/auth/login/ HTTP/1.1" 200 831
+INFO 2026-05-25 12:21:22,560 basehttp 13116 2556 - Broken pipe from ('127.0.0.1', 49376)
+INFO 2026-05-25 12:21:22,560 basehttp 13116 2556 - Broken pipe from ('127.0.0.1', 49376)
+INFO 2026-05-25 12:22:07,045 basehttp 13116 2468 "POST /api/auth/login/ HTTP/1.1" 200 831
+INFO 2026-05-25 12:22:07,045 basehttp 13116 2468 "POST /api/auth/login/ HTTP/1.1" 200 831
+INFO 2026-05-25 12:22:10,247 basehttp 13116 17792 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 12:22:10,247 basehttp 13116 17792 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 12:22:10,267 basehttp 13116 16460 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 714
+INFO 2026-05-25 12:22:10,267 basehttp 13116 16460 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 714
+INFO 2026-05-25 12:22:11,236 basehttp 13116 26104 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 12:22:11,236 basehttp 13116 26104 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 12:22:11,245 basehttp 13116 29476 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 12:22:11,245 basehttp 13116 29476 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 12:22:11,303 basehttp 13116 10084 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 973661
+INFO 2026-05-25 12:22:11,303 basehttp 13116 10084 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 973661
+INFO 2026-05-25 12:22:11,492 basehttp 13116 8624 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1485943
+INFO 2026-05-25 12:22:11,492 basehttp 13116 8624 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1485943
+INFO 2026-05-25 12:22:13,888 basehttp 13116 25124 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 973661
+INFO 2026-05-25 12:22:13,888 basehttp 13116 25124 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 973661
+INFO 2026-05-25 12:22:14,166 basehttp 13116 24360 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1485943
+INFO 2026-05-25 12:22:14,166 basehttp 13116 24360 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1485943
+INFO 2026-05-25 12:22:15,488 basehttp 13116 19652 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 12:22:15,488 basehttp 13116 19652 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 12:22:15,492 basehttp 13116 1144 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 714
+INFO 2026-05-25 12:22:15,492 basehttp 13116 1144 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 714
+INFO 2026-05-25 12:22:23,626 basehttp 13116 19584 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 12:22:23,626 basehttp 13116 19584 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 12:22:23,730 basehttp 13116 11584 "GET /api/requirement-analysis/documents/48/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 12:22:23,730 basehttp 13116 11584 "GET /api/requirement-analysis/documents/48/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 12:22:23,812 basehttp 13116 19060 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 12:22:23,812 basehttp 13116 19060 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 12:22:24,108 basehttp 13116 1228 "GET /api/requirement-analysis/testcase-generation/TASK_87679CC2/ HTTP/1.1" 200 14265
+INFO 2026-05-25 12:22:24,108 basehttp 13116 1228 "GET /api/requirement-analysis/testcase-generation/TASK_87679CC2/ HTTP/1.1" 200 14265
+INFO 2026-05-25 12:22:24,168 basehttp 13116 18488 "GET /api/requirement-analysis/testcase-generation/TASK_87679CC2/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 12:22:24,168 basehttp 13116 18488 "GET /api/requirement-analysis/testcase-generation/TASK_87679CC2/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 12:22:24,201 models 13116 11144 === API调用详情 ===
+INFO 2026-05-25 12:22:24,202 models 13116 11144 原始base_url: https://ark.cn-beijing.volces.com/api/coding/v3
+INFO 2026-05-25 12:22:24,202 models 13116 11144 最终请求URL: https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions
+INFO 2026-05-25 12:22:24,203 models 13116 11144 模型名称: ark-code-latest
+INFO 2026-05-25 12:22:24,203 models 13116 11144 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 12:22:24,790 models 13116 11144 发送POST请求到: https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions
+INFO 2026-05-25 12:22:25,029 _client 13116 11144 HTTP Request: POST https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions "HTTP/1.1 400 Bad Request"
+INFO 2026-05-25 12:22:25,029 models 13116 11144 收到响应: status_code=400
+ERROR 2026-05-25 12:22:25,030 models 13116 11144 API调用返回错误: Status=400, Body={"error":{"code":"InvalidSubscription","message":"Your account (2125369946) does not have a valid CodingPlan subscription, or your subscription has expired. Please visit https://console.volcengine.com/ark/region:ark+cn-beijing/openManagement?OpenModelVisible=false\u0026tab=CodingPlan to review your subscription status or complete the subscription or renewal process.  Request id: 021779682945327cef11be83a3a19450d30840534a3c1e1c171ee","param":"","type":"Bad Request"}}
+ERROR 2026-05-25 12:22:25,031 models 13116 11144 豆包(字节) API返回错误 400: {"error":{"code":"InvalidSubscription","message":"Your account (2125369946) does not have a valid CodingPlan subscription, or your subscription has expired. Please visit https://console.volcengine.com/ark/region:ark+cn-beijing/openManagement?OpenModelVisible=false\u0026tab=CodingPlan to review your subscription status or complete the subscription or renewal process.  Request id: 021779682945327cef11be83a3a19450d30840534a3c1e1c171ee","param":"","type":"Bad Request"}}
+ERROR 2026-05-25 12:22:25,032 views 13116 11144 启动澄清失败: 豆包(字节) API返回错误 400: {"error":{"code":"InvalidSubscription","message":"Your account (2125369946) does not have a valid CodingPlan subscription, or your subscription has expired. Please visit https://console.volcengine.com/ark/region:ark+cn-beijing/openManagement?OpenModelVisible=false\u0026tab=CodingPlan to review your subscription status or complete the subscription or renewal process.  Request id: 021779682945327cef11be83a3a19450d30840534a3c1e1c171ee","param":"","type":"Bad Request"}}
+ERROR 2026-05-25 12:22:25,032 log 13116 11144 Internal Server Error: /api/requirement-analysis/testcase-generation/TASK_87679CC2/start-clarification/
+ERROR 2026-05-25 12:22:25,032 log 13116 11144 Internal Server Error: /api/requirement-analysis/testcase-generation/TASK_87679CC2/start-clarification/
+ERROR 2026-05-25 12:22:25,033 basehttp 13116 11144 "POST /api/requirement-analysis/testcase-generation/TASK_87679CC2/start-clarification/ HTTP/1.1" 500 557
+ERROR 2026-05-25 12:22:25,033 basehttp 13116 11144 "POST /api/requirement-analysis/testcase-generation/TASK_87679CC2/start-clarification/ HTTP/1.1" 500 557
+INFO 2026-05-25 12:22:40,029 basehttp 13116 7896 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 12:22:40,029 basehttp 13116 7896 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 12:22:40,056 basehttp 13116 8836 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 714
+INFO 2026-05-25 12:22:40,056 basehttp 13116 8836 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 714
+INFO 2026-05-25 12:22:58,914 basehttp 13116 26252 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 12:22:58,914 basehttp 13116 26252 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 12:22:59,017 basehttp 13116 11628 "GET /api/requirement-analysis/documents/49/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 12:22:59,017 basehttp 13116 11628 "GET /api/requirement-analysis/documents/49/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 12:22:59,075 basehttp 13116 13224 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 12:22:59,075 basehttp 13116 13224 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 12:22:59,221 basehttp 13116 22016 "GET /api/requirement-analysis/testcase-generation/TASK_77950323/ HTTP/1.1" 200 14265
+INFO 2026-05-25 12:22:59,221 basehttp 13116 22016 "GET /api/requirement-analysis/testcase-generation/TASK_77950323/ HTTP/1.1" 200 14265
+INFO 2026-05-25 12:22:59,293 basehttp 13116 12536 "GET /api/requirement-analysis/testcase-generation/TASK_77950323/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 12:22:59,293 basehttp 13116 12536 "GET /api/requirement-analysis/testcase-generation/TASK_77950323/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 12:22:59,343 models 13116 20544 === API调用详情 ===
+INFO 2026-05-25 12:22:59,343 models 13116 20544 原始base_url: https://ark.cn-beijing.volces.com/api/coding/v3
+INFO 2026-05-25 12:22:59,344 models 13116 20544 最终请求URL: https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions
+INFO 2026-05-25 12:22:59,344 models 13116 20544 模型名称: ark-code-latest
+INFO 2026-05-25 12:22:59,344 models 13116 20544 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 12:22:59,704 models 13116 20544 发送POST请求到: https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions
+INFO 2026-05-25 12:22:59,864 _client 13116 20544 HTTP Request: POST https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions "HTTP/1.1 400 Bad Request"
+INFO 2026-05-25 12:22:59,865 models 13116 20544 收到响应: status_code=400
+ERROR 2026-05-25 12:22:59,865 models 13116 20544 API调用返回错误: Status=400, Body={"error":{"code":"InvalidSubscription","message":"Your account (2125369946) does not have a valid CodingPlan subscription, or your subscription has expired. Please visit https://console.volcengine.com/ark/region:ark+cn-beijing/openManagement?OpenModelVisible=false\u0026tab=CodingPlan to review your subscription status or complete the subscription or renewal process.  Request id: 0217796829802068e448306abe42712131f7cc9472f1383f8a4d0","param":"","type":"Bad Request"}}
+ERROR 2026-05-25 12:22:59,866 models 13116 20544 豆包(字节) API返回错误 400: {"error":{"code":"InvalidSubscription","message":"Your account (2125369946) does not have a valid CodingPlan subscription, or your subscription has expired. Please visit https://console.volcengine.com/ark/region:ark+cn-beijing/openManagement?OpenModelVisible=false\u0026tab=CodingPlan to review your subscription status or complete the subscription or renewal process.  Request id: 0217796829802068e448306abe42712131f7cc9472f1383f8a4d0","param":"","type":"Bad Request"}}
+ERROR 2026-05-25 12:22:59,866 views 13116 20544 启动澄清失败: 豆包(字节) API返回错误 400: {"error":{"code":"InvalidSubscription","message":"Your account (2125369946) does not have a valid CodingPlan subscription, or your subscription has expired. Please visit https://console.volcengine.com/ark/region:ark+cn-beijing/openManagement?OpenModelVisible=false\u0026tab=CodingPlan to review your subscription status or complete the subscription or renewal process.  Request id: 0217796829802068e448306abe42712131f7cc9472f1383f8a4d0","param":"","type":"Bad Request"}}
+ERROR 2026-05-25 12:22:59,867 log 13116 20544 Internal Server Error: /api/requirement-analysis/testcase-generation/TASK_77950323/start-clarification/
+ERROR 2026-05-25 12:22:59,867 log 13116 20544 Internal Server Error: /api/requirement-analysis/testcase-generation/TASK_77950323/start-clarification/
+ERROR 2026-05-25 12:22:59,867 basehttp 13116 20544 "POST /api/requirement-analysis/testcase-generation/TASK_77950323/start-clarification/ HTTP/1.1" 500 557
+ERROR 2026-05-25 12:22:59,867 basehttp 13116 20544 "POST /api/requirement-analysis/testcase-generation/TASK_77950323/start-clarification/ HTTP/1.1" 500 557
+INFO 2026-05-25 13:50:37,200 basehttp 13116 25592 "POST /api/auth/token/refresh/ HTTP/1.1" 200 489
+INFO 2026-05-25 13:50:37,200 basehttp 13116 25592 "POST /api/auth/token/refresh/ HTTP/1.1" 200 489
+INFO 2026-05-25 13:50:37,481 basehttp 13116 33124 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1558
+INFO 2026-05-25 13:50:37,481 basehttp 13116 33124 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1558
+INFO 2026-05-25 13:50:43,249 basehttp 13116 14076 "DELETE /api/requirement-analysis/ai-models/6/ HTTP/1.1" 204 0
+INFO 2026-05-25 13:50:43,249 basehttp 13116 14076 "DELETE /api/requirement-analysis/ai-models/6/ HTTP/1.1" 204 0
+INFO 2026-05-25 13:50:43,288 basehttp 13116 29888 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1083
+INFO 2026-05-25 13:50:43,288 basehttp 13116 29888 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1083
+INFO 2026-05-25 13:57:17,029 basehttp 13116 32348 "PATCH /api/requirement-analysis/ai-models/5/ HTTP/1.1" 200 514
+INFO 2026-05-25 13:57:17,029 basehttp 13116 32348 "PATCH /api/requirement-analysis/ai-models/5/ HTTP/1.1" 200 514
+INFO 2026-05-25 13:57:17,092 basehttp 13116 31412 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1082
+INFO 2026-05-25 13:57:17,092 basehttp 13116 31412 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1082
+INFO 2026-05-25 13:57:19,946 views 13116 30048 === 开始测试模型连接 ===
+INFO 2026-05-25 13:57:19,946 views 13116 30048 模型类型: other
+INFO 2026-05-25 13:57:19,946 views 13116 30048 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 13:57:19,947 views 13116 30048 API URL: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 13:57:19,947 views 13116 30048 API Key前缀: ark-19bc08...
+INFO 2026-05-25 13:57:19,948 views 13116 30048 开始调用API...
+INFO 2026-05-25 13:57:19,948 models 13116 30048 === API调用详情 ===
+INFO 2026-05-25 13:57:19,948 models 13116 30048 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 13:57:19,949 models 13116 30048 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 13:57:19,949 models 13116 30048 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 13:57:19,949 models 13116 30048 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 13:57:20,291 models 13116 30048 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 13:57:20,435 _client 13116 30048 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO 2026-05-25 13:57:20,436 models 13116 30048 收到响应: status_code=401
+ERROR 2026-05-25 13:57:20,436 models 13116 30048 API调用返回错误: Status=401, Body={
+    "error": {
+        "message": "Invalid API Key",
+        "param": "Please provide valid API Key",
+        "code": "401",
+        "type": "invalid_key"
+    }
+}
+
+ERROR 2026-05-25 13:57:20,437 models 13116 30048 其他(兼容OpenAI API) API返回错误 401: {
+    "error": {
+        "message": "Invalid API Key",
+        "param": "Please provide valid API Key",
+        "code": "401",
+        "type": "invalid_key"
+    }
+}
+
+ERROR 2026-05-25 13:57:20,437 views 13116 30048 API连接测试异常: Exception('其他(兼容OpenAI API) API返回错误 401: {\n    "error": {\n        "message": "Invalid API Key",\n        "param": "Please provide valid API Key",\n        "code": "401",\n        "type": "invalid_key"\n    }\n}\n'), URL: https://token-plan-cn.xiaomimimo.com/v1, Model: mimo-v2.5-pro
+ERROR 2026-05-25 13:57:20,445 views 13116 30048 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 542, in call_openai_compatible_api
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '401 Unauthorized' for url 'https://token-plan-cn.xiaomimimo.com/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 550, in call_openai_compatible_api
+    raise Exception(error_msg)
+Exception: 其他(兼容OpenAI API) API返回错误 401: {
+    "error": {
+        "message": "Invalid API Key",
+        "param": "Please provide valid API Key",
+        "code": "401",
+        "type": "invalid_key"
+    }
+}
+
+
+WARNING 2026-05-25 13:57:20,446 log 13116 30048 Bad Request: /api/requirement-analysis/ai-models/5/test_connection/
+WARNING 2026-05-25 13:57:20,446 log 13116 30048 Bad Request: /api/requirement-analysis/ai-models/5/test_connection/
+WARNING 2026-05-25 13:57:20,447 basehttp 13116 30048 "POST /api/requirement-analysis/ai-models/5/test_connection/ HTTP/1.1" 400 287
+WARNING 2026-05-25 13:57:20,447 basehttp 13116 30048 "POST /api/requirement-analysis/ai-models/5/test_connection/ HTTP/1.1" 400 287
+INFO 2026-05-25 13:57:35,472 basehttp 13116 31796 "PATCH /api/requirement-analysis/ai-models/5/ HTTP/1.1" 200 519
+INFO 2026-05-25 13:57:35,472 basehttp 13116 31796 "PATCH /api/requirement-analysis/ai-models/5/ HTTP/1.1" 200 519
+INFO 2026-05-25 13:57:35,536 basehttp 13116 16040 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1087
+INFO 2026-05-25 13:57:35,536 basehttp 13116 16040 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1087
+INFO 2026-05-25 13:57:36,508 views 13116 31436 === 开始测试模型连接 ===
+INFO 2026-05-25 13:57:36,508 views 13116 31436 模型类型: other
+INFO 2026-05-25 13:57:36,508 views 13116 31436 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 13:57:36,508 views 13116 31436 API URL: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 13:57:36,508 views 13116 31436 API Key前缀: tp-c3kjh88...
+INFO 2026-05-25 13:57:36,509 views 13116 31436 开始调用API...
+INFO 2026-05-25 13:57:36,509 models 13116 31436 === API调用详情 ===
+INFO 2026-05-25 13:57:36,509 models 13116 31436 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 13:57:36,510 models 13116 31436 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 13:57:36,510 models 13116 31436 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 13:57:36,510 models 13116 31436 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 13:57:36,855 models 13116 31436 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 13:57:38,436 _client 13116 31436 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 13:57:38,436 models 13116 31436 收到响应: status_code=200
+INFO 2026-05-25 13:57:38,437 models 13116 31436 API调用成功，响应内容: {'id': '1c6ba529a3ba4a5ab344b8deba2ab989', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '连接成功', 'role': 'assistant', 'tool_calls': None, 'reasoning_content': 'The user is a...
+INFO 2026-05-25 13:57:38,437 views 13116 31436 API调用成功: {'id': '1c6ba529a3ba4a5ab344b8deba2ab989', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '连接成功', 'role': 'assistant', 'tool_calls': None, 'reasoning_content': 'The user is asking me to reply with "连接成功" (which means "Connection successful" in Chinese).'}}], 'created': 1779688658, 'model': 'mimo-v2.5-pro', 'object': 'chat.completion', 'usage': {'completion_tokens': 27, 'prompt_tokens': 21, 'total_tokens': 48, 'completion_tokens_details': {'reasoning_tokens': 22}, 'prompt_tokens_details': {}}}
+INFO 2026-05-25 13:57:38,438 basehttp 13116 31436 "POST /api/requirement-analysis/ai-models/5/test_connection/ HTTP/1.1" 200 73
+INFO 2026-05-25 13:57:38,438 basehttp 13116 31436 "POST /api/requirement-analysis/ai-models/5/test_connection/ HTTP/1.1" 200 73
+INFO 2026-05-25 13:58:21,438 basehttp 13116 1648 "PATCH /api/requirement-analysis/ai-models/3/ HTTP/1.1" 200 506
+INFO 2026-05-25 13:58:21,438 basehttp 13116 1648 "PATCH /api/requirement-analysis/ai-models/3/ HTTP/1.1" 200 506
+INFO 2026-05-25 13:58:21,500 basehttp 13116 18144 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1078
+INFO 2026-05-25 13:58:21,500 basehttp 13116 18144 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1078
+INFO 2026-05-25 13:58:23,707 views 13116 8576 === 开始测试模型连接 ===
+INFO 2026-05-25 13:58:23,708 views 13116 8576 模型类型: doubao
+INFO 2026-05-25 13:58:23,708 views 13116 8576 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 13:58:23,708 views 13116 8576 API URL: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 13:58:23,709 views 13116 8576 API Key前缀: tp-c3kjh88...
+INFO 2026-05-25 13:58:23,709 views 13116 8576 开始调用API...
+INFO 2026-05-25 13:58:23,710 models 13116 8576 === API调用详情 ===
+INFO 2026-05-25 13:58:23,710 models 13116 8576 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 13:58:23,710 models 13116 8576 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 13:58:23,710 models 13116 8576 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 13:58:23,711 models 13116 8576 请求参数: max_tokens=16384, temperature=0.8, top_p=0.9
+INFO 2026-05-25 13:58:24,047 models 13116 8576 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 13:58:26,419 _client 13116 8576 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 13:58:26,420 models 13116 8576 收到响应: status_code=200
+INFO 2026-05-25 13:58:26,421 models 13116 8576 API调用成功，响应内容: {'id': 'fe084ddc9768499da13a67e0a50fbcc7', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '连接成功', 'role': 'assistant', 'tool_calls': None, 'reasoning_content': 'The user is a...
+INFO 2026-05-25 13:58:26,421 views 13116 8576 API调用成功: {'id': 'fe084ddc9768499da13a67e0a50fbcc7', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '连接成功', 'role': 'assistant', 'tool_calls': None, 'reasoning_content': 'The user is asking me to reply with "连接成功" (which means "Connection successful" in Chinese).'}}], 'created': 1779688706, 'model': 'mimo-v2.5-pro', 'object': 'chat.completion', 'usage': {'completion_tokens': 27, 'prompt_tokens': 21, 'total_tokens': 48, 'completion_tokens_details': {'reasoning_tokens': 22}, 'prompt_tokens_details': {}}}
+INFO 2026-05-25 13:58:26,422 basehttp 13116 8576 "POST /api/requirement-analysis/ai-models/3/test_connection/ HTTP/1.1" 200 73
+INFO 2026-05-25 13:58:26,422 basehttp 13116 8576 "POST /api/requirement-analysis/ai-models/3/test_connection/ HTTP/1.1" 200 73
+INFO 2026-05-25 13:58:32,877 basehttp 13116 32472 "PATCH /api/requirement-analysis/ai-models/3/ HTTP/1.1" 200 506
+INFO 2026-05-25 13:58:32,877 basehttp 13116 32472 "PATCH /api/requirement-analysis/ai-models/3/ HTTP/1.1" 200 506
+INFO 2026-05-25 13:58:32,934 basehttp 13116 10188 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1078
+INFO 2026-05-25 13:58:32,934 basehttp 13116 10188 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1078
+INFO 2026-05-25 13:58:38,506 basehttp 13116 32648 "GET /api/requirement-analysis/prompts/ HTTP/1.1" 200 20383
+INFO 2026-05-25 13:58:38,506 basehttp 13116 32648 "GET /api/requirement-analysis/prompts/ HTTP/1.1" 200 20383
+INFO 2026-05-25 13:58:47,355 basehttp 13116 10136 "GET /api/requirement-analysis/prompts/load_defaults/ HTTP/1.1" 200 15799
+INFO 2026-05-25 13:58:47,355 basehttp 13116 10136 "GET /api/requirement-analysis/prompts/load_defaults/ HTTP/1.1" 200 15799
+INFO 2026-05-25 13:59:15,597 basehttp 13116 22224 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1078
+INFO 2026-05-25 13:59:15,597 basehttp 13116 22224 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1078
+INFO 2026-05-25 13:59:18,880 basehttp 13116 23724 "GET /api/ui-automation/config/environment/check_environment/ HTTP/1.1" 200 644
+INFO 2026-05-25 13:59:18,880 basehttp 13116 23724 "GET /api/ui-automation/config/environment/check_environment/ HTTP/1.1" 200 644
+INFO 2026-05-25 13:59:22,682 basehttp 13116 11012 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 13:59:22,682 basehttp 13116 11012 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 13:59:22,693 basehttp 13116 21416 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 13:59:22,693 basehttp 13116 21416 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 13:59:35,309 basehttp 13116 19532 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 13:59:35,309 basehttp 13116 19532 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 13:59:35,406 basehttp 13116 31408 "GET /api/requirement-analysis/documents/50/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 13:59:35,406 basehttp 13116 31408 "GET /api/requirement-analysis/documents/50/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 13:59:35,474 basehttp 13116 15792 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 13:59:35,474 basehttp 13116 15792 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 13:59:35,622 basehttp 13116 33452 "GET /api/requirement-analysis/testcase-generation/TASK_69A43818/ HTTP/1.1" 200 14265
+INFO 2026-05-25 13:59:35,622 basehttp 13116 33452 "GET /api/requirement-analysis/testcase-generation/TASK_69A43818/ HTTP/1.1" 200 14265
+INFO 2026-05-25 13:59:35,655 basehttp 13116 29792 "GET /api/requirement-analysis/testcase-generation/TASK_69A43818/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 13:59:35,655 basehttp 13116 29792 "GET /api/requirement-analysis/testcase-generation/TASK_69A43818/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 13:59:35,681 models 13116 25604 === API调用详情 ===
+INFO 2026-05-25 13:59:35,681 models 13116 25604 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 13:59:35,682 models 13116 25604 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 13:59:35,682 models 13116 25604 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 13:59:35,682 models 13116 25604 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 13:59:36,038 models 13116 25604 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:00:00,071 _client 13116 25604 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:00:00,072 models 13116 25604 收到响应: status_code=200
+INFO 2026-05-25 14:00:00,073 models 13116 25604 API调用成功，响应内容: {'id': '927cc8136e8c45d290d06c745c09d21c', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '根据对需求文档的仔细审阅，我识别出以下几个在编写测试用例前必须澄清的关键矛盾点或模糊定义，不澄清将直接影响测试用例的正确性：\n\n### **关键澄清点**\n\n...
+INFO 2026-05-25 14:00:00,080 basehttp 13116 25604 "POST /api/requirement-analysis/testcase-generation/TASK_69A43818/start-clarification/ HTTP/1.1" 200 2660
+INFO 2026-05-25 14:00:00,080 basehttp 13116 25604 "POST /api/requirement-analysis/testcase-generation/TASK_69A43818/start-clarification/ HTTP/1.1" 200 2660
+INFO 2026-05-25 14:01:50,850 basehttp 13116 16352 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:01:50,850 basehttp 13116 16352 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:01:50,853 basehttp 13116 20336 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:01:50,853 basehttp 13116 20336 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:01:59,134 basehttp 13116 12020 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 14:01:59,134 basehttp 13116 12020 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 14:01:59,224 basehttp 13116 31396 "GET /api/requirement-analysis/documents/51/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 14:01:59,224 basehttp 13116 31396 "GET /api/requirement-analysis/documents/51/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 14:01:59,305 basehttp 13116 22908 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 14:01:59,305 basehttp 13116 22908 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 14:01:59,408 basehttp 13116 14452 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:01:59,408 basehttp 13116 14452 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:01:59,451 basehttp 13116 7108 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 14:01:59,451 basehttp 13116 7108 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 14:01:59,479 models 13116 30188 === API调用详情 ===
+INFO 2026-05-25 14:01:59,479 models 13116 30188 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 14:01:59,479 models 13116 30188 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:01:59,480 models 13116 30188 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 14:01:59,480 models 13116 30188 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:01:59,829 models 13116 30188 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:02:25,762 _client 13116 30188 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:02:25,763 models 13116 30188 收到响应: status_code=200
+INFO 2026-05-25 14:02:25,763 models 13116 30188 API调用成功，响应内容: {'id': '5f15835939714dfca04f18421f7ed102', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '需求文档已覆盖核心功能逻辑、触发条件、展示规则、交互行为及边界情况（如互斥弹窗规则、数据展示条件、隐私开关默认状态、自动更新频率限制等），信息足够支撑测试用例编写。\...
+INFO 2026-05-25 14:02:25,769 basehttp 13116 30188 "POST /api/requirement-analysis/testcase-generation/TASK_EA25807C/start-clarification/ HTTP/1.1" 200 703
+INFO 2026-05-25 14:02:25,769 basehttp 13116 30188 "POST /api/requirement-analysis/testcase-generation/TASK_EA25807C/start-clarification/ HTTP/1.1" 200 703
+INFO 2026-05-25 14:07:49,143 basehttp 13116 9128 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:07:49,143 basehttp 13116 9128 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:07:49,202 basehttp 13116 1628 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/clarifications/ HTTP/1.1" 200 669
+INFO 2026-05-25 14:07:49,202 basehttp 13116 1628 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/clarifications/ HTTP/1.1" 200 669
+INFO 2026-05-25 14:07:51,254 basehttp 13116 780 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:07:51,254 basehttp 13116 780 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:07:51,269 basehttp 13116 25044 "GET /api/testcases/?page=1&page_size=15&search=&project=&priority= HTTP/1.1" 200 13519
+INFO 2026-05-25 14:07:51,269 basehttp 13116 25044 "GET /api/testcases/?page=1&page_size=15&search=&project=&priority= HTTP/1.1" 200 13519
+INFO 2026-05-25 14:07:52,230 basehttp 13116 31052 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:07:52,230 basehttp 13116 31052 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:07:52,236 basehttp 13116 32984 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:07:52,236 basehttp 13116 32984 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:07:53,352 basehttp 13116 19980 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:07:53,352 basehttp 13116 19980 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:07:53,363 basehttp 13116 10136 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:07:53,363 basehttp 13116 10136 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:07:53,432 basehttp 13116 17548 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 638017
+INFO 2026-05-25 14:07:53,432 basehttp 13116 17548 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 638017
+INFO 2026-05-25 14:07:53,666 basehttp 13116 15424 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1543007
+INFO 2026-05-25 14:07:53,666 basehttp 13116 15424 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1543007
+INFO 2026-05-25 14:07:57,910 basehttp 13116 28780 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:07:57,910 basehttp 13116 28780 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:07:58,065 basehttp 13116 32228 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/clarifications/ HTTP/1.1" 200 669
+INFO 2026-05-25 14:07:58,065 basehttp 13116 32228 "GET /api/requirement-analysis/testcase-generation/TASK_EA25807C/clarifications/ HTTP/1.1" 200 669
+INFO 2026-05-25 14:08:07,107 basehttp 13116 23916 "DELETE /api/requirement-analysis/testcase-generation/TASK_EA25807C/ HTTP/1.1" 204 0
+INFO 2026-05-25 14:08:07,107 basehttp 13116 23916 "DELETE /api/requirement-analysis/testcase-generation/TASK_EA25807C/ HTTP/1.1" 204 0
+INFO 2026-05-25 14:08:07,137 basehttp 13116 23368 "DELETE /api/requirement-analysis/testcase-generation/TASK_69A43818/ HTTP/1.1" 204 0
+INFO 2026-05-25 14:08:07,137 basehttp 13116 23368 "DELETE /api/requirement-analysis/testcase-generation/TASK_69A43818/ HTTP/1.1" 204 0
+INFO 2026-05-25 14:08:07,151 basehttp 13116 25272 "DELETE /api/requirement-analysis/testcase-generation/TASK_77950323/ HTTP/1.1" 204 0
+INFO 2026-05-25 14:08:07,151 basehttp 13116 25272 "DELETE /api/requirement-analysis/testcase-generation/TASK_77950323/ HTTP/1.1" 204 0
+INFO 2026-05-25 14:08:07,186 basehttp 13116 21976 "DELETE /api/requirement-analysis/testcase-generation/TASK_87679CC2/ HTTP/1.1" 204 0
+INFO 2026-05-25 14:08:07,186 basehttp 13116 21976 "DELETE /api/requirement-analysis/testcase-generation/TASK_87679CC2/ HTTP/1.1" 204 0
+INFO 2026-05-25 14:08:07,261 basehttp 13116 15420 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 973661
+INFO 2026-05-25 14:08:07,261 basehttp 13116 15420 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 973661
+INFO 2026-05-25 14:08:07,426 basehttp 13116 25368 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1485943
+INFO 2026-05-25 14:08:07,426 basehttp 13116 25368 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1485943
+INFO 2026-05-25 14:08:08,556 basehttp 13116 7992 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:08:08,556 basehttp 13116 7992 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:08:08,560 basehttp 13116 12308 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:08:08,560 basehttp 13116 12308 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:08:15,919 basehttp 13116 15820 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 14:08:15,919 basehttp 13116 15820 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 14:08:16,011 basehttp 13116 3220 "GET /api/requirement-analysis/documents/52/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 14:08:16,011 basehttp 13116 3220 "GET /api/requirement-analysis/documents/52/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 14:08:16,079 basehttp 13116 23712 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 14:08:16,079 basehttp 13116 23712 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 14:08:16,140 basehttp 13116 3976 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:08:16,140 basehttp 13116 3976 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:08:16,165 basehttp 13116 21988 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 14:08:16,165 basehttp 13116 21988 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 14:08:16,203 models 13116 7628 === API调用详情 ===
+INFO 2026-05-25 14:08:16,204 models 13116 7628 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 14:08:16,204 models 13116 7628 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:08:16,204 models 13116 7628 模型名称: mimo-v2.5-pro
+INFO 2026-05-25 14:08:16,204 models 13116 7628 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:08:16,566 models 13116 7628 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:08:59,887 _client 13116 7628 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:08:59,888 models 13116 7628 收到响应: status_code=200
+INFO 2026-05-25 14:08:59,888 models 13116 7628 API调用成功，响应内容: {'id': 'b7e9926027eb4ebd99a5c7d4cc611dc5', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '我已仔细阅读了这份PUBG数据工具二期需求文档。文档整体结构清晰，涵盖了社区首页改造、账号绑定引导、数据展示、后台配置等多个模块。\n\n作为测试架构师，为了确保后续...
+INFO 2026-05-25 14:16:32,472 basehttp 13116 24672 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:16:32,472 basehttp 13116 24672 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:16:32,524 basehttp 13116 33644 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarifications/ HTTP/1.1" 200 4406
+INFO 2026-05-25 14:16:32,524 basehttp 13116 33644 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarifications/ HTTP/1.1" 200 4406
+INFO 2026-05-25 14:16:48,446 basehttp 13116 3140 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:16:48,446 basehttp 13116 3140 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:16:48,473 basehttp 13116 23248 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarifications/ HTTP/1.1" 200 4406
+INFO 2026-05-25 14:16:48,473 basehttp 13116 23248 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarifications/ HTTP/1.1" 200 4406
+INFO 2026-05-25 14:16:55,278 basehttp 13116 30108 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:16:55,278 basehttp 13116 30108 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:16:55,352 basehttp 13116 32620 "GET /api/reports/reports/dashboard/ HTTP/1.1" 200 90
+INFO 2026-05-25 14:16:55,352 basehttp 13116 32620 "GET /api/reports/reports/dashboard/ HTTP/1.1" 200 90
+INFO 2026-05-25 14:16:55,380 basehttp 13116 31848 "GET /api/reports/reports/status_distribution/?days=7 HTTP/1.1" 200 62
+INFO 2026-05-25 14:16:55,380 basehttp 13116 31848 "GET /api/reports/reports/status_distribution/?days=7 HTTP/1.1" 200 62
+INFO 2026-05-25 14:16:55,456 basehttp 13116 33604 "GET /api/reports/reports/execution_trend/?days=7 HTTP/1.1" 200 226
+INFO 2026-05-25 14:16:55,456 basehttp 13116 33604 "GET /api/reports/reports/execution_trend/?days=7 HTTP/1.1" 200 226
+INFO 2026-05-25 14:16:55,498 basehttp 13116 10752 "GET /api/reports/reports/defect_distribution/?days=7 HTTP/1.1" 200 27
+INFO 2026-05-25 14:16:55,498 basehttp 13116 10752 "GET /api/reports/reports/defect_distribution/?days=7 HTTP/1.1" 200 27
+INFO 2026-05-25 14:16:55,589 basehttp 13116 30980 "GET /api/reports/reports/failed_cases_top/?days=7 HTTP/1.1" 200 1114
+INFO 2026-05-25 14:16:55,589 basehttp 13116 30980 "GET /api/reports/reports/failed_cases_top/?days=7 HTTP/1.1" 200 1114
+INFO 2026-05-25 14:16:55,661 basehttp 13116 21568 "GET /api/reports/reports/ai_efficiency/?days=7 HTTP/1.1" 200 99
+INFO 2026-05-25 14:16:55,661 basehttp 13116 21568 "GET /api/reports/reports/ai_efficiency/?days=7 HTTP/1.1" 200 99
+INFO 2026-05-25 14:16:55,707 basehttp 13116 33536 "GET /api/reports/reports/team_workload/?days=7 HTTP/1.1" 200 61
+INFO 2026-05-25 14:16:55,707 basehttp 13116 33536 "GET /api/reports/reports/team_workload/?days=7 HTTP/1.1" 200 61
+INFO 2026-05-25 14:16:56,646 basehttp 13116 32560 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:16:56,646 basehttp 13116 32560 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:16:56,661 basehttp 13116 8956 "GET /api/users/users/ HTTP/1.1" 200 361
+INFO 2026-05-25 14:16:56,661 basehttp 13116 8956 "GET /api/users/users/ HTTP/1.1" 200 361
+INFO 2026-05-25 14:16:56,675 basehttp 13116 20136 "GET /api/executions/plans/?page=1&page_size=20 HTTP/1.1" 200 264
+INFO 2026-05-25 14:16:56,675 basehttp 13116 32388 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:16:56,675 basehttp 13116 20136 "GET /api/executions/plans/?page=1&page_size=20 HTTP/1.1" 200 264
+INFO 2026-05-25 14:16:56,675 basehttp 13116 32388 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:17:02,696 basehttp 13116 24328 "POST /api/auth/token/refresh/ HTTP/1.1" 200 489
+INFO 2026-05-25 14:17:02,696 basehttp 13116 24328 "POST /api/auth/token/refresh/ HTTP/1.1" 200 489
+INFO 2026-05-25 14:17:02,715 basehttp 13116 6824 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1078
+INFO 2026-05-25 14:17:02,715 basehttp 13116 6824 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1078
+INFO 2026-05-25 14:17:09,160 basehttp 13116 31676 "PATCH /api/requirement-analysis/ai-models/5/ HTTP/1.1" 200 515
+INFO 2026-05-25 14:17:09,160 basehttp 13116 31676 "PATCH /api/requirement-analysis/ai-models/5/ HTTP/1.1" 200 515
+INFO 2026-05-25 14:17:09,248 basehttp 13116 24612 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1074
+INFO 2026-05-25 14:17:09,248 basehttp 13116 24612 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1074
+INFO 2026-05-25 14:17:13,311 basehttp 13116 31416 "PATCH /api/requirement-analysis/ai-models/3/ HTTP/1.1" 200 502
+INFO 2026-05-25 14:17:13,311 basehttp 13116 31416 "PATCH /api/requirement-analysis/ai-models/3/ HTTP/1.1" 200 502
+INFO 2026-05-25 14:17:13,393 basehttp 13116 29996 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1070
+INFO 2026-05-25 14:17:13,393 basehttp 13116 29996 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1070
+INFO 2026-05-25 14:17:14,327 views 13116 32544 === 开始测试模型连接 ===
+INFO 2026-05-25 14:17:14,328 views 13116 32544 模型类型: doubao
+INFO 2026-05-25 14:17:14,328 views 13116 32544 模型名称: mimo-v2.5
+INFO 2026-05-25 14:17:14,328 views 13116 32544 API URL: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 14:17:14,328 views 13116 32544 API Key前缀: tp-c3kjh88...
+INFO 2026-05-25 14:17:14,329 views 13116 32544 开始调用API...
+INFO 2026-05-25 14:17:14,329 models 13116 32544 === API调用详情 ===
+INFO 2026-05-25 14:17:14,330 models 13116 32544 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 14:17:14,330 models 13116 32544 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:17:14,330 models 13116 32544 模型名称: mimo-v2.5
+INFO 2026-05-25 14:17:14,330 models 13116 32544 请求参数: max_tokens=16384, temperature=0.8, top_p=0.9
+INFO 2026-05-25 14:17:14,778 models 13116 32544 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:17:16,630 _client 13116 32544 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:17:16,630 models 13116 32544 收到响应: status_code=200
+INFO 2026-05-25 14:17:16,631 models 13116 32544 API调用成功，响应内容: {'id': '1d18ab49a819492fa47b3c3ee8d69b4e', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '连接成功', 'role': 'assistant', 'tool_calls': None, 'reasoning_content': 'The user is a...
+INFO 2026-05-25 14:17:16,631 views 13116 32544 API调用成功: {'id': '1d18ab49a819492fa47b3c3ee8d69b4e', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '连接成功', 'role': 'assistant', 'tool_calls': None, 'reasoning_content': 'The user is asking me to reply with \'连接成功\' (which means "Connection successful" in Chinese).'}}], 'created': 1779689837, 'model': 'mimo-v2.5', 'object': 'chat.completion', 'usage': {'completion_tokens': 27, 'prompt_tokens': 21, 'total_tokens': 48, 'completion_tokens_details': {'reasoning_tokens': 22}, 'prompt_tokens_details': {}}}
+INFO 2026-05-25 14:17:16,633 basehttp 13116 32544 "POST /api/requirement-analysis/ai-models/3/test_connection/ HTTP/1.1" 200 73
+INFO 2026-05-25 14:17:16,633 basehttp 13116 32544 "POST /api/requirement-analysis/ai-models/3/test_connection/ HTTP/1.1" 200 73
+INFO 2026-05-25 14:17:21,977 basehttp 13116 5256 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:17:21,977 basehttp 13116 5256 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:17:22,000 basehttp 13116 30084 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:17:22,000 basehttp 13116 30084 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:17:36,556 basehttp 13116 30852 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 877039
+INFO 2026-05-25 14:17:36,556 basehttp 13116 30852 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 877039
+INFO 2026-05-25 14:17:36,566 basehttp 13116 31932 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:17:36,566 basehttp 13116 31932 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:17:36,584 basehttp 13116 15076 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:17:36,584 basehttp 13116 15076 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:17:36,741 basehttp 13116 33208 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1500209
+INFO 2026-05-25 14:17:36,741 basehttp 13116 33208 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1500209
+INFO 2026-05-25 14:17:39,206 basehttp 13116 4748 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:17:39,206 basehttp 13116 4748 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:17:39,364 basehttp 13116 30944 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarifications/ HTTP/1.1" 200 4406
+INFO 2026-05-25 14:17:39,364 basehttp 13116 30944 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarifications/ HTTP/1.1" 200 4406
+INFO 2026-05-25 14:18:42,648 models 13116 9644 === API调用详情 ===
+INFO 2026-05-25 14:18:42,648 models 13116 9644 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 14:18:42,648 models 13116 9644 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:18:42,648 models 13116 9644 模型名称: mimo-v2.5
+INFO 2026-05-25 14:18:42,649 models 13116 9644 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:18:43,007 models 13116 9644 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:18:53,979 _client 13116 9644 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:18:53,979 models 13116 9644 收到响应: status_code=200
+INFO 2026-05-25 14:18:53,980 models 13116 9644 API调用成功，响应内容: {'id': '901c649e43c644d599bfb54be4b7a668', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '感谢您的详细解答。所有关键问题已确认完毕。\n\n[CLARIFICATION_DONE]\n\n**已确认关键点：**\n1.  **绑定引导状态**：退出语音房弹...
+INFO 2026-05-25 14:18:53,985 basehttp 13116 9644 "POST /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarification-reply/ HTTP/1.1" 200 5720
+INFO 2026-05-25 14:18:53,985 basehttp 13116 9644 "POST /api/requirement-analysis/testcase-generation/TASK_B71FB793/clarification-reply/ HTTP/1.1" 200 5720
+INFO 2026-05-25 14:19:03,397 basehttp 13116 14816 "POST /api/requirement-analysis/testcase-generation/TASK_B71FB793/finalize-clarification/ HTTP/1.1" 200 100
+INFO 2026-05-25 14:19:03,397 basehttp 13116 14816 "POST /api/requirement-analysis/testcase-generation/TASK_B71FB793/finalize-clarification/ HTTP/1.1" 200 100
+INFO 2026-05-25 14:19:03,422 basehttp 13116 7116 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24039
+INFO 2026-05-25 14:19:03,422 views 13116 27484 任务 TASK_B71FB793 使用生成配置: auto_review=True, review_timeout=3600s
+INFO 2026-05-25 14:19:03,422 basehttp 13116 7116 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24039
+INFO 2026-05-25 14:19:03,431 models 13116 27484 发起流式请求 (第1次), messages数量: 2
+INFO 2026-05-25 14:19:03,446 basehttp 13116 32228 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:03,446 basehttp 13116 32228 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:04,608 _client 13116 27484 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:19:04,947 basehttp 13116 28556 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:04,947 basehttp 13116 28556 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:06,470 basehttp 13116 2232 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:06,470 basehttp 13116 2232 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:07,967 basehttp 13116 33212 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:07,967 basehttp 13116 33212 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:09,451 basehttp 13116 31428 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:09,451 basehttp 13116 31428 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:10,958 basehttp 13116 32600 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:10,958 basehttp 13116 32600 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:12,464 basehttp 13116 13068 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:12,464 basehttp 13116 13068 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:13,950 basehttp 13116 7436 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:13,950 basehttp 13116 7436 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:15,460 basehttp 13116 19424 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:15,460 basehttp 13116 19424 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:16,948 basehttp 13116 33224 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:16,948 basehttp 13116 33224 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:18,464 basehttp 13116 29520 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:18,464 basehttp 13116 29520 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:19,966 basehttp 13116 31156 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:19,966 basehttp 13116 31156 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:21,462 basehttp 13116 27120 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:21,462 basehttp 13116 27120 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:22,969 basehttp 13116 17300 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:22,969 basehttp 13116 17300 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:24,457 basehttp 13116 33768 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:24,457 basehttp 13116 33768 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:25,965 basehttp 13116 13416 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:25,965 basehttp 13116 13416 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:27,454 basehttp 13116 27544 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:27,454 basehttp 13116 27544 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:28,967 basehttp 13116 25848 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:28,967 basehttp 13116 25848 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:30,469 basehttp 13116 8576 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:30,469 basehttp 13116 8576 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:31,964 basehttp 13116 32476 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:31,964 basehttp 13116 32476 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:33,455 basehttp 13116 31176 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:33,455 basehttp 13116 31176 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:34,974 basehttp 13116 13632 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:34,974 basehttp 13116 13632 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:36,459 basehttp 13116 12344 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:36,459 basehttp 13116 12344 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:37,946 basehttp 13116 28500 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:37,946 basehttp 13116 28500 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:39,460 basehttp 13116 29388 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:39,460 basehttp 13116 29388 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:40,954 basehttp 13116 30816 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:40,954 basehttp 13116 30816 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:42,455 basehttp 13116 30804 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:42,455 basehttp 13116 30804 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:43,950 basehttp 13116 26104 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:43,950 basehttp 13116 26104 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:45,458 basehttp 13116 24500 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:45,458 basehttp 13116 24500 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:46,954 basehttp 13116 6104 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:46,954 basehttp 13116 6104 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:48,446 basehttp 13116 30208 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:48,446 basehttp 13116 30208 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:49,946 basehttp 13116 30796 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:49,946 basehttp 13116 30796 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:51,448 basehttp 13116 31516 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:51,448 basehttp 13116 31516 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:52,968 basehttp 13116 33372 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:52,968 basehttp 13116 33372 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:54,467 basehttp 13116 14964 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:54,467 basehttp 13116 14964 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:55,965 basehttp 13116 33720 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:55,965 basehttp 13116 33720 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:57,457 basehttp 13116 12456 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:57,457 basehttp 13116 12456 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:58,961 basehttp 13116 6484 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:19:58,961 basehttp 13116 6484 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:00,459 basehttp 13116 30972 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:00,459 basehttp 13116 30972 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:01,953 basehttp 13116 31128 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:01,953 basehttp 13116 31128 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:03,448 basehttp 13116 32580 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:03,448 basehttp 13116 32580 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:04,946 basehttp 13116 11700 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:04,946 basehttp 13116 11700 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:06,458 basehttp 13116 32824 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:06,458 basehttp 13116 32824 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:07,953 basehttp 13116 31656 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:07,953 basehttp 13116 31656 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:09,462 basehttp 13116 25248 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:09,462 basehttp 13116 25248 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:10,962 basehttp 13116 17092 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:10,962 basehttp 13116 17092 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:12,448 basehttp 13116 30088 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:12,448 basehttp 13116 30088 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:13,948 basehttp 13116 32180 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:13,948 basehttp 13116 32180 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:15,464 basehttp 13116 23248 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:15,464 basehttp 13116 23248 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 24028
+INFO 2026-05-25 14:20:15,798 models 13116 27484 流式生成正常结束 (finish_reason=stop)
+INFO 2026-05-25 14:20:15,798 models 13116 27484 流式生成完成: 总chunk数=1938, 总字符数=9490
+INFO 2026-05-25 14:20:15,798 models 13116 27484 生成用例统计: 约检测到0个用例编号标记
+INFO 2026-05-25 14:20:15,819 views 13116 27484 开始流式评审任务 TASK_B71FB793
+INFO 2026-05-25 14:20:15,820 models 13116 27484 发起流式请求 (第1次), messages数量: 2
+INFO 2026-05-25 14:20:16,966 basehttp 13116 18128 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:16,966 basehttp 13116 18128 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:17,410 _client 13116 27484 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:20:18,454 basehttp 13116 27356 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:18,454 basehttp 13116 27356 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:19,954 basehttp 13116 31032 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:19,954 basehttp 13116 31032 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:21,466 basehttp 13116 11288 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:21,466 basehttp 13116 11288 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:22,970 basehttp 13116 15420 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:22,970 basehttp 13116 15420 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:24,454 basehttp 13116 29888 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:24,454 basehttp 13116 29888 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:25,970 basehttp 13116 33008 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:25,970 basehttp 13116 33008 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:27,459 basehttp 13116 9604 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:27,459 basehttp 13116 9604 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:28,957 basehttp 13116 32696 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:28,957 basehttp 13116 32696 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:30,472 basehttp 13116 32436 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:30,472 basehttp 13116 32436 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43961
+INFO 2026-05-25 14:20:31,970 basehttp 13116 31416 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43981
+INFO 2026-05-25 14:20:31,970 basehttp 13116 31416 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 43981
+INFO 2026-05-25 14:20:33,458 basehttp 13116 32140 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 44498
+INFO 2026-05-25 14:20:33,458 basehttp 13116 32140 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 44498
+INFO 2026-05-25 14:20:34,945 basehttp 13116 21220 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 44959
+INFO 2026-05-25 14:20:34,945 basehttp 13116 21220 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 44959
+INFO 2026-05-25 14:20:36,460 basehttp 13116 32544 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 45257
+INFO 2026-05-25 14:20:36,460 basehttp 13116 32544 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 45257
+INFO 2026-05-25 14:20:37,949 basehttp 13116 32788 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 45686
+INFO 2026-05-25 14:20:37,949 basehttp 13116 32788 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 45686
+INFO 2026-05-25 14:20:39,485 basehttp 13116 28192 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 46151
+INFO 2026-05-25 14:20:39,485 basehttp 13116 28192 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 46151
+INFO 2026-05-25 14:20:40,960 basehttp 13116 28976 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 46593
+INFO 2026-05-25 14:20:40,960 basehttp 13116 28976 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 46593
+INFO 2026-05-25 14:20:42,465 basehttp 13116 24312 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 47087
+INFO 2026-05-25 14:20:42,465 basehttp 13116 24312 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 47087
+INFO 2026-05-25 14:20:43,965 basehttp 13116 33700 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 47501
+INFO 2026-05-25 14:20:43,965 basehttp 13116 33700 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 47501
+INFO 2026-05-25 14:20:45,459 basehttp 13116 12568 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 47996
+INFO 2026-05-25 14:20:45,459 basehttp 13116 12568 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 47996
+INFO 2026-05-25 14:20:46,972 basehttp 13116 30576 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 48500
+INFO 2026-05-25 14:20:46,972 basehttp 13116 30576 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 48500
+INFO 2026-05-25 14:20:48,445 basehttp 13116 22208 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 49122
+INFO 2026-05-25 14:20:48,445 basehttp 13116 22208 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 49122
+INFO 2026-05-25 14:20:49,964 basehttp 13116 29812 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 49544
+INFO 2026-05-25 14:20:49,964 basehttp 13116 29812 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 49544
+INFO 2026-05-25 14:20:51,465 basehttp 13116 30048 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 50043
+INFO 2026-05-25 14:20:51,465 basehttp 13116 30048 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 50043
+INFO 2026-05-25 14:20:52,951 basehttp 13116 31756 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 50542
+INFO 2026-05-25 14:20:52,951 basehttp 13116 31756 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 50542
+INFO 2026-05-25 14:20:54,467 basehttp 13116 3936 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 51126
+INFO 2026-05-25 14:20:54,467 basehttp 13116 3936 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 51126
+INFO 2026-05-25 14:20:55,987 basehttp 13116 19540 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 51725
+INFO 2026-05-25 14:20:55,987 basehttp 13116 19540 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 51725
+INFO 2026-05-25 14:20:57,471 basehttp 13116 32844 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52179
+INFO 2026-05-25 14:20:57,471 basehttp 13116 32844 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52179
+INFO 2026-05-25 14:20:58,226 models 13116 27484 流式生成正常结束 (finish_reason=stop)
+INFO 2026-05-25 14:20:58,226 models 13116 27484 流式评审完成: 总chunk数=814, 总字符数=3973
+INFO 2026-05-25 14:20:58,231 views 13116 27484 任务 TASK_B71FB793 流式评审完成
+INFO 2026-05-25 14:20:58,231 views 13116 27484 任务 TASK_B71FB793 开始根据评审意见改进测试用例
+INFO 2026-05-25 14:20:58,238 models 13116 27484 发起流式请求 (第1次), messages数量: 2
+INFO 2026-05-25 14:20:58,963 basehttp 13116 29836 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:20:58,963 basehttp 13116 29836 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:20:59,415 _client 13116 27484 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:21:00,444 basehttp 13116 11772 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:00,444 basehttp 13116 11772 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:01,966 basehttp 13116 30856 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:01,966 basehttp 13116 30856 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:03,481 basehttp 13116 32592 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:03,481 basehttp 13116 32592 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:04,961 basehttp 13116 30020 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:04,961 basehttp 13116 30020 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:06,472 basehttp 13116 33504 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:06,472 basehttp 13116 33504 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:07,966 basehttp 13116 33368 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:07,966 basehttp 13116 33368 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:09,463 basehttp 13116 30420 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:09,463 basehttp 13116 30420 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:10,949 basehttp 13116 26728 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:10,949 basehttp 13116 26728 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52380
+INFO 2026-05-25 14:21:12,457 basehttp 13116 15732 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52405
+INFO 2026-05-25 14:21:12,457 basehttp 13116 15732 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52405
+INFO 2026-05-25 14:21:13,963 basehttp 13116 30084 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52948
+INFO 2026-05-25 14:21:13,963 basehttp 13116 30084 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 52948
+INFO 2026-05-25 14:21:15,447 basehttp 13116 31816 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 53608
+INFO 2026-05-25 14:21:15,447 basehttp 13116 31816 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 53608
+INFO 2026-05-25 14:21:16,964 basehttp 13116 32320 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 54217
+INFO 2026-05-25 14:21:16,964 basehttp 13116 32320 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 54217
+INFO 2026-05-25 14:21:18,464 basehttp 13116 20064 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 54660
+INFO 2026-05-25 14:21:18,464 basehttp 13116 20064 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 54660
+INFO 2026-05-25 14:21:19,966 basehttp 13116 26112 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 55345
+INFO 2026-05-25 14:21:19,966 basehttp 13116 26112 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 55345
+INFO 2026-05-25 14:21:21,469 basehttp 13116 32012 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 55784
+INFO 2026-05-25 14:21:21,469 basehttp 13116 32012 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 55784
+INFO 2026-05-25 14:21:22,954 basehttp 13116 3128 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 56418
+INFO 2026-05-25 14:21:22,954 basehttp 13116 3128 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 56418
+INFO 2026-05-25 14:21:24,450 basehttp 13116 32136 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 56842
+INFO 2026-05-25 14:21:24,450 basehttp 13116 32136 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 56842
+INFO 2026-05-25 14:21:25,972 basehttp 13116 8788 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 57271
+INFO 2026-05-25 14:21:25,972 basehttp 13116 8788 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 57271
+INFO 2026-05-25 14:21:27,466 basehttp 13116 30852 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 57926
+INFO 2026-05-25 14:21:27,466 basehttp 13116 30852 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 57926
+INFO 2026-05-25 14:21:28,955 basehttp 13116 22152 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 58588
+INFO 2026-05-25 14:21:28,955 basehttp 13116 22152 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 58588
+INFO 2026-05-25 14:21:30,456 basehttp 13116 31468 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 59199
+INFO 2026-05-25 14:21:30,456 basehttp 13116 31468 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 59199
+INFO 2026-05-25 14:21:31,958 basehttp 13116 25044 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 59609
+INFO 2026-05-25 14:21:31,958 basehttp 13116 25044 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 59609
+INFO 2026-05-25 14:21:33,453 basehttp 13116 1444 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 60240
+INFO 2026-05-25 14:21:33,453 basehttp 13116 1444 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 60240
+INFO 2026-05-25 14:21:34,963 basehttp 13116 32536 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 60664
+INFO 2026-05-25 14:21:34,963 basehttp 13116 32536 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 60664
+INFO 2026-05-25 14:21:36,108 models 13116 27484 流式生成正常结束 (finish_reason=stop)
+INFO 2026-05-25 14:21:36,109 models 13116 27484 流式改进完成: 总chunk数=697, 总字符数=3922
+INFO 2026-05-25 14:21:36,109 models 13116 27484 改进用例统计: 约检测到0个用例编号标记
+INFO 2026-05-25 14:21:36,110 views 13116 27484 任务 TASK_B71FB793 增量合并完成 - 原始:55 条 / AI输出:17 条 (修改 13, 新增 4, 删除 0) / 保留未改动:42 / 最终:59 条 (保留率 107%)
+INFO 2026-05-25 14:21:36,110 models 13116 27484 未检测到足够的用例编号（只找到0个），保持原顺序
+WARNING 2026-05-25 14:21:36,111 models 13116 27484 无法识别编号格式: PUBG账号绑定引导
+INFO 2026-05-25 14:21:36,111 views 13116 27484 任务 TASK_B71FB793 测试用例改进完成 (merged长度: 10846, 最终保存长度: 10846)
+INFO 2026-05-25 14:21:36,117 views 13116 27484 任务 TASK_B71FB793 已完成
+INFO 2026-05-25 14:21:36,463 basehttp 13116 25228 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 60696
+INFO 2026-05-25 14:21:36,463 basehttp 13116 25228 "GET /api/requirement-analysis/testcase-generation/TASK_B71FB793/ HTTP/1.1" 200 60696
+INFO 2026-05-25 14:30:57,700 basehttp 13116 35572 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 923470
+INFO 2026-05-25 14:30:57,700 basehttp 13116 35572 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 923470
+INFO 2026-05-25 14:30:57,735 basehttp 13116 27532 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:30:57,735 basehttp 13116 27532 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:30:57,751 basehttp 13116 34720 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:30:57,751 basehttp 13116 34720 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:30:57,902 basehttp 13116 35580 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1546640
+INFO 2026-05-25 14:30:57,902 basehttp 13116 35580 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1546640
+INFO 2026-05-25 14:31:56,068 basehttp 13116 21308 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:31:56,068 basehttp 13116 21308 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:31:56,073 basehttp 13116 9588 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:31:56,073 basehttp 13116 9588 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:32:04,277 basehttp 13116 32508 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 14:32:04,277 basehttp 13116 32508 "POST /api/requirement-analysis/documents/ HTTP/1.1" 201 410
+INFO 2026-05-25 14:32:04,384 basehttp 13116 32984 "GET /api/requirement-analysis/documents/53/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 14:32:04,384 basehttp 13116 32984 "GET /api/requirement-analysis/documents/53/extract_text/ HTTP/1.1" 200 13369
+INFO 2026-05-25 14:32:04,425 basehttp 13116 32824 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 14:32:04,425 basehttp 13116 32824 "POST /api/requirement-analysis/testcase-generation/generate/ HTTP/1.1" 201 14379
+INFO 2026-05-25 14:32:04,522 basehttp 13116 16040 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:32:04,522 basehttp 13116 16040 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 14265
+INFO 2026-05-25 14:32:04,549 basehttp 13116 26136 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 14:32:04,549 basehttp 13116 26136 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/clarifications/ HTTP/1.1" 200 80
+INFO 2026-05-25 14:32:04,591 models 13116 23700 === API调用详情 ===
+INFO 2026-05-25 14:32:04,592 models 13116 23700 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 14:32:04,592 models 13116 23700 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:32:04,592 models 13116 23700 模型名称: mimo-v2.5
+INFO 2026-05-25 14:32:04,592 models 13116 23700 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:32:04,958 models 13116 23700 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:32:28,661 _client 13116 23700 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:32:28,661 models 13116 23700 收到响应: status_code=200
+INFO 2026-05-25 14:32:28,662 models 13116 23700 API调用成功，响应内容: {'id': 'e7ec7bc9309f46b0bfb595a33ab63fa9', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '我已仔细阅读需求文档。文档对功能模块划分清晰，原型和说明较为详细，但在业务规则、数据逻辑、异常处理和边界条件等方面仍存在一些模糊或缺失的信息，需要进一步澄清以确保测试...
+INFO 2026-05-25 14:32:28,668 basehttp 13116 23700 "POST /api/requirement-analysis/testcase-generation/TASK_29851E44/start-clarification/ HTTP/1.1" 200 4140
+INFO 2026-05-25 14:32:28,668 basehttp 13116 23700 "POST /api/requirement-analysis/testcase-generation/TASK_29851E44/start-clarification/ HTTP/1.1" 200 4140
+INFO 2026-05-25 14:33:20,285 models 13116 30316 === API调用详情 ===
+INFO 2026-05-25 14:33:20,285 models 13116 30316 原始base_url: https://token-plan-cn.xiaomimimo.com/v1
+INFO 2026-05-25 14:33:20,285 models 13116 30316 最终请求URL: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:33:20,286 models 13116 30316 模型名称: mimo-v2.5
+INFO 2026-05-25 14:33:20,286 models 13116 30316 请求参数: max_tokens=20000, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:33:20,664 models 13116 30316 发送POST请求到: https://token-plan-cn.xiaomimimo.com/v1/chat/completions
+INFO 2026-05-25 14:33:32,569 _client 13116 30316 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:33:32,569 models 13116 30316 收到响应: status_code=200
+INFO 2026-05-25 14:33:32,570 models 13116 30316 API调用成功，响应内容: {'id': '8115c0e9718346428809c419c41a3ccc', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': '感谢您的详细解答。所有关键问题已确认完毕。\n\n[CLARIFICATION_DONE]\n\n**关键点总结：**\n1.  **数据展示**：战绩卡“常用武器”...
+INFO 2026-05-25 14:33:32,577 basehttp 13116 30316 "POST /api/requirement-analysis/testcase-generation/TASK_29851E44/clarification-reply/ HTTP/1.1" 200 5017
+INFO 2026-05-25 14:33:32,577 basehttp 13116 30316 "POST /api/requirement-analysis/testcase-generation/TASK_29851E44/clarification-reply/ HTTP/1.1" 200 5017
+INFO 2026-05-25 14:33:45,704 basehttp 13116 35092 "POST /api/requirement-analysis/testcase-generation/TASK_29851E44/finalize-clarification/ HTTP/1.1" 200 100
+INFO 2026-05-25 14:33:45,704 basehttp 13116 35092 "POST /api/requirement-analysis/testcase-generation/TASK_29851E44/finalize-clarification/ HTTP/1.1" 200 100
+INFO 2026-05-25 14:33:45,712 views 13116 34264 任务 TASK_29851E44 使用生成配置: auto_review=True, review_timeout=3600s
+INFO 2026-05-25 14:33:45,721 models 13116 34264 发起流式请求 (第1次), messages数量: 2
+INFO 2026-05-25 14:33:45,730 basehttp 13116 23140 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:45,730 basehttp 13116 23140 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:45,776 basehttp 13116 33860 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:45,776 basehttp 13116 33860 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:46,973 _client 13116 34264 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:33:47,248 basehttp 13116 27104 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:47,248 basehttp 13116 27104 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:48,762 basehttp 13116 4828 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:48,762 basehttp 13116 4828 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:50,248 basehttp 13116 28432 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:50,248 basehttp 13116 28432 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:51,749 basehttp 13116 18612 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:51,749 basehttp 13116 18612 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:53,272 basehttp 13116 27760 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:53,272 basehttp 13116 27760 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:54,750 basehttp 13116 34080 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:54,750 basehttp 13116 34080 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:56,270 basehttp 13116 20548 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:56,270 basehttp 13116 20548 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:57,749 basehttp 13116 33764 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:57,749 basehttp 13116 33764 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:59,266 basehttp 13116 33008 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:33:59,266 basehttp 13116 33008 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:00,751 basehttp 13116 35492 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:00,751 basehttp 13116 35492 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:02,249 basehttp 13116 18248 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:02,249 basehttp 13116 18248 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:03,764 basehttp 13116 34872 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:03,764 basehttp 13116 34872 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:05,260 basehttp 13116 9504 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:05,260 basehttp 13116 9504 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:06,752 basehttp 13116 6720 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:06,752 basehttp 13116 6720 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:08,251 basehttp 13116 35668 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:08,251 basehttp 13116 35668 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:09,773 basehttp 13116 34916 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:09,773 basehttp 13116 34916 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:11,249 basehttp 13116 10364 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:11,249 basehttp 13116 10364 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:12,748 basehttp 13116 26528 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:12,748 basehttp 13116 26528 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:14,249 basehttp 13116 16136 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:14,249 basehttp 13116 16136 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:15,754 basehttp 13116 33224 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:15,754 basehttp 13116 33224 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:17,265 basehttp 13116 12272 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:17,265 basehttp 13116 12272 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:18,747 basehttp 13116 7844 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:18,747 basehttp 13116 7844 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:20,259 basehttp 13116 33156 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:20,259 basehttp 13116 33156 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:21,770 basehttp 13116 27476 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:21,770 basehttp 13116 27476 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:23,246 basehttp 13116 34504 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:23,246 basehttp 13116 34504 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:24,769 basehttp 13116 7920 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:24,769 basehttp 13116 7920 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:26,268 basehttp 13116 26064 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:26,268 basehttp 13116 26064 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:27,762 basehttp 13116 34812 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:27,762 basehttp 13116 34812 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:29,268 basehttp 13116 14968 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:29,268 basehttp 13116 14968 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:30,767 basehttp 13116 15216 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:30,767 basehttp 13116 15216 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:32,246 basehttp 13116 33812 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:32,246 basehttp 13116 33812 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:33,767 basehttp 13116 25632 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:33,767 basehttp 13116 25632 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:35,247 basehttp 13116 35136 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:35,247 basehttp 13116 35136 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:36,763 basehttp 13116 29932 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:36,763 basehttp 13116 29932 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:38,268 basehttp 13116 34896 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:38,268 basehttp 13116 34896 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:39,746 basehttp 13116 22852 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:39,746 basehttp 13116 22852 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:41,270 basehttp 13116 35480 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:41,270 basehttp 13116 35480 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:42,746 basehttp 13116 3128 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:42,746 basehttp 13116 3128 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:44,267 basehttp 13116 34408 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:44,267 basehttp 13116 34408 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:45,762 basehttp 13116 25568 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:45,762 basehttp 13116 25568 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:47,261 basehttp 13116 31456 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:47,261 basehttp 13116 31456 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:48,747 basehttp 13116 34972 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:48,747 basehttp 13116 34972 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:50,271 basehttp 13116 26436 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:50,271 basehttp 13116 26436 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:51,748 basehttp 13116 5360 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:51,748 basehttp 13116 5360 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:53,269 basehttp 13116 24756 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:53,269 basehttp 13116 24756 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:54,768 basehttp 13116 31000 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:54,768 basehttp 13116 31000 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:56,254 basehttp 13116 28780 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:56,254 basehttp 13116 28780 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:57,751 basehttp 13116 32300 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:57,751 basehttp 13116 32300 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:59,251 basehttp 13116 10752 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:34:59,251 basehttp 13116 10752 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:00,754 basehttp 13116 33828 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:00,754 basehttp 13116 33828 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:02,256 basehttp 13116 21556 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:02,256 basehttp 13116 21556 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:03,748 basehttp 13116 35040 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:03,748 basehttp 13116 35040 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:05,249 basehttp 13116 35288 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:05,249 basehttp 13116 35288 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:06,748 basehttp 13116 10960 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:06,748 basehttp 13116 10960 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 23024
+INFO 2026-05-25 14:35:07,621 models 13116 34264 流式生成正常结束 (finish_reason=stop)
+INFO 2026-05-25 14:35:07,621 models 13116 34264 流式生成完成: 总chunk数=2183, 总字符数=10554
+INFO 2026-05-25 14:35:07,621 models 13116 34264 生成用例统计: 约检测到0个用例编号标记
+INFO 2026-05-25 14:35:07,640 views 13116 34264 开始流式评审任务 TASK_29851E44
+INFO 2026-05-25 14:35:07,641 models 13116 34264 发起流式请求 (第1次), messages数量: 2
+INFO 2026-05-25 14:35:08,277 basehttp 13116 32360 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:08,277 basehttp 13116 32360 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:09,775 basehttp 13116 33836 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:09,775 basehttp 13116 33836 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:11,121 _client 13116 34264 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:35:11,248 basehttp 13116 35608 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:11,248 basehttp 13116 35608 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:12,755 basehttp 13116 35452 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:12,755 basehttp 13116 35452 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:14,270 basehttp 13116 32736 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:14,270 basehttp 13116 32736 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:15,747 basehttp 13116 3532 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:15,747 basehttp 13116 3532 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:17,253 basehttp 13116 35192 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:17,253 basehttp 13116 35192 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:18,752 basehttp 13116 34844 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:18,752 basehttp 13116 34844 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:20,270 basehttp 13116 6488 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:20,270 basehttp 13116 6488 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:21,756 basehttp 13116 34380 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:21,756 basehttp 13116 34380 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45295
+INFO 2026-05-25 14:35:23,256 basehttp 13116 34744 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45568
+INFO 2026-05-25 14:35:23,256 basehttp 13116 34744 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 45568
+INFO 2026-05-25 14:35:24,761 basehttp 13116 35624 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 46022
+INFO 2026-05-25 14:35:24,761 basehttp 13116 35624 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 46022
+INFO 2026-05-25 14:35:26,255 basehttp 13116 35800 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 46479
+INFO 2026-05-25 14:35:26,255 basehttp 13116 35800 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 46479
+INFO 2026-05-25 14:35:27,753 basehttp 13116 35404 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 46920
+INFO 2026-05-25 14:35:27,753 basehttp 13116 35404 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 46920
+INFO 2026-05-25 14:35:29,272 basehttp 13116 14932 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 47184
+INFO 2026-05-25 14:35:29,272 basehttp 13116 14932 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 47184
+INFO 2026-05-25 14:35:30,756 basehttp 13116 31256 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 47661
+INFO 2026-05-25 14:35:30,756 basehttp 13116 31256 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 47661
+INFO 2026-05-25 14:35:32,265 basehttp 13116 34996 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 48178
+INFO 2026-05-25 14:35:32,265 basehttp 13116 34996 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 48178
+INFO 2026-05-25 14:35:33,777 basehttp 13116 7748 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 48487
+INFO 2026-05-25 14:35:33,777 basehttp 13116 7748 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 48487
+INFO 2026-05-25 14:35:35,248 basehttp 13116 34104 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 48931
+INFO 2026-05-25 14:35:35,248 basehttp 13116 34104 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 48931
+INFO 2026-05-25 14:35:36,767 basehttp 13116 35704 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 49468
+INFO 2026-05-25 14:35:36,767 basehttp 13116 35704 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 49468
+INFO 2026-05-25 14:35:38,261 basehttp 13116 28212 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 49956
+INFO 2026-05-25 14:35:38,261 basehttp 13116 28212 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 49956
+INFO 2026-05-25 14:35:39,757 basehttp 13116 35184 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 50439
+INFO 2026-05-25 14:35:39,757 basehttp 13116 35184 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 50439
+INFO 2026-05-25 14:35:41,324 basehttp 13116 35208 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 50885
+INFO 2026-05-25 14:35:41,324 basehttp 13116 35208 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 50885
+INFO 2026-05-25 14:35:42,754 basehttp 13116 23172 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 51149
+INFO 2026-05-25 14:35:42,754 basehttp 13116 23172 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 51149
+INFO 2026-05-25 14:35:44,270 basehttp 13116 14444 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 51777
+INFO 2026-05-25 14:35:44,270 basehttp 13116 14444 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 51777
+INFO 2026-05-25 14:35:45,750 basehttp 13116 34900 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 52053
+INFO 2026-05-25 14:35:45,750 basehttp 13116 34900 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 52053
+INFO 2026-05-25 14:35:47,263 basehttp 13116 35520 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 52774
+INFO 2026-05-25 14:35:47,263 basehttp 13116 35520 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 52774
+INFO 2026-05-25 14:35:48,750 basehttp 13116 35056 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 53002
+INFO 2026-05-25 14:35:48,750 basehttp 13116 35056 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 53002
+INFO 2026-05-25 14:35:50,265 basehttp 13116 32836 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 53478
+INFO 2026-05-25 14:35:50,265 basehttp 13116 32836 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 53478
+INFO 2026-05-25 14:35:51,753 basehttp 13116 1352 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 53947
+INFO 2026-05-25 14:35:51,753 basehttp 13116 1352 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 53947
+INFO 2026-05-25 14:35:53,255 basehttp 13116 34336 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54626
+INFO 2026-05-25 14:35:53,255 basehttp 13116 34336 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54626
+INFO 2026-05-25 14:35:54,241 models 13116 34264 流式生成正常结束 (finish_reason=stop)
+INFO 2026-05-25 14:35:54,241 models 13116 34264 流式评审完成: 总chunk数=1006, 总字符数=4007
+INFO 2026-05-25 14:35:54,243 views 13116 34264 任务 TASK_29851E44 流式评审完成
+INFO 2026-05-25 14:35:54,243 views 13116 34264 任务 TASK_29851E44 开始根据评审意见改进测试用例
+INFO 2026-05-25 14:35:54,251 models 13116 34264 发起流式请求 (第1次), messages数量: 2
+INFO 2026-05-25 14:35:54,753 basehttp 13116 29772 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:35:54,753 basehttp 13116 29772 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:35:55,785 _client 13116 34264 HTTP Request: POST https://token-plan-cn.xiaomimimo.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2026-05-25 14:35:56,254 basehttp 13116 32816 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:35:56,254 basehttp 13116 32816 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:35:57,767 basehttp 13116 22200 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:35:57,767 basehttp 13116 22200 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:35:59,251 basehttp 13116 6796 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:35:59,251 basehttp 13116 6796 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:00,777 basehttp 13116 31400 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:00,777 basehttp 13116 31400 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:02,260 basehttp 13116 30748 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:02,260 basehttp 13116 30748 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:03,753 basehttp 13116 2944 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:03,753 basehttp 13116 2944 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:05,252 basehttp 13116 33276 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:05,252 basehttp 13116 33276 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 54917
+INFO 2026-05-25 14:36:06,748 basehttp 13116 17440 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 55482
+INFO 2026-05-25 14:36:06,748 basehttp 13116 17440 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 55482
+INFO 2026-05-25 14:36:08,273 basehttp 13116 31544 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 55897
+INFO 2026-05-25 14:36:08,273 basehttp 13116 31544 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 55897
+INFO 2026-05-25 14:36:09,761 basehttp 13116 20064 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 56167
+INFO 2026-05-25 14:36:09,761 basehttp 13116 20064 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 56167
+INFO 2026-05-25 14:36:11,271 basehttp 13116 18664 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 56615
+INFO 2026-05-25 14:36:11,271 basehttp 13116 18664 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 56615
+INFO 2026-05-25 14:36:12,773 basehttp 13116 34424 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 57307
+INFO 2026-05-25 14:36:12,773 basehttp 13116 34424 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 57307
+INFO 2026-05-25 14:36:14,252 basehttp 13116 32984 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 57781
+INFO 2026-05-25 14:36:14,252 basehttp 13116 32984 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 57781
+INFO 2026-05-25 14:36:15,759 basehttp 13116 33196 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 58234
+INFO 2026-05-25 14:36:15,759 basehttp 13116 33196 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 58234
+INFO 2026-05-25 14:36:17,250 basehttp 13116 31428 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 58866
+INFO 2026-05-25 14:36:17,250 basehttp 13116 31428 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 58866
+INFO 2026-05-25 14:36:18,749 basehttp 13116 32724 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 59318
+INFO 2026-05-25 14:36:18,749 basehttp 13116 32724 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 59318
+INFO 2026-05-25 14:36:20,248 basehttp 13116 28248 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 59769
+INFO 2026-05-25 14:36:20,248 basehttp 13116 28248 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 59769
+INFO 2026-05-25 14:36:21,749 basehttp 13116 31208 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 60200
+INFO 2026-05-25 14:36:21,749 basehttp 13116 31208 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 60200
+INFO 2026-05-25 14:36:23,258 basehttp 13116 32640 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 60409
+INFO 2026-05-25 14:36:23,258 basehttp 13116 32640 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 60409
+INFO 2026-05-25 14:36:24,759 basehttp 13116 31568 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 61119
+INFO 2026-05-25 14:36:24,759 basehttp 13116 31568 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 61119
+INFO 2026-05-25 14:36:26,268 basehttp 13116 24548 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 61547
+INFO 2026-05-25 14:36:26,268 basehttp 13116 24548 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 61547
+INFO 2026-05-25 14:36:27,748 basehttp 13116 13796 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 61972
+INFO 2026-05-25 14:36:27,748 basehttp 13116 13796 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 61972
+INFO 2026-05-25 14:36:29,267 basehttp 13116 16352 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 62669
+INFO 2026-05-25 14:36:29,267 basehttp 13116 16352 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 62669
+INFO 2026-05-25 14:36:30,749 basehttp 13116 33512 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 63125
+INFO 2026-05-25 14:36:30,749 basehttp 13116 33512 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 63125
+INFO 2026-05-25 14:36:32,248 basehttp 13116 33908 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 63586
+INFO 2026-05-25 14:36:32,248 basehttp 13116 33908 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 63586
+INFO 2026-05-25 14:36:33,752 basehttp 13116 15380 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 64063
+INFO 2026-05-25 14:36:33,752 basehttp 13116 15380 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 64063
+INFO 2026-05-25 14:36:35,270 basehttp 13116 32712 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 64532
+INFO 2026-05-25 14:36:35,270 basehttp 13116 32712 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 64532
+INFO 2026-05-25 14:36:35,960 models 13116 34264 流式生成正常结束 (finish_reason=stop)
+INFO 2026-05-25 14:36:35,960 models 13116 34264 流式改进完成: 总chunk数=909, 总字符数=4452
+INFO 2026-05-25 14:36:35,960 models 13116 34264 改进用例统计: 约检测到0个用例编号标记
+INFO 2026-05-25 14:36:35,961 views 13116 34264 任务 TASK_29851E44 增量合并完成 - 原始:63 条 / AI输出:18 条 (修改 12, 新增 6, 删除 0) / 保留未改动:51 / 最终:69 条 (保留率 110%)
+INFO 2026-05-25 14:36:35,961 models 13116 34264 未检测到足够的用例编号（只找到0个），保持原顺序
+WARNING 2026-05-25 14:36:35,961 models 13116 34264 无法识别编号格式: 吃鸡日榜
+INFO 2026-05-25 14:36:35,962 views 13116 34264 任务 TASK_29851E44 测试用例改进完成 (merged长度: 12697, 最终保存长度: 12697)
+INFO 2026-05-25 14:36:35,967 views 13116 34264 任务 TASK_29851E44 已完成
+INFO 2026-05-25 14:36:36,750 basehttp 13116 15556 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 64829
+INFO 2026-05-25 14:36:36,750 basehttp 13116 15556 "GET /api/requirement-analysis/testcase-generation/TASK_29851E44/ HTTP/1.1" 200 64829
+INFO 2026-05-25 14:36:48,390 basehttp 13116 23700 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:36:48,390 basehttp 13116 23700 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:36:48,394 basehttp 13116 11732 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:36:48,394 basehttp 13116 11732 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:36:48,461 basehttp 13116 12568 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 895374
+INFO 2026-05-25 14:36:48,461 basehttp 13116 12568 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 895374
+INFO 2026-05-25 14:36:48,646 basehttp 13116 30992 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1611470
+INFO 2026-05-25 14:36:48,646 basehttp 13116 30992 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1611470
+INFO 2026-05-25 14:36:55,133 basehttp 13116 32848 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1070
+INFO 2026-05-25 14:36:55,133 basehttp 13116 32848 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1070
+INFO 2026-05-25 14:37:16,832 basehttp 13116 34888 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:37:16,832 basehttp 13116 34888 "GET /api/projects/ HTTP/1.1" 200 595
+INFO 2026-05-25 14:37:16,836 basehttp 13116 32240 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:37:16,836 basehttp 13116 32240 "GET /api/requirement-analysis/config/check/ HTTP/1.1" 200 724
+INFO 2026-05-25 14:37:18,270 basehttp 13116 30448 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:37:18,270 basehttp 13116 30448 "GET /api/projects/list/ HTTP/1.1" 200 62
+INFO 2026-05-25 14:37:18,281 basehttp 13116 35644 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:37:18,281 basehttp 13116 35644 "GET /api/versions/ HTTP/1.1" 200 547
+INFO 2026-05-25 14:37:18,331 basehttp 13116 30420 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 895374
+INFO 2026-05-25 14:37:18,331 basehttp 13116 30420 "GET /api/requirement-analysis/testcase-generation/?page=1&page_size=10 HTTP/1.1" 200 895374
+INFO 2026-05-25 14:37:18,541 basehttp 13116 15008 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1611470
+INFO 2026-05-25 14:37:18,541 basehttp 13116 15008 "GET /api/requirement-analysis/testcase-generation/?page_size=10000&page=1 HTTP/1.1" 200 1611470
+INFO 2026-05-25 14:42:07,012 basehttp 13116 21700 "POST /api/auth/token/refresh/ HTTP/1.1" 200 489
+INFO 2026-05-25 14:42:07,012 basehttp 13116 21700 "POST /api/auth/token/refresh/ HTTP/1.1" 200 489
+INFO 2026-05-25 14:42:07,031 basehttp 13116 30728 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1070
+INFO 2026-05-25 14:42:07,031 basehttp 13116 30728 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1070
+INFO 2026-05-25 14:43:24,286 basehttp 13116 34784 "POST /api/requirement-analysis/ai-models/ HTTP/1.1" 201 484
+INFO 2026-05-25 14:43:24,286 basehttp 13116 34784 "POST /api/requirement-analysis/ai-models/ HTTP/1.1" 201 484
+INFO 2026-05-25 14:43:24,344 basehttp 13116 35340 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1555
+INFO 2026-05-25 14:43:24,344 basehttp 13116 35340 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1555
+INFO 2026-05-25 14:43:37,582 views 13116 664 === 开始测试模型连接 ===
+INFO 2026-05-25 14:43:37,582 views 13116 664 模型类型: other
+INFO 2026-05-25 14:43:37,582 views 13116 664 模型名称: gpt-5.5
+INFO 2026-05-25 14:43:37,583 views 13116 664 API URL: http://172.25.32.11:3000/v1
+INFO 2026-05-25 14:43:37,583 views 13116 664 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 14:43:37,583 views 13116 664 开始调用API...
+INFO 2026-05-25 14:43:37,584 models 13116 664 === API调用详情 ===
+INFO 2026-05-25 14:43:37,584 models 13116 664 原始base_url: http://172.25.32.11:3000/v1
+INFO 2026-05-25 14:43:37,584 models 13116 664 最终请求URL: http://172.25.32.11:3000/v1/chat/completions
+INFO 2026-05-25 14:43:37,584 models 13116 664 模型名称: gpt-5.5
+INFO 2026-05-25 14:43:37,585 models 13116 664 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:43:37,989 models 13116 664 发送POST请求到: http://172.25.32.11:3000/v1/chat/completions
+ERROR 2026-05-25 14:43:59,036 models 13116 664 其他(兼容OpenAI API) API调用失败: ConnectError('All connection attempts failed')
+ERROR 2026-05-25 14:43:59,037 views 13116 664 API连接测试异常: Exception('其他(兼容OpenAI API) API调用失败: All connection attempts failed'), URL: http://172.25.32.11:3000/v1, Model: gpt-5.5
+ERROR 2026-05-25 14:43:59,054 views 13116 664 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 394, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        pool_request.request
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 101, in handle_async_request
+    raise exc
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 78, in handle_async_request
+    stream = await self._connect(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 124, in _connect
+    stream = await self._network_backend.connect_tcp(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_backends\auto.py", line 31, in connect_tcp
+    return await self._backend.connect_tcp(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_backends\anyio.py", line 113, in connect_tcp
+    with map_exceptions(exc_map):
+         ~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectError: All connection attempts failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 530, in call_openai_compatible_api
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1859, in post
+    return await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<13 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1540, in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 393, in handle_async_request
+    with map_httpcore_exceptions():
+         ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: All connection attempts failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 559, in call_openai_compatible_api
+    raise Exception(f"{provider_name} API调用失败: {str(e) or repr(e)}")
+Exception: 其他(兼容OpenAI API) API调用失败: All connection attempts failed
+
+WARNING 2026-05-25 14:43:59,055 log 13116 664 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:43:59,055 log 13116 664 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:43:59,056 basehttp 13116 664 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 122
+WARNING 2026-05-25 14:43:59,056 basehttp 13116 664 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 122
+INFO 2026-05-25 14:45:07,563 basehttp 13116 34856 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 484
+INFO 2026-05-25 14:45:07,563 basehttp 13116 34856 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 484
+INFO 2026-05-25 14:45:07,633 basehttp 13116 35320 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1555
+INFO 2026-05-25 14:45:07,633 basehttp 13116 35320 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1555
+INFO 2026-05-25 14:45:09,978 views 13116 28560 === 开始测试模型连接 ===
+INFO 2026-05-25 14:45:09,978 views 13116 28560 模型类型: other
+INFO 2026-05-25 14:45:09,978 views 13116 28560 模型名称: gpt-5.5
+INFO 2026-05-25 14:45:09,979 views 13116 28560 API URL: http://43.167.155.5:7890/v1
+INFO 2026-05-25 14:45:09,979 views 13116 28560 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 14:45:09,979 views 13116 28560 开始调用API...
+INFO 2026-05-25 14:45:09,980 models 13116 28560 === API调用详情 ===
+INFO 2026-05-25 14:45:09,980 models 13116 28560 原始base_url: http://43.167.155.5:7890/v1
+INFO 2026-05-25 14:45:09,980 models 13116 28560 最终请求URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 14:45:09,980 models 13116 28560 模型名称: gpt-5.5
+INFO 2026-05-25 14:45:09,981 models 13116 28560 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:45:10,374 models 13116 28560 发送POST请求到: http://43.167.155.5:7890/v1/chat/completions
+ERROR 2026-05-25 14:45:31,413 models 13116 28560 其他(兼容OpenAI API) API调用失败: ConnectError('All connection attempts failed')
+ERROR 2026-05-25 14:45:31,414 views 13116 28560 API连接测试异常: Exception('其他(兼容OpenAI API) API调用失败: All connection attempts failed'), URL: http://43.167.155.5:7890/v1, Model: gpt-5.5
+ERROR 2026-05-25 14:45:31,421 views 13116 28560 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 394, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        pool_request.request
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 101, in handle_async_request
+    raise exc
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 78, in handle_async_request
+    stream = await self._connect(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 124, in _connect
+    stream = await self._network_backend.connect_tcp(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_backends\auto.py", line 31, in connect_tcp
+    return await self._backend.connect_tcp(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_backends\anyio.py", line 113, in connect_tcp
+    with map_exceptions(exc_map):
+         ~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectError: All connection attempts failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 530, in call_openai_compatible_api
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1859, in post
+    return await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<13 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1540, in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 393, in handle_async_request
+    with map_httpcore_exceptions():
+         ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: All connection attempts failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 559, in call_openai_compatible_api
+    raise Exception(f"{provider_name} API调用失败: {str(e) or repr(e)}")
+Exception: 其他(兼容OpenAI API) API调用失败: All connection attempts failed
+
+WARNING 2026-05-25 14:45:31,421 log 13116 28560 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:45:31,421 log 13116 28560 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:45:31,422 basehttp 13116 28560 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 122
+WARNING 2026-05-25 14:45:31,422 basehttp 13116 28560 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 122
+INFO 2026-05-25 14:49:10,219 basehttp 13116 31236 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 484
+INFO 2026-05-25 14:49:10,219 basehttp 13116 31236 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 484
+INFO 2026-05-25 14:49:10,286 basehttp 13116 33828 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1555
+INFO 2026-05-25 14:49:10,286 basehttp 13116 33828 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1555
+INFO 2026-05-25 14:49:12,202 views 13116 29316 === 开始测试模型连接 ===
+INFO 2026-05-25 14:49:12,203 views 13116 29316 模型类型: other
+INFO 2026-05-25 14:49:12,203 views 13116 29316 模型名称: gpt-5.5
+INFO 2026-05-25 14:49:12,203 views 13116 29316 API URL: http://43.167.155.5:7890/v1
+INFO 2026-05-25 14:49:12,203 views 13116 29316 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 14:49:12,204 views 13116 29316 开始调用API...
+INFO 2026-05-25 14:49:12,204 models 13116 29316 === API调用详情 ===
+INFO 2026-05-25 14:49:12,205 models 13116 29316 原始base_url: http://43.167.155.5:7890/v1
+INFO 2026-05-25 14:49:12,205 models 13116 29316 最终请求URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 14:49:12,205 models 13116 29316 模型名称: gpt-5.5
+INFO 2026-05-25 14:49:12,206 models 13116 29316 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:49:12,613 models 13116 29316 发送POST请求到: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 14:49:12,814 _client 13116 29316 HTTP Request: POST http://43.167.155.5:7890/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+INFO 2026-05-25 14:49:12,815 models 13116 29316 收到响应: status_code=500
+ERROR 2026-05-25 14:49:12,815 models 13116 29316 API调用返回错误: Status=500, Body={"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250649133231602648268d9d6D60NuDGz)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 14:49:12,816 models 13116 29316 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250649133231602648268d9d6D60NuDGz)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 14:49:12,817 views 13116 29316 API连接测试异常: Exception('其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250649133231602648268d9d6D60NuDGz)","type":"new_api_error","param":"","code":"convert_request_failed"}}'), URL: http://43.167.155.5:7890/v1, Model: gpt-5.5
+ERROR 2026-05-25 14:49:12,819 views 13116 29316 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 542, in call_openai_compatible_api
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Server error '500 Internal Server Error' for url 'http://43.167.155.5:7890/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 550, in call_openai_compatible_api
+    raise Exception(error_msg)
+Exception: 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250649133231602648268d9d6D60NuDGz)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+
+WARNING 2026-05-25 14:49:12,820 log 13116 29316 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:49:12,820 log 13116 29316 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:49:12,821 basehttp 13116 29316 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+WARNING 2026-05-25 14:49:12,821 basehttp 13116 29316 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+INFO 2026-05-25 14:54:33,203 basehttp 13116 28192 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 484
+INFO 2026-05-25 14:54:33,203 basehttp 13116 28192 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 484
+INFO 2026-05-25 14:54:33,271 basehttp 13116 30000 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1555
+INFO 2026-05-25 14:54:33,271 basehttp 13116 30000 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1555
+INFO 2026-05-25 14:54:34,377 views 13116 3340 === 开始测试模型连接 ===
+INFO 2026-05-25 14:54:34,378 views 13116 3340 模型类型: other
+INFO 2026-05-25 14:54:34,378 views 13116 3340 模型名称: gpt-5.4
+INFO 2026-05-25 14:54:34,378 views 13116 3340 API URL: http://43.167.155.5:7890/v1
+INFO 2026-05-25 14:54:34,378 views 13116 3340 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 14:54:34,379 views 13116 3340 开始调用API...
+INFO 2026-05-25 14:54:34,379 models 13116 3340 === API调用详情 ===
+INFO 2026-05-25 14:54:34,379 models 13116 3340 原始base_url: http://43.167.155.5:7890/v1
+INFO 2026-05-25 14:54:34,379 models 13116 3340 最终请求URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 14:54:34,380 models 13116 3340 模型名称: gpt-5.4
+INFO 2026-05-25 14:54:34,380 models 13116 3340 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:54:34,803 models 13116 3340 发送POST请求到: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 14:54:34,984 _client 13116 3340 HTTP Request: POST http://43.167.155.5:7890/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+INFO 2026-05-25 14:54:34,985 models 13116 3340 收到响应: status_code=500
+ERROR 2026-05-25 14:54:34,985 models 13116 3340 API调用返回错误: Status=500, Body={"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250654355113885168268d9d6Af1ANKEF)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 14:54:34,985 models 13116 3340 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250654355113885168268d9d6Af1ANKEF)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 14:54:34,986 views 13116 3340 API连接测试异常: Exception('其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250654355113885168268d9d6Af1ANKEF)","type":"new_api_error","param":"","code":"convert_request_failed"}}'), URL: http://43.167.155.5:7890/v1, Model: gpt-5.4
+ERROR 2026-05-25 14:54:34,988 views 13116 3340 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 542, in call_openai_compatible_api
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Server error '500 Internal Server Error' for url 'http://43.167.155.5:7890/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 550, in call_openai_compatible_api
+    raise Exception(error_msg)
+Exception: 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250654355113885168268d9d6Af1ANKEF)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+
+WARNING 2026-05-25 14:54:34,989 log 13116 3340 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:54:34,989 log 13116 3340 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:54:34,989 basehttp 13116 3340 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+WARNING 2026-05-25 14:54:34,989 basehttp 13116 3340 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+INFO 2026-05-25 14:58:16,253 basehttp 13116 33352 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 473
+INFO 2026-05-25 14:58:16,253 basehttp 13116 33352 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 473
+INFO 2026-05-25 14:58:16,331 basehttp 13116 35244 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1544
+INFO 2026-05-25 14:58:16,331 basehttp 13116 35244 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1544
+INFO 2026-05-25 14:58:17,354 views 13116 11224 === 开始测试模型连接 ===
+INFO 2026-05-25 14:58:17,354 views 13116 11224 模型类型: openai
+INFO 2026-05-25 14:58:17,355 views 13116 11224 模型名称: gpt-5.4
+INFO 2026-05-25 14:58:17,355 views 13116 11224 API URL: http://43.167.155.5:7890/v1
+INFO 2026-05-25 14:58:17,355 views 13116 11224 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 14:58:17,356 views 13116 11224 开始调用API...
+INFO 2026-05-25 14:58:17,356 models 13116 11224 === API调用详情 ===
+INFO 2026-05-25 14:58:17,356 models 13116 11224 原始base_url: http://43.167.155.5:7890/v1
+INFO 2026-05-25 14:58:17,356 models 13116 11224 最终请求URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 14:58:17,356 models 13116 11224 模型名称: gpt-5.4
+INFO 2026-05-25 14:58:17,357 models 13116 11224 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 14:58:17,712 models 13116 11224 发送POST请求到: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 14:58:17,937 _client 13116 11224 HTTP Request: POST http://43.167.155.5:7890/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+INFO 2026-05-25 14:58:17,938 models 13116 11224 收到响应: status_code=500
+ERROR 2026-05-25 14:58:17,938 models 13116 11224 API调用返回错误: Status=500, Body={"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250658184681099498268d9d6EmGqBT9o)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 14:58:17,939 models 13116 11224 OpenAI (GPT) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250658184681099498268d9d6EmGqBT9o)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 14:58:17,939 views 13116 11224 API连接测试异常: Exception('OpenAI (GPT) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250658184681099498268d9d6EmGqBT9o)","type":"new_api_error","param":"","code":"convert_request_failed"}}'), URL: http://43.167.155.5:7890/v1, Model: gpt-5.4
+ERROR 2026-05-25 14:58:17,941 views 13116 11224 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 542, in call_openai_compatible_api
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Server error '500 Internal Server Error' for url 'http://43.167.155.5:7890/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 550, in call_openai_compatible_api
+    raise Exception(error_msg)
+Exception: OpenAI (GPT) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250658184681099498268d9d6EmGqBT9o)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+
+WARNING 2026-05-25 14:58:17,942 log 13116 11224 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:58:17,942 log 13116 11224 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 14:58:17,942 basehttp 13116 11224 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 304
+WARNING 2026-05-25 14:58:17,942 basehttp 13116 11224 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 304
+INFO 2026-05-25 15:01:10,826 basehttp 13116 32940 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 501
+INFO 2026-05-25 15:01:10,826 basehttp 13116 32940 "PATCH /api/requirement-analysis/ai-models/7/ HTTP/1.1" 200 501
+INFO 2026-05-25 15:01:10,913 basehttp 13116 32408 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1572
+INFO 2026-05-25 15:01:10,913 basehttp 13116 32408 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1572
+INFO 2026-05-25 15:01:11,983 views 13116 32840 === 开始测试模型连接 ===
+INFO 2026-05-25 15:01:11,984 views 13116 32840 模型类型: other
+INFO 2026-05-25 15:01:11,984 views 13116 32840 模型名称: gpt-5.4
+INFO 2026-05-25 15:01:11,984 views 13116 32840 API URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:11,984 views 13116 32840 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 15:01:11,985 views 13116 32840 开始调用API...
+INFO 2026-05-25 15:01:11,985 models 13116 32840 === API调用详情 ===
+INFO 2026-05-25 15:01:11,986 models 13116 32840 原始base_url: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:11,986 models 13116 32840 最终请求URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:11,986 models 13116 32840 模型名称: gpt-5.4
+INFO 2026-05-25 15:01:11,986 models 13116 32840 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 15:01:12,393 models 13116 32840 发送POST请求到: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:12,576 _client 13116 32840 HTTP Request: POST http://43.167.155.5:7890/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+INFO 2026-05-25 15:01:12,577 models 13116 32840 收到响应: status_code=500
+ERROR 2026-05-25 15:01:12,577 models 13116 32840 API调用返回错误: Status=500, Body={"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250701131101193718268d9d6Cf1vOO9E)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 15:01:12,577 models 13116 32840 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250701131101193718268d9d6Cf1vOO9E)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 15:01:12,578 views 13116 32840 API连接测试异常: Exception('其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250701131101193718268d9d6Cf1vOO9E)","type":"new_api_error","param":"","code":"convert_request_failed"}}'), URL: http://43.167.155.5:7890/v1/chat/completions, Model: gpt-5.4
+ERROR 2026-05-25 15:01:12,581 views 13116 32840 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 542, in call_openai_compatible_api
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Server error '500 Internal Server Error' for url 'http://43.167.155.5:7890/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 550, in call_openai_compatible_api
+    raise Exception(error_msg)
+Exception: 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250701131101193718268d9d6Cf1vOO9E)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+
+WARNING 2026-05-25 15:01:12,581 log 13116 32840 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 15:01:12,581 log 13116 32840 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 15:01:12,582 basehttp 13116 32840 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+WARNING 2026-05-25 15:01:12,582 basehttp 13116 32840 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+INFO 2026-05-25 15:01:17,693 views 13116 25756 === 开始测试模型连接 ===
+INFO 2026-05-25 15:01:17,693 views 13116 25756 模型类型: other
+INFO 2026-05-25 15:01:17,693 views 13116 25756 模型名称: gpt-5.4
+INFO 2026-05-25 15:01:17,693 views 13116 25756 API URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:17,694 views 13116 25756 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 15:01:17,694 views 13116 25756 开始调用API...
+INFO 2026-05-25 15:01:17,694 models 13116 25756 === API调用详情 ===
+INFO 2026-05-25 15:01:17,695 models 13116 25756 原始base_url: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:17,695 models 13116 25756 最终请求URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:17,695 models 13116 25756 模型名称: gpt-5.4
+INFO 2026-05-25 15:01:17,695 models 13116 25756 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 15:01:18,088 models 13116 25756 发送POST请求到: http://43.167.155.5:7890/v1/chat/completions
+ERROR 2026-05-25 15:01:39,145 models 13116 25756 其他(兼容OpenAI API) API调用失败: ConnectError('All connection attempts failed')
+ERROR 2026-05-25 15:01:39,146 views 13116 25756 API连接测试异常: Exception('其他(兼容OpenAI API) API调用失败: All connection attempts failed'), URL: http://43.167.155.5:7890/v1/chat/completions, Model: gpt-5.4
+ERROR 2026-05-25 15:01:39,154 views 13116 25756 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 394, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        pool_request.request
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 101, in handle_async_request
+    raise exc
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 78, in handle_async_request
+    stream = await self._connect(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_async\connection.py", line 124, in _connect
+    stream = await self._network_backend.connect_tcp(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_backends\auto.py", line 31, in connect_tcp
+    return await self._backend.connect_tcp(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_backends\anyio.py", line 113, in connect_tcp
+    with map_exceptions(exc_map):
+         ~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpcore\_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectError: All connection attempts failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 530, in call_openai_compatible_api
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1859, in post
+    return await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<13 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1540, in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 393, in handle_async_request
+    with map_httpcore_exceptions():
+         ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: All connection attempts failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 559, in call_openai_compatible_api
+    raise Exception(f"{provider_name} API调用失败: {str(e) or repr(e)}")
+Exception: 其他(兼容OpenAI API) API调用失败: All connection attempts failed
+
+WARNING 2026-05-25 15:01:39,155 log 13116 25756 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 15:01:39,155 log 13116 25756 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+INFO 2026-05-25 15:01:39,166 basehttp 13116 35316 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1572
+INFO 2026-05-25 15:01:39,166 basehttp 13116 35316 "GET /api/requirement-analysis/ai-models/ HTTP/1.1" 200 1572
+INFO 2026-05-25 15:01:40,463 views 13116 32780 === 开始测试模型连接 ===
+INFO 2026-05-25 15:01:40,463 views 13116 32780 模型类型: other
+INFO 2026-05-25 15:01:40,463 views 13116 32780 模型名称: gpt-5.4
+INFO 2026-05-25 15:01:40,463 views 13116 32780 API URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:40,464 views 13116 32780 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 15:01:40,464 views 13116 32780 开始调用API...
+INFO 2026-05-25 15:01:40,464 models 13116 32780 === API调用详情 ===
+INFO 2026-05-25 15:01:40,465 models 13116 32780 原始base_url: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:40,465 models 13116 32780 最终请求URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:40,465 models 13116 32780 模型名称: gpt-5.4
+INFO 2026-05-25 15:01:40,465 models 13116 32780 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 15:01:40,856 models 13116 32780 发送POST请求到: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:01:41,038 _client 13116 32780 HTTP Request: POST http://43.167.155.5:7890/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+INFO 2026-05-25 15:01:41,039 models 13116 32780 收到响应: status_code=500
+ERROR 2026-05-25 15:01:41,039 models 13116 32780 API调用返回错误: Status=500, Body={"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250701415745926388268d9d6KUOAHMMc)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 15:01:41,039 models 13116 32780 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250701415745926388268d9d6KUOAHMMc)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 15:01:41,040 views 13116 32780 API连接测试异常: Exception('其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250701415745926388268d9d6KUOAHMMc)","type":"new_api_error","param":"","code":"convert_request_failed"}}'), URL: http://43.167.155.5:7890/v1/chat/completions, Model: gpt-5.4
+ERROR 2026-05-25 15:01:41,042 views 13116 32780 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 542, in call_openai_compatible_api
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Server error '500 Internal Server Error' for url 'http://43.167.155.5:7890/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 550, in call_openai_compatible_api
+    raise Exception(error_msg)
+Exception: 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250701415745926388268d9d6KUOAHMMc)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+
+WARNING 2026-05-25 15:01:41,043 log 13116 32780 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 15:01:41,043 log 13116 32780 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 15:01:41,043 basehttp 13116 32780 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+WARNING 2026-05-25 15:01:41,043 basehttp 13116 32780 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+INFO 2026-05-25 15:05:35,082 views 13116 8612 === 开始测试模型连接 ===
+INFO 2026-05-25 15:05:35,083 views 13116 8612 模型类型: other
+INFO 2026-05-25 15:05:35,083 views 13116 8612 模型名称: gpt-5.4
+INFO 2026-05-25 15:05:35,083 views 13116 8612 API URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:05:35,083 views 13116 8612 API Key前缀: sk-DyqPfB9...
+INFO 2026-05-25 15:05:35,084 views 13116 8612 开始调用API...
+INFO 2026-05-25 15:05:35,084 models 13116 8612 === API调用详情 ===
+INFO 2026-05-25 15:05:35,085 models 13116 8612 原始base_url: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:05:35,085 models 13116 8612 最终请求URL: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:05:35,085 models 13116 8612 模型名称: gpt-5.4
+INFO 2026-05-25 15:05:35,085 models 13116 8612 请求参数: max_tokens=4096, temperature=0.7, top_p=0.9
+INFO 2026-05-25 15:05:35,474 models 13116 8612 发送POST请求到: http://43.167.155.5:7890/v1/chat/completions
+INFO 2026-05-25 15:05:35,655 _client 13116 8612 HTTP Request: POST http://43.167.155.5:7890/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+INFO 2026-05-25 15:05:35,656 models 13116 8612 收到响应: status_code=500
+ERROR 2026-05-25 15:05:35,656 models 13116 8612 API调用返回错误: Status=500, Body={"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250705361949480178268d9d6BW9bvYBa)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 15:05:35,657 models 13116 8612 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250705361949480178268d9d6BW9bvYBa)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+ERROR 2026-05-25 15:05:35,657 views 13116 8612 API连接测试异常: Exception('其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250705361949480178268d9d6BW9bvYBa)","type":"new_api_error","param":"","code":"convert_request_failed"}}'), URL: http://43.167.155.5:7890/v1/chat/completions, Model: gpt-5.4
+ERROR 2026-05-25 15:05:35,660 views 13116 8612 详细错误堆栈:
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 542, in call_openai_compatible_api
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\venv\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Server error '500 Internal Server Error' for url 'http://43.167.155.5:7890/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\views.py", line 960, in test_api_connection
+    result = loop.run_until_complete(
+        asyncio.wait_for(
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\a\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\apps\requirement_analysis\models.py", line 550, in call_openai_compatible_api
+    raise Exception(error_msg)
+Exception: 其他(兼容OpenAI API) API返回错误 500: {"error":{"message":"codex channel: /v1/chat/completions endpoint not supported (request id: 202605250705361949480178268d9d6BW9bvYBa)","type":"new_api_error","param":"","code":"convert_request_failed"}}
+
+WARNING 2026-05-25 15:05:35,660 log 13116 8612 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 15:05:35,660 log 13116 8612 Bad Request: /api/requirement-analysis/ai-models/7/test_connection/
+WARNING 2026-05-25 15:05:35,661 basehttp 13116 8612 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316
+WARNING 2026-05-25 15:05:35,661 basehttp 13116 8612 "POST /api/requirement-analysis/ai-models/7/test_connection/ HTTP/1.1" 400 316

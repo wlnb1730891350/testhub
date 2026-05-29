@@ -1,0 +1,25 @@
+﻿
+> testhub-frontend@1.0.1 dev
+> vite
+
+[2m11:21:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Forced re-optimization of dependencies
+
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m690[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3000[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://10.1.106.10:[1m3000[22m/[39m
+npm.cmd : [2m11:21:55[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login/[39m
+所在位置 行:1 字符: 147
++ ... law\workspace\testhub_platform\frontend; npm.cmd run dev 2>&1 | Out-F ...
++                                              ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([2m11:21:55[2...uth/login/[39m:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)
+[2m11:21:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login/[39m
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)
+[2m11:21:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login/[39m
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)

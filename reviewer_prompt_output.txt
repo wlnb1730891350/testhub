@@ -1,0 +1,13 @@
+﻿=== Reviewer Prompt (ID=2) ===
+Name: Ĭ�ϲ�������������ʾ��
+.\venv\Scripts\python.exe : Traceback (most recent call last):
+所在位置 行:1 字符: 138
++ ... b_platform; .\venv\Scripts\python.exe check_reviewer_prompt.py 2>&1 | ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\a\.qclaw\workspace\testhub_platform\check_reviewer_prompt.py", line 12, in <module>
+    print(f"Length: {len(reviewer.prompt_content)} chars")
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'PromptConfig' object has no attribute 'prompt_content'

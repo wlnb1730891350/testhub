@@ -1,0 +1,2 @@
+﻿id	name	prompt_type	len	is_active
+1	Ĭ�ϲ���������д��ʾ��	writer	3673	1
