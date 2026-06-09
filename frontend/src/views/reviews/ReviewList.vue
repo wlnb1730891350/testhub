@@ -126,8 +126,8 @@
       <el-form :model="reviewForm" label-width="80px">
         <el-form-item :label="$t('reviewList.reviewResult')" required>
           <el-radio-group v-model="reviewForm.status">
-            <el-radio-button label="approved">{{ $t('reviewList.approved') }}</el-radio-button>
-            <el-radio-button label="rejected">{{ $t('reviewList.rejected') }}</el-radio-button>
+            <el-radio-button value="approved">{{ $t('reviewList.approved') }}</el-radio-button>
+            <el-radio-button value="rejected">{{ $t('reviewList.rejected') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <el-form-item :label="$t('reviewList.reviewComment')">

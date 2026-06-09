@@ -1,4 +1,4 @@
-"""
+﻿"""
 Core application views.
 """
 from datetime import timedelta
@@ -109,6 +109,98 @@ class WorkspaceViewSet(viewsets.ViewSet):
             'focus': focus,
             'health': health,
             'recent_activities': self._build_recent_activities(limit=10),
+        })
+
+    @action(detail=False, methods=['get'], url_path='system-health')
+    def system_health(self, request):
+        """Return real-time system health status for all services."""
+        import time
+        from django.db import connection
+        services = []
+        # Database health
+        db_start = time.time()
+        db_ok = False
+        db_msg = ''
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT 1')
+            db_ok = True
+            db_msg = 'MySQL ok'
+        except Exception as e:
+            db_msg = f'MySQL error: {str(e)[:80]}'
+        db_latency = round((time.time() - db_start) * 1000, 1)
+        services.append({
+            'name': 'MySQL Database',
+            'status': 'healthy' if db_ok else 'error',
+            'latency_ms': db_latency,
+            'message': db_msg,
+        })
+        # AI Model availability
+        try:
+            from apps.requirement_analysis.models import AIModelConfig
+            active_models = AIModelConfig.objects.filter(is_active=True).count()
+            services.append({
+                'name': 'AI Models',
+                'status': 'healthy' if active_models > 0 else 'warning',
+                'latency_ms': 0,
+                'message': f'{active_models} models configured',
+            })
+        except Exception as e:
+            services.append({
+                'name': 'AI Models',
+                'status': 'error',
+                'latency_ms': 0,
+                'message': f'Config query failed: {str(e)[:80]}',
+            })
+        # Celery worker health
+        try:
+            from backend.celery import app as celery_app
+            inspect = celery_app.control.inspect(timeout=1.0)
+            active_workers = inspect.active_queues()
+            worker_count = len(active_workers) if active_workers else 0
+            services.append({
+                'name': 'Celery Worker',
+                'status': 'healthy' if worker_count > 0 else 'warning',
+                'latency_ms': 0,
+                'message': f'{worker_count} workers online' if worker_count > 0 else 'No workers online',
+            })
+        except Exception:
+            services.append({
+                'name': 'Celery Worker',
+                'status': 'warning',
+                'latency_ms': 0,
+                'message': 'Cannot check Celery status',
+            })
+        # Disk space
+        try:
+            import shutil
+            total, used, free = shutil.disk_usage('C:\\')
+            free_gb = round(free / (1024**3), 1)
+            usage_pct = round(used / total * 100, 1)
+            services.append({
+                'name': 'Disk Space',
+                'status': 'healthy' if usage_pct < 85 else ('warning' if usage_pct < 95 else 'error'),
+                'latency_ms': 0,
+                'message': f'{usage_pct}% used, {free_gb}GB free',
+            })
+        except Exception:
+            services.append({
+                'name': 'Disk Space',
+                'status': 'unknown',
+                'latency_ms': 0,
+                'message': 'Cannot check disk info',
+            })
+        statuses = [s['status'] for s in services]
+        if 'error' in statuses:
+            overall = 'error'
+        elif 'warning' in statuses:
+            overall = 'warning'
+        else:
+            overall = 'healthy'
+        return Response({
+            'overall': overall,
+            'services': services,
+            'timestamp': timezone.now().isoformat(),
         })
 
     @action(detail=False, methods=['get'])

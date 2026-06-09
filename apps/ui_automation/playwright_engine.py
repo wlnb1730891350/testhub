@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Tuple
 from playwright.async_api import async_playwright, Page, Browser, BrowserContext, TimeoutError as PlaywrightTimeout
 import logging
 from .variable_resolver import resolve_variables
+from .ai_assertion import AIAssertionService
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,27 @@ class PlaywrightTestEngine:
         self.headless = headless
         self.playwright = None
         self.browser: Optional[Browser] = None
+
+    @classmethod
+    def check_execution_environment_sync(cls, browser_type='chromium'):
+        try:
+            from playwright.sync_api import sync_playwright
+            pw = sync_playwright().start()
+            normalized = cls.normalize_browser_type(browser_type)
+            launcher = getattr(pw, normalized, pw.chromium)
+            browser = launcher.launch(headless=True)
+            browser.close()
+            pw.stop()
+            return True, ''
+        except ImportError:
+            return False, 'playwright 未安装，请执行 pip install playwright'
+        except Exception as e:
+            return False, str(e)
+
+    @staticmethod
+    def normalize_browser_type(browser_type):
+        mapping = {'chrome': 'chromium', 'edge': 'chromium', 'firefox': 'firefox', 'webkit': 'webkit'}
+        return mapping.get(browser_type, 'chromium')
         self.context: Optional[BrowserContext] = None
         self.page: Optional[Page] = None
 
@@ -129,6 +151,22 @@ class PlaywrightTestEngine:
                 log += f"  - 截图范围: 整个页面\n"
                 log += f"  - 执行时间: {execution_time}秒"
                 return True, log, screenshot_base64
+
+            elif action_type == 'aiAssert':
+                # AI智能断言 - 不需要元素定位器
+                # 先等待页面稳定（默认2秒，可通过步骤等待时间配置）
+                assert_wait = (step.wait_time / 1000) if step.wait_time and step.wait_time > 0 else 2.0
+                await asyncio.sleep(assert_wait)
+
+                assertion_text = step.input_value or step.description or step.assert_value
+                if not assertion_text:
+                    return False, "AI断言需要填写断言描述（在输入值或描述中填写）", None
+
+                from .ai_assertion import AIAssertionService
+                passed, log, ss = await AIAssertionService.ai_assert(
+                    self.page, assertion_text
+                )
+                return passed, log, ss
 
             elif action_type == 'switchTab':
                 # 切换标签页
@@ -598,6 +636,21 @@ class PlaywrightTestEngine:
                 if force_action:
                     log += f"  - 强制操作: 是（忽略可见性检查）\n"
                 log += f"  - 执行时间: {execution_time}秒"
+                return True, log, None
+
+            elif action_type == 'press':
+                has_locator = locator is not None
+                if has_locator:
+                    await locator.focus(timeout=timeout_ms)
+                    await locator.press(resolved_input_value, timeout=timeout_ms)
+                else:
+                    await self.page.keyboard.press(resolved_input_value)
+
+                execution_time = round(time.time() - start_time, 2)
+                log = f"Pressed key '{resolved_input_value}' successfully\n"
+                if has_locator and locator_strategy and locator_value:
+                    log += f"  - Locator: {locator_strategy}={locator_value}\n"
+                log += f"  - Execution time: {execution_time}s"
                 return True, log, None
 
             elif action_type == 'getText':

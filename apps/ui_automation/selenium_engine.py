@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementNotInteractableException
 import logging
 
@@ -625,6 +626,39 @@ class SeleniumTestEngine:
                             logger.info(f"✓ 元素重新定位成功")
                         else:
                             raise
+
+            elif action_type == 'press':
+                key_map = {
+                    'Enter': Keys.ENTER,
+                    'Tab': Keys.TAB,
+                    'Escape': Keys.ESCAPE,
+                    'Backspace': Keys.BACKSPACE,
+                    'Delete': Keys.DELETE,
+                    'ArrowUp': Keys.ARROW_UP,
+                    'ArrowDown': Keys.ARROW_DOWN,
+                    'ArrowLeft': Keys.ARROW_LEFT,
+                    'ArrowRight': Keys.ARROW_RIGHT,
+                    'Home': Keys.HOME,
+                    'End': Keys.END,
+                    'PageUp': Keys.PAGE_UP,
+                    'PageDown': Keys.PAGE_DOWN,
+                    'Space': Keys.SPACE,
+                }
+
+                combo_parts = [part.strip() for part in str(resolved_input_value).split('+') if part.strip()]
+                selenium_keys = [key_map.get(part, part) for part in combo_parts]
+
+                if element:
+                    element.send_keys(*selenium_keys)
+                else:
+                    ActionChains(self.driver).send_keys(*selenium_keys).perform()
+
+                execution_time = round(time.time() - start_time, 2)
+                log = f"Pressed key '{resolved_input_value}' successfully\n"
+                if locator_strategy and locator_value:
+                    log += f"  - Locator: {locator_strategy}={locator_value}\n"
+                log += f"  - Execution time: {execution_time}s"
+                return True, log, None
 
             elif action_type == 'getText':
                 # 获取文本（添加 stale element 重试）

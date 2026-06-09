@@ -185,9 +185,9 @@
       <el-form :model="reviewForm" label-width="100px">
         <el-form-item :label="$t('reviewDetail.reviewResult')" required>
           <el-radio-group v-model="reviewForm.status">
-            <el-radio-button label="approved">{{ $t('reviewDetail.approved') }}</el-radio-button>
-            <el-radio-button label="rejected">{{ $t('reviewDetail.rejected') }}</el-radio-button>
-            <el-radio-button label="abstained">{{ $t('reviewDetail.abstained') }}</el-radio-button>
+            <el-radio-button value="approved">{{ $t('reviewDetail.approved') }}</el-radio-button>
+            <el-radio-button value="rejected">{{ $t('reviewDetail.rejected') }}</el-radio-button>
+            <el-radio-button value="abstained">{{ $t('reviewDetail.abstained') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
@@ -212,8 +212,8 @@
                 </div>
                 <div class="item-controls">
                   <el-radio-group v-model="reviewForm.checklist_results[index]">
-                    <el-radio-button :label="true">{{ $t('reviewDetail.approved') }}</el-radio-button>
-                    <el-radio-button :label="false">{{ $t('reviewDetail.rejected') }}</el-radio-button>
+                    <el-radio-button :value="true">{{ $t('reviewDetail.approved') }}</el-radio-button>
+                    <el-radio-button :value="false">{{ $t('reviewDetail.rejected') }}</el-radio-button>
                   </el-radio-group>
                 </div>
               </div>
@@ -241,8 +241,8 @@
       <el-form :model="commentForm" label-width="100px">
         <el-form-item :label="$t('reviewDetail.commentType')" required>
           <el-radio-group v-model="commentForm.comment_type">
-            <el-radio-button label="general">{{ $t('reviewDetail.generalComment') }}</el-radio-button>
-            <el-radio-button label="testcase">{{ $t('reviewDetail.testcaseComment') }}</el-radio-button>
+            <el-radio-button value="general">{{ $t('reviewDetail.generalComment') }}</el-radio-button>
+            <el-radio-button value="testcase">{{ $t('reviewDetail.testcaseComment') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <el-form-item v-if="commentForm.comment_type === 'testcase'" :label="$t('reviewDetail.relatedTestcaseLabel')">

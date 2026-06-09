@@ -144,7 +144,8 @@ import {
   FolderOpened,
   UserFilled,
   Operation,
-  House
+  House,
+  VideoCamera
 } from '@element-plus/icons-vue'
 import logoImage from '@/assets/images/logo_home.png'
 

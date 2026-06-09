@@ -2354,16 +2354,20 @@ class TestCaseGenerationTaskViewSet(viewsets.ModelViewSet):
 
                 if any(keyword in header for keyword in ['编号', 'id', '序号', '用例id']):
                     test_case['caseId'] = value
-                elif any(keyword in header for keyword in ['场景', '标题', '名称', 'title', 'scenario', '测试目标']):
+                elif any(keyword in header for keyword in ['场景', '标题', '名称', 'title', 'scenario', '测试目标', '功能点', 'function', '测试点']):
                     test_case['scenario'] = value
                 elif any(keyword in header for keyword in ['前置', '前提', 'precondition']):
                     test_case['precondition'] = value
                 elif any(keyword in header for keyword in ['步骤', 'step', '测试步骤', '操作步骤']):
                     test_case['steps'] = value
-                elif any(keyword in header for keyword in ['预期', '结果', 'expected', 'result']):
+                elif any(keyword in header for keyword in ['预期', '结果', 'expected', 'result', '说明', '描述', 'description', '验证标准']):
                     test_case['expected'] = value
                 elif any(keyword in header for keyword in ['优先级', 'priority']):
                     test_case['priority'] = value
+                elif any(keyword in header for keyword in ['模块', 'module', '功能']):
+                    # 模块信息可选，存入scenario if scenario为空
+                    if not test_case.get('scenario'):
+                        test_case['scenario'] = value
 
             if test_case.get('scenario') or test_case.get('steps'):
                 test_cases.append(test_case)
@@ -3501,11 +3505,38 @@ def _kickoff_generation_for_task(task):
                     # 从数据库重新获取最新的任务对象
                     task.refresh_from_db()
 
+                    # ===== 关键修复：确保 final_test_cases 包含实际测试用例 =====
+                    # 如果 revising 阶段失败或返回空内容，回退到 generated_test_cases
+                    # 检查 final_test_cases 是否包含实际的表格行（测试用例）
+                    final_has_test_cases = False
+                    if task.final_test_cases and task.final_test_cases.strip():
+                        # 检查是否包含表格行（包含 | 且不是分隔行）
+                        for line in task.final_test_cases.split('\n'):
+                            if '|' in line and '---' not in line and line.strip().startswith('|'):
+                                final_has_test_cases = True
+                                break
+                    
+                    if not final_has_test_cases:
+                        if task.generated_test_cases and task.generated_test_cases.strip():
+                            logger.warning(
+                                f"任务 {task.task_id} final_test_cases 无实际测试用例内容，回退到 generated_test_cases "
+                                f"(final长度: {len(task.final_test_cases) if task.final_test_cases else 0}, "
+                                f"generated长度: {len(task.generated_test_cases)})")
+                            # 按用例编号排序后再保存
+                            sorted_cases = AIModelService.sort_test_cases_by_id(
+                                task.generated_test_cases)
+                            renumbered_cases = AIModelService.renumber_test_cases(
+                                sorted_cases)
+                            task.final_test_cases = renumbered_cases
+                        else:
+                            logger.error(
+                                f"任务 {task.task_id} final_test_cases 和 generated_test_cases 均无有效内容")
+
                     task.status = 'completed'
                     task.progress = 100
                     task.completed_at = timezone.now()
                     task.save(update_fields=['status', 'progress', 'completed_at', 'final_test_cases'])
-                    logger.info(f"任务 {task.task_id} 已完成")
+                    logger.info(f"任务 {task.task_id} 已完成, final_test_cases 长度: {len(task.final_test_cases) if task.final_test_cases else 0}")
 
                 finally:
                     try:

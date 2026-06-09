@@ -533,7 +533,8 @@ class TestCaseStepSerializer(serializers.ModelSerializer):
         model = TestCaseStep
         fields = [
             'id', 'step_number', 'action_type', 'element', 'element_name', 'element_locator',
-            'input_value', 'wait_time', 'assert_type', 'assert_value', 'description', 'created_at'
+            'input_value', 'wait_time', 'assert_type', 'assert_value',
+            'is_optional', 'optional_note', 'description', 'created_at'
         ]
 
 
@@ -934,3 +935,23 @@ class UiTaskNotificationSettingSerializer(serializers.ModelSerializer):
             type_names.append('Webhook机器人')
         return ', '.join(type_names) if type_names else "无"
 
+
+class RecordingSessionSerializer(serializers.ModelSerializer):
+    """录制会话序列化器"""
+    project_name = serializers.CharField(source='project.name', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.username', read_only=True)
+    actions_count = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import RecordingSession
+        model = RecordingSession
+        fields = [
+            'id', 'session_id', 'project', 'project_name', 'start_url',
+            'status', 'browser', 'headless', 'recorded_actions', 'error_message',
+            'created_by', 'created_by_name', 'actions_count', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_by', 'session_id', 'status', 'recorded_actions', 'error_message']
+
+    def get_actions_count(self, obj):
+        actions = obj.recorded_actions or []
+        return len(actions)

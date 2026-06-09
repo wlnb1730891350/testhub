@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+﻿import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 // 静态导入常用组件来避免动态导入问题
@@ -11,6 +11,7 @@ import DataFactory from '@/views/data-factory/DataFactory.vue'
 import CommandCenter from '@/views/workspace/CommandCenter.vue'
 import ReportCenter from '@/views/workspace/ReportCenter.vue'
 import SchedulerCenter from '@/views/workspace/SchedulerCenter.vue'
+import TestAnalytics from '@/views/workspace/TestAnalytics.vue'
 import ApiDashboard from '@/views/api-testing/Dashboard.vue'
 import ApiProjectManagement from '@/views/api-testing/ProjectManagement.vue'
 import ApiInterfaceManagement from '@/views/api-testing/InterfaceManagement.vue'
@@ -74,6 +75,12 @@ const routes = [
         name: 'SchedulerCenter',
         component: SchedulerCenter,
         meta: { title: 'Unified Scheduler Center' }
+      },
+      {
+        path: 'analytics',
+        name: 'TestAnalytics',
+        component: TestAnalytics,
+        meta: { title: 'Test Analytics' }
       }
     ]
   },
@@ -335,7 +342,7 @@ const routes = [
         path: 'notification-logs',
         name: 'UiNotificationLogs',
         component: UiNotificationLogs
-      }
+      },
     ]
   },
   {

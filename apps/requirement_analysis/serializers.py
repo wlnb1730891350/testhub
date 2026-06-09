@@ -19,6 +19,7 @@ class RequirementDocumentSerializer(serializers.ModelSerializer):
     uploaded_by_name = serializers.CharField(source='uploaded_by.username', read_only=True)
     project_name = serializers.CharField(source='project.name', read_only=True)
     document_type_display = serializers.CharField(source='get_document_type_display', read_only=True)
+    document_type = serializers.CharField(required=False, allow_blank=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     file_url = serializers.SerializerMethodField()
     

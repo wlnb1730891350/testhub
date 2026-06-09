@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="home-shell">
     <section class="hero-panel">
       <div class="hero-topbar">
@@ -45,6 +45,10 @@
         </div>
       </div>
 
+      <div class="health-row-container">
+        <SystemHealthMonitor />
+      </div>
+
       <div class="hero-content">
         <div class="hero-copy">
           <span class="hero-badge">{{ pageCopy.badge }}</span>
@@ -84,6 +88,10 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <section class="section-block">
+      <DashboardStats />
     </section>
 
     <section class="section-block">
@@ -195,6 +203,8 @@ import {
   Promotion
 } from '@element-plus/icons-vue'
 import logoImage from '@/assets/images/logo_home.png'
+import SystemHealthMonitor from '@/views/home/SystemHealthMonitor.vue'
+import DashboardStats from '@/views/home/DashboardStats.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -363,6 +373,17 @@ const platformCards = computed(() => [
     icon: ChatDotRound,
     color: '#c2410c',
     status: statusText.value.explore
+  },
+  {
+    title: isChinese.value ? '测试分析' : 'Test Analytics',
+    description: isChinese.value
+      ? '跨模块执行趋势、覆盖统计和活动时间线，一目了然。'
+      : 'Cross-module execution trends, coverage stats and activity timeline at a glance.',
+    route: '/workspace/analytics',
+    routeLabel: isChinese.value ? '查看分析' : 'Open analytics',
+    icon: Histogram,
+    color: '#1d4ed8',
+    status: statusText.value.ready
   },
   {
     title: isChinese.value ? '配置中心' : 'Configuration Center',
@@ -902,5 +923,8 @@ const navigateTo = (path) => {
     width: 100%;
     justify-content: center;
   }
+}
+.health-row-container {
+  margin-top: 16px;
 }
 </style>

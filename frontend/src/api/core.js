@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 核心功能模块相关 API
  */
 import request from '@/utils/api'
@@ -84,5 +84,12 @@ export function getUnifiedSchedulerCenter(params) {
     url: '/core/workspace/scheduler_center/',
     method: 'get',
     params
+  })
+}
+
+export function getSystemHealth() {
+  return request({
+    url: '/core/workspace/system-health/',
+    method: 'get'
   })
 }

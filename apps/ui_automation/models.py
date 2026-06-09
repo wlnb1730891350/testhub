@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 import json
@@ -113,6 +113,7 @@ class Element(models.Model):
 
     page = models.CharField(max_length=200, verbose_name='所属页面', blank=True)
     component_name = models.CharField(max_length=100, blank=True, verbose_name='组件名称', help_text='所属UI组件名称')
+    order = models.IntegerField(default=0, verbose_name='排序')
 
     # 元素层次关系
     parent_element = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='父元素', help_text='用于构建元素层次结构')
@@ -139,7 +140,7 @@ class Element(models.Model):
         db_table = 'ui_elements'
         verbose_name = 'UI元素'
         verbose_name_plural = 'UI元素'
-        ordering = ['page', 'name']
+        ordering = ['page', 'order', 'name']
         indexes = [
             models.Index(fields=['project', 'page']),
             models.Index(fields=['project', 'element_type']),
@@ -616,6 +617,8 @@ class TestCaseStep(models.Model):
         ('scroll', '滚动'),
         ('screenshot', '截图'),
         ('assert', '断言'),
+        ('aiAssert', 'AI智能断言'),
+        ('press', '按键'),
         ('wait', '等待'),
         ('switchTab', '切换标签页'),
     ]
@@ -636,6 +639,8 @@ class TestCaseStep(models.Model):
     wait_time = models.IntegerField(default=1000, verbose_name='等待时间(毫秒)')
     assert_type = models.CharField(max_length=20, choices=ASSERT_TYPE_CHOICES, blank=True, verbose_name='断言类型')
     assert_value = models.TextField(blank=True, verbose_name='断言期望值')
+    is_optional = models.BooleanField(default=False, verbose_name='找不到时跳过')
+    optional_note = models.CharField(max_length=200, blank=True, verbose_name='跳过说明')
     description = models.TextField(blank=True, verbose_name='步骤描述')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
@@ -663,6 +668,7 @@ class TestCaseExecution(models.Model):
     ENGINE_CHOICES = [
         ('playwright', 'Playwright'),
         ('selenium', 'Selenium'),
+        ('ai', 'AI智能执行'),
     ]
 
     SOURCE_CHOICES = [
@@ -682,6 +688,10 @@ class TestCaseExecution(models.Model):
     execution_logs = models.TextField(blank=True, verbose_name='执行日志')
     error_message = models.TextField(null=True, blank=True, verbose_name='错误信息')
     screenshots = models.JSONField(default=list, blank=True, verbose_name='截图列表')
+    ai_execution_details = models.JSONField(default=dict, blank=True, verbose_name='AI执行详情',
+        help_text='AI引擎执行时的步骤级详情，包含每步的定位器、截图、实际结果等')
+    ai_execution_details = models.JSONField(default=dict, blank=True, verbose_name='AI执行详情',
+        help_text='AI引擎执行时的步骤级详情，包含每步的定位器、截图、实际结果等')
     execution_time = models.FloatField(null=True, blank=True, verbose_name='执行时长(秒)')
     started_at = models.DateTimeField(null=True, blank=True, verbose_name='开始时间')
     finished_at = models.DateTimeField(null=True, blank=True, verbose_name='完成时间')
@@ -1056,3 +1066,36 @@ class AIExecutionRecord(models.Model):
 
     def __str__(self):
         return f"{self.case_name} - {self.get_status_display()}"
+
+
+class RecordingSession(models.Model):
+    """录制会话"""
+    STATUS_CHOICES = [
+        ('starting', '启动中'),
+        ('recording', '录制中'),
+        ('stopped', '已停止'),
+        ('saving', '保存中'),
+        ('saved', '已保存'),
+        ('error', '异常'),
+    ]
+
+    project = models.ForeignKey(UiProject, on_delete=models.CASCADE, related_name='recording_sessions', verbose_name='所属项目')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recording_sessions', verbose_name='创建人')
+    session_id = models.CharField(max_length=100, unique=True, verbose_name='会话ID')
+    start_url = models.URLField(max_length=500, verbose_name='起始URL')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='starting', verbose_name='状态')
+    browser = models.CharField(max_length=50, default='chromium', verbose_name='浏览器')
+    headless = models.BooleanField(default=False, verbose_name='无头模式')
+    recorded_actions = models.JSONField(default=list, blank=True, verbose_name='录制动作')
+    error_message = models.TextField(blank=True, verbose_name='错误信息')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'ui_recording_sessions'
+        verbose_name = '录制会话'
+        verbose_name_plural = '录制会话'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.session_id

@@ -166,8 +166,8 @@
           <!-- 执行日志 - 所有状态都显示 -->
           <el-tab-pane :label="$t('uiAutomation.execution.executionLogs')" name="logs">
             <div class="logs-container">
-              <div v-if="currentExecution.execution_logs">
-                <div v-for="(step, index) in parseExecutionLogs(currentExecution.execution_logs)" :key="index" class="log-item">
+              <div v-if="getExecutionLogs(currentExecution).length > 0">
+                <div v-for="(step, index) in getExecutionLogs(currentExecution)" :key="index" class="log-item">
                   <div class="log-header">
                     <el-tag :type="step.success ? 'success' : 'danger'" size="small">
                       {{ $t('uiAutomation.execution.step') }} {{ step.step_number }}
@@ -181,12 +181,18 @@
                   </div>
                 </div>
               </div>
-              <el-empty v-else :description="$t('uiAutomation.execution.noLogs')" />
+              <el-empty v-else :description="getExecutionEmptyText(currentExecution)" />
             </div>
           </el-tab-pane>
 
           <!-- 失败截图 - 仅失败或错误状态显示 -->
-          <el-tab-pane :label="$t('uiAutomation.execution.failedScreenshots')" name="screenshots" v-if="currentExecution.status === 'failed' || currentExecution.status === 'error'">
+          <el-tab-pane
+            :label="(currentExecution.status === 'failed' || currentExecution.status === 'error')
+              ? $t('uiAutomation.execution.failedScreenshots')
+              : $t('uiAutomation.execution.successScreenshots')"
+            name="screenshots"
+            v-if="currentExecution.screenshots && currentExecution.screenshots.length > 0"
+          >
             <div class="screenshots-container">
               <div v-if="currentExecution.screenshots && currentExecution.screenshots.length > 0">
                 <div v-for="(screenshot, index) in currentExecution.screenshots" :key="index" class="screenshot-item">
@@ -234,8 +240,8 @@
       <el-form :model="rerunFormData" label-width="100px">
         <el-form-item :label="$t('uiAutomation.execution.testEngine')">
           <el-radio-group v-model="rerunFormData.engine">
-            <el-radio label="playwright">Playwright</el-radio>
-            <el-radio label="selenium">Selenium</el-radio>
+            <el-radio value="playwright">Playwright</el-radio>
+            <el-radio value="selenium">Selenium</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item :label="$t('uiAutomation.execution.browserFilter')">
@@ -248,8 +254,8 @@
         </el-form-item>
         <el-form-item :label="$t('uiAutomation.execution.executionMode')">
           <el-radio-group v-model="rerunFormData.headless">
-            <el-radio :label="false">{{ $t('uiAutomation.execution.headedMode') }}</el-radio>
-            <el-radio :label="true">{{ $t('uiAutomation.execution.headlessMode') }}</el-radio>
+            <el-radio :value="false">{{ $t('uiAutomation.execution.headedMode') }}</el-radio>
+            <el-radio :value="true">{{ $t('uiAutomation.execution.headlessMode') }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -433,6 +439,20 @@ const parseExecutionLogs = (logs) => {
   }
 }
 
+const getExecutionLogs = (execution) => {
+  if (!execution) return []
+  const logs = parseExecutionLogs(execution.execution_logs)
+  return Array.isArray(logs) ? logs : []
+}
+
+const getExecutionEmptyText = (execution) => {
+  if (!execution) return t('uiAutomation.execution.noLogs')
+  if (execution.status === 'passed' && execution.execution_logs === '[]') {
+    return '这次执行没有步骤日志，通常是因为执行到了一个空用例'
+  }
+  return t('uiAutomation.execution.noLogs')
+}
+
 // 加载项目列表
 const loadProjects = async () => {
   try {
@@ -555,7 +575,7 @@ const handleBatchDelete = () => {
 // 查看执行详情
 const viewExecutionDetail = (execution) => {
   currentExecution.value = execution
-  activeTab.value = 'logs'
+  activeTab.value = execution.screenshots && execution.screenshots.length > 0 ? 'screenshots' : 'logs'
   showDetailDialog.value = true
 }
 

@@ -10,6 +10,8 @@ from django.db import connection
 from playwright.sync_api import sync_playwright
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options as ChromeOptions
@@ -79,6 +81,35 @@ class TestExecutor:
         self.test_suite.failed_count = failed
         self.test_suite.execution_status = 'passed' if failed == 0 and passed > 0 else 'failed'
         self.test_suite.save()
+
+    def is_optional_step_failure(self, step_data, error_text):
+        if not step_data.get('is_optional'):
+            return False
+
+        text = str(error_text or '').lower()
+        skippable_markers = [
+            'timeout',
+            'locator.click',
+            'waiting for locator',
+            'no such element',
+            'element not found',
+            'not attached',
+            'not visible',
+            'unable to locate',
+            '找不到',
+            '未找到',
+            '超时'
+        ]
+        return any(marker in text for marker in skippable_markers)
+
+    def mark_optional_step_skipped(self, step_result, step_data):
+        note = step_data.get('optional_note') or '可跳过步骤未出现，已自动跳过'
+        original_error = step_result.get('error', '')
+        step_result['success'] = True
+        step_result['skipped_optional'] = True
+        step_result['error'] = None
+        step_result['log'] = f"{note}\n原始信息: {original_error}".strip()
+        return step_result
 
     def get_test_cases(self):
         """获取测试套件中的所有测试用例"""
@@ -204,6 +235,8 @@ class TestExecutor:
                     'wait_time': step.wait_time,
                     'assert_type': step.assert_type,
                     'assert_value': step.assert_value,
+                    'is_optional': step.is_optional,
+                    'optional_note': step.optional_note,
                     'element': None
                 }
 
@@ -413,6 +446,8 @@ class TestExecutor:
                 just_switched_tab = False  # 重置标志
 
                 step_result = self.execute_step_playwright(step_data)
+                if (not step_result['success']) and self.is_optional_step_failure(step_data, step_result.get('error')):
+                    step_result = self.mark_optional_step_skipped(step_result, step_data)
 
                 # Debug: Log which page we're using
                 print(f"📄 步骤 {step_data['step_number']} 执行完成")
@@ -432,7 +467,7 @@ class TestExecutor:
 
                 # 步骤执行完后添加短暂延迟，确保页面状态稳定
                 # 特别是点击操作后，可能触发动画、下拉框展开等
-                if step_result['success'] and step_data['action_type'] in ['click', 'fill', 'hover']:
+                if step_result['success'] and step_data['action_type'] in ['click', 'fill', 'hover', 'press']:
                     import asyncio
                     import time as sync_time
                     # 点击操作后等待更长时间（下拉框展开动画）
@@ -531,6 +566,36 @@ class TestExecutor:
                     'error': str(screenshot_error)
                 })
 
+        if result['status'] == 'passed' and result['steps']:
+            try:
+                import base64
+                final_step = result['steps'][-1]
+                screenshot_bytes = self.current_page.screenshot(timeout=5000)
+                screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
+                result['screenshots'].append({
+                    'url': f'data:image/png;base64,{screenshot_base64}',
+                    'description': f'最终成功截图: 步骤 {final_step.get("step_number")} {final_step.get("description", "")}',
+                    'step_number': final_step.get('step_number'),
+                    'timestamp': datetime.now().isoformat()
+                })
+            except Exception as screenshot_error:
+                print(f"Capture final success screenshot failed: {str(screenshot_error)}")
+
+        if result['status'] == 'passed' and result['steps']:
+            try:
+                import base64
+                final_step = result['steps'][-1]
+                screenshot_bytes = driver.get_screenshot_as_png()
+                screenshot_base64 = base64.b64encode(screenshot_bytes).decode()
+                result['screenshots'].append({
+                    'url': f'data:image/png;base64,{screenshot_base64}',
+                    'description': f'最终成功截图: 步骤 {final_step.get("step_number")} {final_step.get("description", "")}',
+                    'step_number': final_step.get('step_number'),
+                    'timestamp': datetime.now().isoformat()
+                })
+            except Exception as screenshot_error:
+                print(f"Capture final success screenshot failed: {str(screenshot_error)}")
+
         result['end_time'] = datetime.now().isoformat()
         return result
 
@@ -566,6 +631,8 @@ class TestExecutor:
             # 遍历预先准备好的步骤数据
             for step_data in case_data['steps']:
                 step_result = self.execute_step_playwright(step_data)
+                if (not step_result['success']) and self.is_optional_step_failure(step_data, step_result.get('error')):
+                    step_result = self.mark_optional_step_skipped(step_result, step_data)
                 result['steps'].append(step_result)
 
                 if not step_result['success']:
@@ -888,6 +955,24 @@ class TestExecutor:
                         step_result['resolved_value'] = resolved_value
                         print(f"  ✓ 变量解析: {step_data['input_value']} -> {resolved_value}")
 
+
+                elif step_data['action_type'] == 'press':
+                    resolved_value = resolve_variables(step_data.get('input_value'))
+                    locator = self.current_page.locator(selector)
+
+                    if step_data.get('_just_switched_tab'):
+                        self.current_page.bring_to_front()
+                        extended_timeout = max(step_data['wait_time'], 10000)
+                        locator.focus(timeout=extended_timeout)
+                        locator.press(resolved_value, timeout=extended_timeout)
+                    else:
+                        locator.focus(timeout=step_data['wait_time'])
+                        locator.press(resolved_value, timeout=step_data['wait_time'])
+
+                    step_result['success'] = True
+                    if resolved_value != step_data.get('input_value'):
+                        step_result['resolved_value'] = resolved_value
+                        print(f"  Key resolved: {step_data.get('input_value')} -> {resolved_value}")
 
                 elif step_data['action_type'] == 'getText':
                     text = self.current_page.text_content(selector, timeout=step_data['wait_time'])
@@ -1292,6 +1377,8 @@ class TestExecutor:
                     'wait_time': step.wait_time,
                     'assert_type': step.assert_type,
                     'assert_value': step.assert_value,
+                    'is_optional': step.is_optional,
+                    'optional_note': step.optional_note,
                     'element': None
                 }
 
@@ -1748,11 +1835,13 @@ class TestExecutor:
             # 遍历预先准备好的步骤数据
             for step_data in case_data['steps']:
                 step_result = self.execute_step_selenium(driver, step_data)
+                if (not step_result['success']) and self.is_optional_step_failure(step_data, step_result.get('error')):
+                    step_result = self.mark_optional_step_skipped(step_result, step_data)
                 result['steps'].append(step_result)
 
                 # 步骤执行完后添加短暂延迟，确保页面状态稳定
                 # 特别是点击操作后，可能触发动画、下拉框展开等
-                if step_result['success'] and step_data['action_type'] in ['click', 'fill', 'hover']:
+                if step_result['success'] and step_data['action_type'] in ['click', 'fill', 'hover', 'press']:
                     # 点击操作后等待更长时间（下拉框展开动画）
                     if step_data['action_type'] == 'click':
                         time.sleep(0.8)  # 等待800ms，确保下拉框完全展开
@@ -1831,6 +1920,8 @@ class TestExecutor:
             # 遍历预先准备好的步骤数据
             for step_data in case_data['steps']:
                 step_result = self.execute_step_selenium(driver, step_data)
+                if (not step_result['success']) and self.is_optional_step_failure(step_data, step_result.get('error')):
+                    step_result = self.mark_optional_step_skipped(step_result, step_data)
                 result['steps'].append(step_result)
 
                 if not step_result['success']:
@@ -2149,6 +2240,34 @@ class TestExecutor:
                             else:
                                 raise
 
+                elif step_data['action_type'] == 'press':
+                    resolved_value = resolve_variables(step_data.get('input_value'))
+                    key_map = {
+                        'Enter': Keys.ENTER,
+                        'Tab': Keys.TAB,
+                        'Escape': Keys.ESCAPE,
+                        'Backspace': Keys.BACKSPACE,
+                        'Delete': Keys.DELETE,
+                        'ArrowUp': Keys.ARROW_UP,
+                        'ArrowDown': Keys.ARROW_DOWN,
+                        'ArrowLeft': Keys.ARROW_LEFT,
+                        'ArrowRight': Keys.ARROW_RIGHT,
+                        'Home': Keys.HOME,
+                        'End': Keys.END,
+                        'PageUp': Keys.PAGE_UP,
+                        'PageDown': Keys.PAGE_DOWN,
+                        'Space': Keys.SPACE,
+                    }
+                    combo_parts = [part.strip() for part in str(resolved_value).split('+') if part.strip()]
+                    selenium_keys = [key_map.get(part, part) for part in combo_parts]
+                    element_obj = wait.until(EC.presence_of_element_located((by, locator_value)))
+                    element_obj.click()
+                    element_obj.send_keys(*selenium_keys)
+                    step_result['success'] = True
+                    if resolved_value != step_data.get('input_value'):
+                        step_result['resolved_value'] = resolved_value
+                        print(f"  Key resolved: {step_data.get('input_value')} -> {resolved_value}")
+
                 elif step_data['action_type'] == 'hover':
                     # 先定位元素
                     element_obj = wait.until(EC.presence_of_element_located((by, locator_value)))
@@ -2319,6 +2438,8 @@ class TestExecutor:
                     error_parts.append(f"等待元素可点击失败（超时{timeout_seconds}秒）")
                 elif action_type_str == 'fill':
                     error_parts.append(f"等待输入框可用失败（超时{timeout_seconds}秒）")
+                elif action_type_str == 'press':
+                    error_parts.append(f"等待按键目标元素就绪失败（超时{timeout_seconds}秒）")
                 elif action_type_str == 'waitFor':
                     error_parts.append(f"等待元素出现失败（超时{timeout_seconds}秒）")
 

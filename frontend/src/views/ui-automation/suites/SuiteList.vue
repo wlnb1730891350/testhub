@@ -236,8 +236,8 @@
         </el-form-item>
         <el-form-item :label="$t('uiAutomation.suite.executionMode')">
           <el-radio-group v-model="runConfig.headless">
-            <el-radio :label="false">{{ $t('uiAutomation.suite.headedMode') }}</el-radio>
-            <el-radio :label="true">{{ $t('uiAutomation.suite.headlessMode') }}</el-radio>
+            <el-radio :value="false">{{ $t('uiAutomation.suite.headedMode') }}</el-radio>
+            <el-radio :value="true">{{ $t('uiAutomation.suite.headlessMode') }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>

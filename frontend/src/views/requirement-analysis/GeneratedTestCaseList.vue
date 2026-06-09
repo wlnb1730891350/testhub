@@ -15,6 +15,7 @@
             <option value="generating">{{ $t('generatedTestCases.statusGenerating') }}</option>
             <option value="writing">{{ $t('generatedTestCases.statusWriting') || '用例编写中' }}</option>
             <option value="reviewing">{{ $t('generatedTestCases.statusReviewing') }}</option>
+            <option value="revising">{{ $t('generatedTestCases.statusRevising') || '用例改进中' }}</option>
             <option value="completed">{{ $t('generatedTestCases.statusCompleted') }}</option>
             <option value="failed">{{ $t('generatedTestCases.statusFailed') }}</option>
           </select>
@@ -633,54 +634,48 @@ export default {
       const statusMap = {
         'pending': this.$t('generatedTestCases.statusPending'),
         'pending_clarification': this.$t('generatedTestCases.statusPendingClarification'),
+        'clarified': this.$t('generatedTestCases.statusClarified') || '需求已澄清',
         'generating': this.$t('generatedTestCases.statusGenerating'),
         'writing': this.$t('generatedTestCases.statusWriting') || '用例编写中',
         'reviewing': this.$t('generatedTestCases.statusReviewing'),
+        'revising': this.$t('generatedTestCases.statusRevising') || '用例改进中',
+        'completing': this.$t('generatedTestCases.statusCompleting') || '完成中',
         'completed': this.$t('generatedTestCases.statusCompleted'),
-        'failed': this.$t('generatedTestCases.statusFailed')
+        'failed': this.$t('generatedTestCases.statusFailed'),
+        'cancelled': this.$t('generatedTestCases.statusCancelled') || '已取消'
       }
       return statusMap[status] || status
     },
 
     // 获取测试用例条数
     getTestCaseCount(task) {
-      if (!task.final_test_cases) {
+      // 优先从 final_test_cases 字段计数
+      const content = task.final_test_cases || task.generated_test_cases || ''
+      if (!content) {
         return 0
       }
 
       // 解析测试用例内容，计算条数
-      const content = task.final_test_cases
       const lines = content.split('\n').filter(line => line.trim())
 
-      // 尝试表格格式
+      // 尝试表格格式：统计包含 | 且不是分隔行的行数（排除表头）
       let tableRows = 0
-      let isFirstRow = true
-      let isTableFormat = false
+      let headerSkipped = false
 
       for (let line of lines) {
         if (line.includes('|') && !line.includes('--------')) {
           const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell)
           if (cells.length > 1) {
-            // 检查第一行是否是表头
-            if (isFirstRow) {
-              isFirstRow = false
-              // 如果第一行包含表头标识，标记为表格格式
-              if (line.includes('测试用例编号') || line.includes('ID') || line.includes('用例ID') ||
-                  line.includes('场景') || line.includes('步骤')) {
-                isTableFormat = true
-                continue  // 跳过表头行
-              }
+            if (!headerSkipped) {
+              headerSkipped = true
+              continue  // 跳过第一行（表头）
             }
-
             tableRows++
-            if (tableRows >= 1) {
-              isTableFormat = true
-            }
           }
         }
       }
 
-      if (isTableFormat && tableRows > 0) {
+      if (tableRows > 0) {
         return tableRows
       }
 

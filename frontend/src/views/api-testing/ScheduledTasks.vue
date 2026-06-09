@@ -140,16 +140,16 @@
 
         <el-form-item :label="$t('apiTesting.scheduledTask.taskType')" required>
           <el-radio-group v-model="taskForm.task_type">
-            <el-radio label="TEST_SUITE">{{ $t('apiTesting.scheduledTask.taskTypes.testSuite') }}</el-radio>
-            <el-radio label="API_REQUEST">{{ $t('apiTesting.scheduledTask.taskTypes.apiRequest') }}</el-radio>
+            <el-radio value="TEST_SUITE">{{ $t('apiTesting.scheduledTask.taskTypes.testSuite') }}</el-radio>
+            <el-radio value="API_REQUEST">{{ $t('apiTesting.scheduledTask.taskTypes.apiRequest') }}</el-radio>
           </el-radio-group>
         </el-form-item>
 
         <el-form-item :label="$t('apiTesting.scheduledTask.triggerType')" required>
           <el-radio-group v-model="taskForm.trigger_type">
-            <el-radio label="CRON">{{ $t('apiTesting.scheduledTask.triggerTypes.cron') }}</el-radio>
-            <el-radio label="INTERVAL">{{ $t('apiTesting.scheduledTask.triggerTypes.interval') }}</el-radio>
-            <el-radio label="ONCE">{{ $t('apiTesting.scheduledTask.triggerTypes.once') }}</el-radio>
+            <el-radio value="CRON">{{ $t('apiTesting.scheduledTask.triggerTypes.cron') }}</el-radio>
+            <el-radio value="INTERVAL">{{ $t('apiTesting.scheduledTask.triggerTypes.interval') }}</el-radio>
+            <el-radio value="ONCE">{{ $t('apiTesting.scheduledTask.triggerTypes.once') }}</el-radio>
           </el-radio-group>
         </el-form-item>
 

@@ -352,14 +352,12 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'app.log'),
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
         'error_file': {
             'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'error.log'),
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
         'console': {

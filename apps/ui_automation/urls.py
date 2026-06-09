@@ -1,8 +1,10 @@
+from .views import AIAssertionView
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from .views import (
+    RecordingSessionViewSet,
     UiProjectViewSet,
     LocatorStrategyViewSet,
     ElementGroupViewSet,
@@ -46,6 +48,7 @@ router.register(r'ai-cases', AICaseViewSet, basename='ai-cases')
 router.register(r'ai-case-generation', AICaseViewSet, basename='ai-case-generation')
 router.register(r'notification-logs', UiNotificationLogViewSet)
 router.register(r'operation-records', OperationRecordViewSet)
+router.register(r'recording', RecordingSessionViewSet, basename='recording')
 
 
 # Configuration Center APIs
@@ -55,6 +58,7 @@ router.register(r'ai-models', AIIntelligentModeConfigViewSet, basename='ai-model
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('ai-assertion/', AIAssertionView.as_view(), name='ai-assertion'),
 ]
 
 # 添加媒体文件路由

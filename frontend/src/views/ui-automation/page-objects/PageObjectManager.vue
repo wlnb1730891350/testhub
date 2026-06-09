@@ -197,8 +197,8 @@
                   </el-form-item>
                   <el-form-item :label="$t('uiAutomation.pageObject.type')">
                     <el-radio-group v-model="selectedCanvasElement.is_property" @change="updateCanvasElement">
-                      <el-radio :label="true">{{ $t('uiAutomation.pageObject.property') }}</el-radio>
-                      <el-radio :label="false">{{ $t('uiAutomation.pageObject.method') }}</el-radio>
+                      <el-radio :value="true">{{ $t('uiAutomation.pageObject.property') }}</el-radio>
+                      <el-radio :value="false">{{ $t('uiAutomation.pageObject.method') }}</el-radio>
                     </el-radio-group>
                   </el-form-item>
                   <el-form-item :label="$t('uiAutomation.pageObject.order')">
@@ -279,8 +279,8 @@
         </el-form-item>
         <el-form-item :label="$t('uiAutomation.pageObject.type')">
           <el-radio-group v-model="addElementForm.is_property">
-            <el-radio :label="true">{{ $t('uiAutomation.pageObject.property') }}</el-radio>
-            <el-radio :label="false">{{ $t('uiAutomation.pageObject.method') }}</el-radio>
+            <el-radio :value="true">{{ $t('uiAutomation.pageObject.property') }}</el-radio>
+            <el-radio :value="false">{{ $t('uiAutomation.pageObject.method') }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item :label="$t('uiAutomation.pageObject.order')">

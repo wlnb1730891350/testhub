@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -19,8 +20,8 @@ from .models import (
     UiProject, LocatorStrategy, Element, TestScript, TestSuite,
     TestSuiteScript, TestExecution, Screenshot,
     ElementGroup, PageObject, PageObjectElement, ScriptStep, ScriptElementUsage,
-    TestCase, TestCaseStep, TestCaseExecution, OperationRecord,
-    TestCase, TestCaseStep, TestCaseExecution, OperationRecord,
+    TestCase, TestCaseStep, TestCaseExecution, OperationRecord, RecordingSession,
+    TestCase, TestCaseStep, TestCaseExecution, OperationRecord, RecordingSession,
     UiScheduledTask, UiNotificationLog, UiTaskNotificationSetting,
     AICase, AIExecutionRecord
 )
@@ -38,7 +39,7 @@ from .serializers import (
     ScriptStepSerializer, ScriptElementUsageSerializer,
     ScriptAnalysisSerializer, ElementValidationSerializer, CodeGenerationSerializer,
     TestCaseSerializer, TestCaseStepSerializer, TestCaseExecutionSerializer, TestCaseRunSerializer,
-    OperationRecordSerializer,
+    OperationRecordSerializer, RecordingSessionSerializer,
     UiScheduledTaskSerializer, UiNotificationLogSerializer, UiTaskNotificationSettingSerializer,
     AICaseSerializer, AIExecutionRecordSerializer
 )
@@ -1012,53 +1013,55 @@ class TestCaseViewSet(viewsets.ModelViewSet):
         log_operation('edit', 'test_case', instance.id, instance.name, self.request.user)
 
         # 处理步骤数据
-        steps_data = self.request.data.get('steps', [])
+        if 'steps' not in self.request.data:
+            return
+
+        steps_data = self.request.data.get('steps') or []
         logger.info(f"更新测试用例 {instance.id} 的步骤数据: {len(steps_data)} 个步骤")
 
-        if steps_data:
-            # 删除现有步骤
-            existing_steps_count = instance.steps.count()
-            instance.steps.all().delete()
-            logger.info(f"删除了 {existing_steps_count} 个现有步骤")
+        # 删除现有步骤
+        existing_steps_count = instance.steps.count()
+        instance.steps.all().delete()
+        logger.info(f"删除了 {existing_steps_count} 个现有步骤")
 
-            # 创建新步骤
-            created_count = 0
-            for i, step_data in enumerate(steps_data):
-                # 确保步骤数据结构正确
-                step_data = dict(step_data)  # 创建副本避免修改原数据
-                step_data['test_case'] = instance.id  # 使用测试用例ID
-                step_data['step_number'] = i + 1  # 确保步骤序号正确
+        # 创建新步骤
+        created_count = 0
+        for i, step_data in enumerate(steps_data):
+            # 确保步骤数据结构正确
+            step_data = dict(step_data)  # 创建副本避免修改原数据
+            step_data['test_case'] = instance.id  # 使用测试用例ID
+            step_data['step_number'] = i + 1  # 确保步骤序号正确
 
-                # 处理元素ID
-                if 'element_id' in step_data:
-                    step_data['element'] = step_data.pop('element_id')
+            # 处理元素ID
+            if 'element_id' in step_data:
+                step_data['element'] = step_data.pop('element_id')
 
-                # 移除只读字段
-                step_data.pop('id', None)
-                step_data.pop('element_name', None)
-                step_data.pop('element_locator', None)
-                step_data.pop('created_at', None)
-                step_data.pop('expanded', None)  # 前端UI状态字段
+            # 移除只读字段
+            step_data.pop('id', None)
+            step_data.pop('element_name', None)
+            step_data.pop('element_locator', None)
+            step_data.pop('created_at', None)
+            step_data.pop('expanded', None)  # 前端UI状态字段
 
-                # 使用模型直接创建，避免序列化器的复杂性
-                try:
-                    TestCaseStep.objects.create(
-                        test_case=instance,
-                        step_number=step_data.get('step_number', i + 1),
-                        action_type=step_data.get('action_type', 'click'),
-                        element_id=step_data.get('element') if step_data.get('element') else None,
-                        input_value=step_data.get('input_value', ''),
-                        wait_time=step_data.get('wait_time', 1000),
-                        assert_type=step_data.get('assert_type', ''),
-                        assert_value=step_data.get('assert_value', ''),
-                        description=step_data.get('description', '')
-                    )
-                    created_count += 1
-                except Exception as e:
-                    logger.error(f"创建步骤 {i + 1} 失败: {str(e)}")
-                    logger.error(f"步骤数据: {step_data}")
+            # 使用模型直接创建，避免序列化器的复杂性
+            try:
+                TestCaseStep.objects.create(
+                    test_case=instance,
+                    step_number=step_data.get('step_number', i + 1),
+                    action_type=step_data.get('action_type', 'click'),
+                    element_id=step_data.get('element') if step_data.get('element') else None,
+                    input_value=step_data.get('input_value', ''),
+                    wait_time=step_data.get('wait_time', 1000),
+                    assert_type=step_data.get('assert_type', ''),
+                    assert_value=step_data.get('assert_value', ''),
+                    description=step_data.get('description', '')
+                )
+                created_count += 1
+            except Exception as e:
+                logger.error(f"创建步骤 {i + 1} 失败: {str(e)}")
+                logger.error(f"步骤数据: {step_data}")
 
-            logger.info(f"成功创建了 {created_count} 个新步骤")
+        logger.info(f"成功创建了 {created_count} 个新步骤")
 
     def _generate_step_log(self, step, step_result='success'):
         """根据测试步骤生成执行日志"""
@@ -2952,6 +2955,8 @@ class AICaseViewSet(viewsets.ModelViewSet):
                         if step_info.get('type') == 'log':
                             content = step_info.get('content')
                             if content:
+                                # 统一换行符，避免乱码
+                                content = str(content).replace(chr(13)+chr(10), chr(10)).replace(chr(13), chr(10))
                                 execution_record.logs += content
                                 await sync_to_async(safe_save)(execution_record, update_fields=['logs'])
                             return
@@ -3010,9 +3015,18 @@ class AICaseViewSet(viewsets.ModelViewSet):
                         except Exception:
                             pass
 
+                    # 检查是否有未完成的待处理任务
+                    has_pending = False
+                    if execution_record.planned_tasks:
+                        has_pending = any(t.get('status') in ('pending', 'in_progress') for t in execution_record.planned_tasks)
+
                     if failed:
                         execution_record.status = 'failed'
                         execution_record.logs += "\n执行完成，但检测到失败步骤或任务。"
+                    elif has_pending:
+                        execution_record.status = 'failed'
+                        pending_count = len([t for t in execution_record.planned_tasks if t.get('status') in ('pending', 'in_progress')])
+                        execution_record.logs += f"\n执行完成，但有 {pending_count} 个子任务未完成（AI未标记）。"
                     else:
                         execution_record.status = 'passed'
                         execution_record.logs += "\n执行完成。"
@@ -3288,6 +3302,8 @@ def resolve_execution_status(planned_tasks):
 
 def append_execution_summary(logs, summary):
     """把任务统计附加到日志中。"""
+    # 统一换行符
+    logs = (logs or '').replace(chr(13)+chr(10), chr(10)).replace(chr(13), chr(10))
     if summary['total'] == 0:
         return logs
     return (
@@ -3477,6 +3493,8 @@ class AIExecutionRecordViewSet(viewsets.ModelViewSet):
                         if step_info.get('type') == 'log':
                             content = step_info.get('content')
                             if content:
+                                # 统一换行符，避免乱码
+                                content = str(content).replace(chr(13)+chr(10), chr(10)).replace(chr(13), chr(10))
                                 execution_record.logs += content
                                 # 立即保存到数据库，确保前端轮询能看到最新日志
                                 await sync_to_async(safe_save)(execution_record, update_fields=['logs'])
@@ -3554,9 +3572,18 @@ class AIExecutionRecordViewSet(viewsets.ModelViewSet):
                         except Exception:
                             pass
 
+                    # 检查是否有未完成的待处理任务
+                    has_pending = False
+                    if execution_record.planned_tasks:
+                        has_pending = any(t.get('status') in ('pending', 'in_progress') for t in execution_record.planned_tasks)
+
                     if failed:
                         execution_record.status = 'failed'
                         execution_record.logs += "\n执行完成，但检测到失败步骤或任务。"
+                    elif has_pending:
+                        execution_record.status = 'failed'
+                        pending_count = len([t for t in execution_record.planned_tasks if t.get('status') in ('pending', 'in_progress')])
+                        execution_record.logs += f"\n执行完成，但有 {pending_count} 个子任务未完成（AI未标记）。"
                     else:
                         execution_record.status = 'passed'
                         execution_record.logs += "\n执行完成。"
@@ -3871,3 +3898,155 @@ class UiDashboardViewSet(viewsets.ViewSet):
             'suite_count': suite_test_case_count,
             'execution_count': total_execution_count
         })
+
+
+class RecordingSessionViewSet(viewsets.ModelViewSet):
+    """录制会话视图集"""
+    queryset = RecordingSession.objects.all()
+    serializer_class = RecordingSessionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        """开始录制"""
+        from .recording_engine import RecordingEngine
+        import uuid
+
+        start_url = request.data.get('start_url', 'https://example.com')
+        project_id = request.data.get('project_id')
+        browser_type = request.data.get('browser', 'chromium')
+        headless = request.data.get('headless', False)
+
+        if not project_id:
+            return Response({'error': '请指定项目'}, status=status.HTTP_400_BAD_REQUEST)
+
+        session_id = f"rec_{uuid.uuid4().hex[:12]}"
+        auth_token = str(request.auth.token) if hasattr(request, 'auth') and request.auth else ''
+
+        result = RecordingEngine.start_recording(
+            session_id=session_id,
+            start_url=start_url,
+            project_id=project_id,
+            browser_type=browser_type,
+            headless=headless,
+            user=request.user,
+            auth_token=auth_token,
+        )
+
+        if result.get('success'):
+            return Response({'session_id': session_id, 'message': '录制已启动'})
+        else:
+            return Response({'error': result.get('error', '启动录制失败')}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'], url_path=r'(?P<session_id>[\w-]+)/stop')
+    def stop(self, request, session_id=None):
+        """停止录制"""
+        from .recording_engine import RecordingEngine
+
+        result = RecordingEngine.stop_recording(session_id)
+        if result.get('success'):
+            return Response({
+                'success': True,
+                'actions': result.get('actions', []),
+                'error': result.get('error'),
+            })
+        else:
+            return Response({'error': result.get('error', '停止录制失败')}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'], url_path=r'actions')
+    def actions_list(self, request):
+        """获取录制的操作列表"""
+        from .recording_engine import RecordingEngine
+
+        session_id = request.query_params.get('session_id')
+        if not session_id:
+            return Response({'error': '缺少session_id参数'}, status=status.HTTP_400_BAD_REQUEST)
+
+        actions = RecordingEngine.get_actions(session_id)
+        return Response({'actions': actions})
+
+    @action(detail=False, methods=['post'], url_path=r'actions')
+    def add_actions(self, request):
+        """添加录制的操作"""
+        from .recording_engine import RecordingEngine
+
+        session_id = request.data.get('session_id')
+        actions = request.data.get('actions', [])
+
+        if not session_id:
+            return Response({'error': '缺少session_id参数'}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = RecordingEngine.add_actions(session_id, actions)
+        return Response(result)
+
+    @action(detail=False, methods=['get'], url_path=r'(?P<session_id>[\w-]+)/status-check')
+    def status_check(self, request, session_id=None):
+        """检查录制状态"""
+        from .recording_engine import RecordingEngine
+
+        result = RecordingEngine.get_status(session_id)
+        return Response(result)
+
+    @action(detail=False, methods=['get'], url_path=r'active')
+    def active_sessions(self, request):
+        """获取活跃的录制会话"""
+        from .recording_engine import _active_sessions, _session_lock
+
+        with _session_lock:
+            sessions = []
+            for sid, data in _active_sessions.items():
+                sessions.append({
+                    'session_id': sid,
+                    'status': data.get('session', {}).status if data.get('session') else 'unknown',
+                    'actions_count': len(data.get('actions', [])),
+                })
+        return Response({'sessions': sessions})
+
+    @action(detail=False, methods=['post'], url_path=r'(?P<session_id>[\w-]+)/save-as-test-case')
+    def save_as_test_case(self, request, session_id=None):
+        """将录制保存为测试用例"""
+        from .recording_engine import RecordingEngine
+
+        test_case_name = request.data.get('name', f'录制用例_{session_id}')
+        project_id = request.data.get('project_id')
+        target_test_case_id = request.data.get('target_test_case_id')
+        selected_action_indexes = request.data.get('selected_action_indexes')
+
+        if not project_id:
+            return Response({'error': '请指定项目'}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = RecordingEngine.save_as_test_case(
+            session_id=session_id,
+            test_case_name=test_case_name,
+            project_id=project_id,
+            user=request.user,
+            target_test_case_id=target_test_case_id,
+            selected_action_indexes=selected_action_indexes,
+        )
+
+        if result.get('success'):
+            return Response({
+                'success': True,
+                'test_case_id': result.get('test_case_id'),
+                'steps_count': result.get('steps_count', 0),
+                'message': result.get('message', '保存成功'),
+            })
+        else:
+            return Response({'error': result.get('error', '保存失败')}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path=r'clean-actions')
+    def clean_actions(self, request):
+        """清理录制的操作（去噪）"""
+        from .recording_engine import RecordingEngine
+
+        actions = request.data.get('actions', [])
+        clean = RecordingEngine._clean_actions(actions)
+        return Response({'actions': clean, 'removed_count': len(actions) - len(clean)})
+
+
+class AIAssertionView(APIView):
+    """AI断言验证接口"""
+    def post(self, request):
+        from .ai_assertion import AIAssertionService
+        service = AIAssertionService()
+        result = service.assert_condition(request.data)
+        return Response(result)

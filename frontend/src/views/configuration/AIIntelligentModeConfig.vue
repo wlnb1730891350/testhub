@@ -93,18 +93,20 @@
               <label>{{ $t('configuration.aiMode.modelProvider') }} <span class="required">*</span></label>
               <el-select
                 v-model="configForm.model_type"
-                placeholder="{{ $t('configuration.aiMode.selectProvider') }} [el-select测试]"
+                :placeholder="$t('configuration.aiMode.selectProvider')"
                 class="form-select"
                 required
                 @change="onModelTypeChange"
-                style="width: 100%">
+                style="width: 100%"
+                popper-class="ai-mode-select-popper"
+                teleported>
                 <el-option value="openai" :label="$t('configuration.aiMode.providers.openai')" />
                 <el-option value="azure_openai" :label="$t('configuration.aiMode.providers.azure_openai')" />
                 <el-option value="anthropic" :label="$t('configuration.aiMode.providers.anthropic')" />
                 <el-option value="google_gemini" :label="$t('configuration.aiMode.providers.google_gemini')" />
                 <el-option value="qwen" :label="$t('configuration.aiMode.providers.qwen')" />
                 <el-option value="ollama" :label="$t('configuration.aiMode.providers.ollama')" />
-                <el-option value="deepseek" label="🔥DeepSeek-已修改-如果看到说明生效了🔥" />
+                <el-option value="deepseek" :label="$t('configuration.aiMode.providers.deepseek')" />
                 <el-option value="siliconflow" :label="$t('configuration.aiMode.providers.siliconflow')" />
                 <el-option value="zhipu" :label="$t('configuration.aiMode.providers.zhipu')" />
                 <el-option value="baichuan" :label="$t('configuration.aiMode.providers.baichuan')" />
@@ -1006,6 +1008,11 @@ onMounted(() => {
   opacity: 1 !important;
 }
 
+/* 下拉框 z-index 必须高于 modal overlay */
+.ai-mode-select-popper {
+  z-index: 10002 !important;
+}
+
 /* 隐藏状态 */
 .config-modal.hidden, .test-result-modal.hidden {
   display: none !important;
@@ -1026,4 +1033,11 @@ onMounted(() => {
 }
 </style>
 
-<!-- FORCE RELOAD TEST v3 -->
+<!-- FORCE RELOAD TEST v3 -->/bin/bash: line 5: C:/Users/a/.hermes/cache/terminal/hermes-snap-c9b969df4ffc.sh: No such file or directory
+/bin/bash: line 6: C:/Users/a/.hermes/cache/terminal/hermes-cwd-c9b969df4ffc.txt: No such file or directory
+/bin/bash: line 5: C:/Users/a/.hermes/cache/terminal/hermes-snap-c9b969df4ffc.sh: No such file or directory
+/bin/bash: line 6: C:/Users/a/.hermes/cache/terminal/hermes-cwd-c9b969df4ffc.txt: No such file or directory
+/bin/bash: line 5: C:/Users/a/.hermes/cache/terminal/hermes-snap-c9b969df4ffc.sh: No such file or directory
+/bin/bash: line 6: C:/Users/a/.hermes/cache/terminal/hermes-cwd-c9b969df4ffc.txt: No such file or directory
+/bin/bash: line 5: C:/Users/a/.hermes/cache/terminal/hermes-snap-c9b969df4ffc.sh: No such file or directory
+/bin/bash: line 6: C:/Users/a/.hermes/cache/terminal/hermes-cwd-c9b969df4ffc.txt: No such file or directory

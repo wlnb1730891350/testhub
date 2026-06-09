@@ -1,6 +1,6 @@
-import request from '@/utils/api'
+﻿import request from '@/utils/api'
 
-// 仪表盘相关API
+// 浠〃鐩樼浉鍏矨PI
 export function getDashboardStats() {
   return request({
     url: '/ui-automation/dashboard/stats/',
@@ -8,9 +8,12 @@ export function getDashboardStats() {
   })
 }
 
-// UI项目相关API
+// 鑾峰彇椤圭洰鍒楄〃 (alias for getUiProjects)
+export const getProjects = getUiProjects
 
-// 获取UI项目列表
+// UI椤圭洰鐩稿叧API
+
+// 鑾峰彇UI椤圭洰鍒楄〃
 export function getUiProjects(params) {
   return request({
     url: '/ui-automation/projects/',
@@ -19,7 +22,7 @@ export function getUiProjects(params) {
   })
 }
 
-// 创建UI项目
+// 鍒涘缓UI椤圭洰
 export function createUiProject(data) {
   return request({
     url: '/ui-automation/projects/',
@@ -28,7 +31,7 @@ export function createUiProject(data) {
   })
 }
 
-// 获取UI项目详情
+// 鑾峰彇UI椤圭洰璇︽儏
 export function getUiProjectDetail(id) {
   return request({
     url: `/ui-automation/projects/${id}/`,
@@ -36,7 +39,7 @@ export function getUiProjectDetail(id) {
   })
 }
 
-// 更新UI项目
+// 鏇存柊UI椤圭洰
 export function updateUiProject(id, data) {
   return request({
     url: `/ui-automation/projects/${id}/`,
@@ -45,7 +48,7 @@ export function updateUiProject(id, data) {
   })
 }
 
-// 删除UI项目
+// 鍒犻櫎UI椤圭洰
 export function deleteUiProject(id) {
   return request({
     url: `/ui-automation/projects/${id}/`,
@@ -53,9 +56,9 @@ export function deleteUiProject(id) {
   })
 }
 
-// 定位策略相关API
+// 瀹氫綅绛栫暐鐩稿叧API
 
-// 获取定位策略列表
+// 鑾峰彇瀹氫綅绛栫暐鍒楄〃
 export function getLocatorStrategies(params) {
   return request({
     url: '/ui-automation/locator-strategies/',
@@ -64,7 +67,7 @@ export function getLocatorStrategies(params) {
   })
 }
 
-// 创建定位策略
+// 鍒涘缓瀹氫綅绛栫暐
 export function createLocatorStrategy(data) {
   return request({
     url: '/ui-automation/locator-strategies/',
@@ -73,9 +76,9 @@ export function createLocatorStrategy(data) {
   })
 }
 
-// UI元素相关API
+// UI鍏冪礌鐩稿叧API
 
-// 获取UI元素列表
+// 鑾峰彇UI鍏冪礌鍒楄〃
 export function getElements(params) {
   return request({
     url: '/ui-automation/elements/',
@@ -84,7 +87,7 @@ export function getElements(params) {
   })
 }
 
-// 创建UI元素
+// 鍒涘缓UI鍏冪礌
 export function createElement(data) {
   return request({
     url: '/ui-automation/elements/',
@@ -93,7 +96,7 @@ export function createElement(data) {
   })
 }
 
-// 获取UI元素详情
+// 鑾峰彇UI鍏冪礌璇︽儏
 export function getElementDetail(id) {
   return request({
     url: `/ui-automation/elements/${id}/`,
@@ -101,7 +104,7 @@ export function getElementDetail(id) {
   })
 }
 
-// 更新UI元素
+// 鏇存柊UI鍏冪礌
 export function updateElement(id, data) {
   return request({
     url: `/ui-automation/elements/${id}/`,
@@ -110,7 +113,7 @@ export function updateElement(id, data) {
   })
 }
 
-// 删除UI元素
+// 鍒犻櫎UI鍏冪礌
 export function deleteElement(id) {
   return request({
     url: `/ui-automation/elements/${id}/`,
@@ -118,9 +121,9 @@ export function deleteElement(id) {
   })
 }
 
-// 测试脚本相关API
+// 娴嬭瘯鑴氭湰鐩稿叧API
 
-// 获取测试脚本列表
+// 鑾峰彇娴嬭瘯鑴氭湰鍒楄〃
 export function getTestScripts(params) {
   return request({
     url: '/ui-automation/test-scripts/',
@@ -129,7 +132,7 @@ export function getTestScripts(params) {
   })
 }
 
-// 创建测试脚本
+// 鍒涘缓娴嬭瘯鑴氭湰
 export function createTestScript(data) {
   return request({
     url: '/ui-automation/test-scripts/',
@@ -138,7 +141,7 @@ export function createTestScript(data) {
   })
 }
 
-// 获取测试脚本详情
+// 鑾峰彇娴嬭瘯鑴氭湰璇︽儏
 export function getTestScriptDetail(id) {
   return request({
     url: `/ui-automation/test-scripts/${id}/`,
@@ -146,7 +149,7 @@ export function getTestScriptDetail(id) {
   })
 }
 
-// 更新测试脚本
+// 鏇存柊娴嬭瘯鑴氭湰
 export function updateTestScript(id, data) {
   return request({
     url: `/ui-automation/test-scripts/${id}/`,
@@ -155,7 +158,7 @@ export function updateTestScript(id, data) {
   })
 }
 
-// 删除测试脚本
+// 鍒犻櫎娴嬭瘯鑴氭湰
 export function deleteTestScript(id) {
   return request({
     url: `/ui-automation/test-scripts/${id}/`,
@@ -163,9 +166,9 @@ export function deleteTestScript(id) {
   })
 }
 
-// 测试套件相关API
+// 娴嬭瘯濂椾欢鐩稿叧API
 
-// 获取测试套件列表
+// 鑾峰彇娴嬭瘯濂椾欢鍒楄〃
 export function getTestSuites(params) {
   return request({
     url: '/ui-automation/test-suites/',
@@ -174,7 +177,7 @@ export function getTestSuites(params) {
   })
 }
 
-// 创建测试套件
+// 鍒涘缓娴嬭瘯濂椾欢
 export function createTestSuite(data) {
   return request({
     url: '/ui-automation/test-suites/',
@@ -183,7 +186,7 @@ export function createTestSuite(data) {
   })
 }
 
-// 获取测试套件详情
+// 鑾峰彇娴嬭瘯濂椾欢璇︽儏
 export function getTestSuiteDetail(id) {
   return request({
     url: `/ui-automation/test-suites/${id}/`,
@@ -191,7 +194,7 @@ export function getTestSuiteDetail(id) {
   })
 }
 
-// 更新测试套件
+// 鏇存柊娴嬭瘯濂椾欢
 export function updateTestSuite(id, data) {
   return request({
     url: `/ui-automation/test-suites/${id}/`,
@@ -200,7 +203,7 @@ export function updateTestSuite(id, data) {
   })
 }
 
-// 删除测试套件
+// 鍒犻櫎娴嬭瘯濂椾欢
 export function deleteTestSuite(id) {
   return request({
     url: `/ui-automation/test-suites/${id}/`,
@@ -208,7 +211,7 @@ export function deleteTestSuite(id) {
   })
 }
 
-// 获取测试套件中的测试用例
+// 鑾峰彇娴嬭瘯濂椾欢涓殑娴嬭瘯鐢ㄤ緥
 export function getTestSuiteTestCases(id) {
   return request({
     url: `/ui-automation/test-suites/${id}/test_cases/`,
@@ -216,7 +219,7 @@ export function getTestSuiteTestCases(id) {
   })
 }
 
-// 向测试套件添加测试用例
+// 鍚戞祴璇曞浠舵坊鍔犳祴璇曠敤渚?
 export function addTestCaseToTestSuite(id, data) {
   return request({
     url: `/ui-automation/test-suites/${id}/add_test_case/`,
@@ -225,7 +228,7 @@ export function addTestCaseToTestSuite(id, data) {
   })
 }
 
-// 从测试套件移除测试用例
+// 浠庢祴璇曞浠剁Щ闄ゆ祴璇曠敤渚?
 export function removeTestCaseFromTestSuite(suiteId, testCaseId) {
   return request({
     url: `/ui-automation/test-suites/${suiteId}/remove_test_case/`,
@@ -234,7 +237,7 @@ export function removeTestCaseFromTestSuite(suiteId, testCaseId) {
   })
 }
 
-// 更新测试套件中测试用例的顺序
+// 鏇存柊娴嬭瘯濂椾欢涓祴璇曠敤渚嬬殑椤哄簭
 export function updateTestCaseOrder(suiteId, testCaseOrders) {
   return request({
     url: `/ui-automation/test-suites/${suiteId}/update_test_case_order/`,
@@ -243,19 +246,19 @@ export function updateTestCaseOrder(suiteId, testCaseOrders) {
   })
 }
 
-// 运行测试套件
+// 杩愯娴嬭瘯濂椾欢
 export function runTestSuite(suiteId, data) {
   return request({
     url: `/ui-automation/test-suites/${suiteId}/run_suite/`,
     method: 'post',
     data,
-    timeout: 600000  // 10分钟超时，因为套件可能包含多个测试用例
+    timeout: 600000  // 10鍒嗛挓瓒呮椂锛屽洜涓哄浠跺彲鑳藉寘鍚涓祴璇曠敤渚?
   })
 }
 
-// 测试执行相关API
+// 娴嬭瘯鎵ц鐩稿叧API
 
-// 获取测试执行列表
+// 鑾峰彇娴嬭瘯鎵ц鍒楄〃
 export function getTestExecutions(params) {
   return request({
     url: '/ui-automation/test-executions/',
@@ -264,7 +267,7 @@ export function getTestExecutions(params) {
   })
 }
 
-// 创建测试执行
+// 鍒涘缓娴嬭瘯鎵ц
 export function createTestExecution(data) {
   return request({
     url: '/ui-automation/test-executions/',
@@ -273,7 +276,7 @@ export function createTestExecution(data) {
   })
 }
 
-// 获取测试执行详情
+// 鑾峰彇娴嬭瘯鎵ц璇︽儏
 export function getTestExecutionDetail(id) {
   return request({
     url: `/ui-automation/test-executions/${id}/`,
@@ -281,7 +284,7 @@ export function getTestExecutionDetail(id) {
   })
 }
 
-// 删除测试执行记录
+// 鍒犻櫎娴嬭瘯鎵ц璁板綍
 export function deleteTestExecution(id) {
   return request({
     url: `/ui-automation/test-executions/${id}/`,
@@ -289,7 +292,7 @@ export function deleteTestExecution(id) {
   })
 }
 
-// 运行测试执行
+// 杩愯娴嬭瘯鎵ц
 export function runTestExecution(id) {
   return request({
     url: `/ui-automation/test-executions/${id}/run/`,
@@ -297,7 +300,7 @@ export function runTestExecution(id) {
   })
 }
 
-// 中止测试执行
+// 涓娴嬭瘯鎵ц
 export function abortTestExecution(id) {
   return request({
     url: `/ui-automation/test-executions/${id}/abort/`,
@@ -305,9 +308,9 @@ export function abortTestExecution(id) {
   })
 }
 
-// 测试环境相关API
+// 娴嬭瘯鐜鐩稿叧API
 
-// 获取测试环境列表
+// 鑾峰彇娴嬭瘯鐜鍒楄〃
 export function getTestEnvironments(params) {
   return request({
     url: '/ui-automation/test-environments/',
@@ -316,7 +319,7 @@ export function getTestEnvironments(params) {
   })
 }
 
-// 创建测试环境
+// 鍒涘缓娴嬭瘯鐜
 export function createTestEnvironment(data) {
   return request({
     url: '/ui-automation/test-environments/',
@@ -325,7 +328,7 @@ export function createTestEnvironment(data) {
   })
 }
 
-// 获取测试环境详情
+// 鑾峰彇娴嬭瘯鐜璇︽儏
 export function getTestEnvironmentDetail(id) {
   return request({
     url: `/ui-automation/test-environments/${id}/`,
@@ -333,7 +336,7 @@ export function getTestEnvironmentDetail(id) {
   })
 }
 
-// 更新测试环境
+// 鏇存柊娴嬭瘯鐜
 export function updateTestEnvironment(id, data) {
   return request({
     url: `/ui-automation/test-environments/${id}/`,
@@ -342,7 +345,7 @@ export function updateTestEnvironment(id, data) {
   })
 }
 
-// 删除测试环境
+// 鍒犻櫎娴嬭瘯鐜
 export function deleteTestEnvironment(id) {
   return request({
     url: `/ui-automation/test-environments/${id}/`,
@@ -350,9 +353,9 @@ export function deleteTestEnvironment(id) {
   })
 }
 
-// 截图相关API
+// 鎴浘鐩稿叧API
 
-// 获取截图列表
+// 鑾峰彇鎴浘鍒楄〃
 export function getScreenshots(params) {
   return request({
     url: '/ui-automation/screenshots/',
@@ -361,7 +364,7 @@ export function getScreenshots(params) {
   })
 }
 
-// 创建截图
+// 鍒涘缓鎴浘
 export function createScreenshot(data) {
   return request({
     url: '/ui-automation/screenshots/',
@@ -370,7 +373,7 @@ export function createScreenshot(data) {
   })
 }
 
-// 获取截图详情
+// 鑾峰彇鎴浘璇︽儏
 export function getScreenshotDetail(id) {
   return request({
     url: `/ui-automation/screenshots/${id}/`,
@@ -378,7 +381,7 @@ export function getScreenshotDetail(id) {
   })
 }
 
-// 删除截图
+// 鍒犻櫎鎴浘
 export function deleteScreenshot(id) {
   return request({
     url: `/ui-automation/screenshots/${id}/`,
@@ -386,9 +389,9 @@ export function deleteScreenshot(id) {
   })
 }
 
-// ============ 新增功能API ============
+// ============ 鏂板鍔熻兘API ============
 
-// 元素分组相关API
+// 鍏冪礌鍒嗙粍鐩稿叧API
 export function getElementGroups(params) {
   return request({
     url: '/ui-automation/element-groups/',
@@ -435,7 +438,7 @@ export function getElementGroupTree(params) {
   })
 }
 
-// 元素增强功能API
+// 鍏冪礌澧炲己鍔熻兘API
 export function validateElementLocator(id) {
   return request({
     url: `/ui-automation/elements/${id}/validate_locator/`,
@@ -473,7 +476,7 @@ export function generateElementSuggestions(id) {
   })
 }
 
-// 页面对象相关API
+// 椤甸潰瀵硅薄鐩稿叧API
 export function getPageObjects(params) {
   return request({
     url: '/ui-automation/page-objects/',
@@ -535,7 +538,7 @@ export function getPageObjectElements(id) {
   })
 }
 
-// 页面对象元素关联API
+// 椤甸潰瀵硅薄鍏冪礌鍏宠仈API
 export function getPageObjectElementDetails(params) {
   return request({
     url: '/ui-automation/page-object-elements/',
@@ -567,7 +570,7 @@ export function deletePageObjectElement(id) {
   })
 }
 
-// 脚本步骤相关API
+// 鑴氭湰姝ラ鐩稿叧API
 export function getScriptSteps(params) {
   return request({
     url: '/ui-automation/script-steps/',
@@ -607,7 +610,7 @@ export function deleteScriptStep(id) {
   })
 }
 
-// 脚本元素使用情况API
+// 鑴氭湰鍏冪礌浣跨敤鎯呭喌API
 export function getScriptElementUsages(params) {
   return request({
     url: '/ui-automation/script-element-usages/',
@@ -647,9 +650,9 @@ export function deleteScriptElementUsage(id) {
   })
 }
 
-// 测试用例相关API
+// 娴嬭瘯鐢ㄤ緥鐩稿叧API
 
-// 获取测试用例列表
+// 鑾峰彇娴嬭瘯鐢ㄤ緥鍒楄〃
 export function getTestCases(params) {
   return request({
     url: '/ui-automation/test-cases/',
@@ -658,7 +661,7 @@ export function getTestCases(params) {
   })
 }
 
-// 创建测试用例
+// 鍒涘缓娴嬭瘯鐢ㄤ緥
 export function createTestCase(data) {
   return request({
     url: '/ui-automation/test-cases/',
@@ -667,7 +670,7 @@ export function createTestCase(data) {
   })
 }
 
-// 获取测试用例详情
+// 鑾峰彇娴嬭瘯鐢ㄤ緥璇︽儏
 export function getTestCaseDetail(id) {
   return request({
     url: `/ui-automation/test-cases/${id}/`,
@@ -675,7 +678,7 @@ export function getTestCaseDetail(id) {
   })
 }
 
-// 更新测试用例
+// 鏇存柊娴嬭瘯鐢ㄤ緥
 export function updateTestCase(id, data) {
   return request({
     url: `/ui-automation/test-cases/${id}/`,
@@ -684,7 +687,7 @@ export function updateTestCase(id, data) {
   })
 }
 
-// 删除测试用例
+// 鍒犻櫎娴嬭瘯鐢ㄤ緥
 export function deleteTestCase(id) {
   return request({
     url: `/ui-automation/test-cases/${id}/`,
@@ -692,17 +695,36 @@ export function deleteTestCase(id) {
   })
 }
 
-// 运行测试用例
+// 杩愯娴嬭瘯鐢ㄤ緥
 export function runTestCase(testCaseId, data) {
   return request({
     url: `/ui-automation/test-cases/${testCaseId}/run/`,
     method: 'post',
     data,
-    timeout: 300000  // 5分钟超时，因为测试执行需要启动浏览器和执行多个步骤
+    timeout: 300000  // 5鍒嗛挓瓒呮椂锛屽洜涓烘祴璇曟墽琛岄渶瑕佸惎鍔ㄦ祻瑙堝櫒鍜屾墽琛屽涓楠?
   })
 }
 
-// 复制测试用例
+// AI鎅鸿兘鎵ц屸祴璇曠敤渚?
+export function runAITestCase(testCaseId, data) {
+  return request({
+    url: `/ui-automation/test-cases/${testCaseId}/run_ai/`,
+    method: 'post',
+    data: data || {},
+    timeout: 600000
+  })
+}
+
+// 审核AI执行结果
+export function acceptAILocators(executionId) {
+  return request({
+    url: `/ui-automation/test-cases/accept_ai_locators/`,
+    method: 'post',
+    data: { execution_id: executionId }
+  })
+}
+
+// 澶嶅埗娴嬭瘯鐢ㄤ緥
 export function copyTestCase(id) {
   return request({
     url: `/ui-automation/test-cases/${id}/copy_case/`,
@@ -710,7 +732,7 @@ export function copyTestCase(id) {
   })
 }
 
-// 获取测试用例执行历史
+// 鑾峰彇娴嬭瘯鐢ㄤ緥鎵ц鍘嗗彶
 export function getTestCaseExecutions(params) {
   return request({
     url: '/ui-automation/test-case-executions/',
@@ -719,7 +741,7 @@ export function getTestCaseExecutions(params) {
   })
 }
 
-// 删除测试用例执行记录
+// 鍒犻櫎娴嬭瘯鐢ㄤ緥鎵ц璁板綍
 export function deleteTestCaseExecution(id) {
   return request({
     url: `/ui-automation/test-case-executions/${id}/`,
@@ -727,7 +749,7 @@ export function deleteTestCaseExecution(id) {
   })
 }
 
-// 批量删除测试用例执行记录
+// 鎵归噺鍒犻櫎娴嬭瘯鐢ㄤ緥鎵ц璁板綍
 export function batchDeleteTestCaseExecutions(ids) {
   return request({
     url: '/ui-automation/test-case-executions/batch-delete/',
@@ -736,7 +758,7 @@ export function batchDeleteTestCaseExecutions(ids) {
   })
 }
 
-// 批量运行测试用例
+// 鎵归噺杩愯娴嬭瘯鐢ㄤ緥
 export function batchRunTestCases(data) {
   return request({
     url: '/ui-automation/test-cases/batch-run/',
@@ -745,9 +767,9 @@ export function batchRunTestCases(data) {
   })
 }
 
-// 操作记录相关API
+// 鎿嶄綔璁板綍鐩稿叧API
 
-// 获取操作记录列表
+// 鑾峰彇鎿嶄綔璁板綍鍒楄〃
 export function getOperationRecords(params) {
   return request({
     url: '/ui-automation/operation-records/',
@@ -756,7 +778,7 @@ export function getOperationRecords(params) {
   })
 }
 
-// 创建操作记录
+// 鍒涘缓鎿嶄綔璁板綍
 export function createOperationRecord(data) {
   return request({
     url: '/ui-automation/operation-records/',
@@ -765,9 +787,9 @@ export function createOperationRecord(data) {
   })
 }
 
-// ==================== 定时任务相关API ====================
+// ==================== 瀹氭椂浠诲姟鐩稿叧API ====================
 
-// 获取定时任务列表
+// 鑾峰彇瀹氭椂浠诲姟鍒楄〃
 export function getScheduledTasks(params) {
   return request({
     url: '/ui-automation/scheduled-tasks/',
@@ -776,7 +798,7 @@ export function getScheduledTasks(params) {
   })
 }
 
-// 创建定时任务
+// 鍒涘缓瀹氭椂浠诲姟
 export function createScheduledTask(data) {
   return request({
     url: '/ui-automation/scheduled-tasks/',
@@ -785,7 +807,7 @@ export function createScheduledTask(data) {
   })
 }
 
-// 获取定时任务详情
+// 鑾峰彇瀹氭椂浠诲姟璇︽儏
 export function getScheduledTaskDetail(id) {
   return request({
     url: `/ui-automation/scheduled-tasks/${id}/`,
@@ -793,7 +815,7 @@ export function getScheduledTaskDetail(id) {
   })
 }
 
-// 更新定时任务
+// 鏇存柊瀹氭椂浠诲姟
 export function updateScheduledTask(id, data) {
   return request({
     url: `/ui-automation/scheduled-tasks/${id}/`,
@@ -802,7 +824,7 @@ export function updateScheduledTask(id, data) {
   })
 }
 
-// 删除定时任务
+// 鍒犻櫎瀹氭椂浠诲姟
 export function deleteScheduledTask(id) {
   return request({
     url: `/ui-automation/scheduled-tasks/${id}/`,
@@ -810,7 +832,7 @@ export function deleteScheduledTask(id) {
   })
 }
 
-// 暂停定时任务
+// 鏆傚仠瀹氭椂浠诲姟
 export function pauseScheduledTask(id) {
   return request({
     url: `/ui-automation/scheduled-tasks/${id}/pause/`,
@@ -818,7 +840,7 @@ export function pauseScheduledTask(id) {
   })
 }
 
-// 恢复定时任务
+// 鎭㈠瀹氭椂浠诲姟
 export function resumeScheduledTask(id) {
   return request({
     url: `/ui-automation/scheduled-tasks/${id}/resume/`,
@@ -826,7 +848,7 @@ export function resumeScheduledTask(id) {
   })
 }
 
-// 立即运行任务
+// 绔嬪嵆杩愯浠诲姟
 export function runScheduledTask(id) {
   return request({
     url: `/ui-automation/scheduled-tasks/${id}/run_now/`,
@@ -834,9 +856,9 @@ export function runScheduledTask(id) {
   })
 }
 
-// ==================== 通知配置相关API ====================
+// ==================== 閫氱煡閰嶇疆鐩稿叧API ====================
 
-// 获取通知配置列表
+// 鑾峰彇閫氱煡閰嶇疆鍒楄〃
 export function getNotificationConfigs(params) {
   return request({
     url: '/ui-automation/notification-configs/',
@@ -845,7 +867,7 @@ export function getNotificationConfigs(params) {
   })
 }
 
-// 创建通知配置
+// 鍒涘缓閫氱煡閰嶇疆
 export function createNotificationConfig(data) {
   return request({
     url: '/ui-automation/notification-configs/',
@@ -854,7 +876,7 @@ export function createNotificationConfig(data) {
   })
 }
 
-// 获取通知配置详情
+// 鑾峰彇閫氱煡閰嶇疆璇︽儏
 export function getNotificationConfigDetail(id) {
   return request({
     url: `/ui-automation/notification-configs/${id}/`,
@@ -862,7 +884,7 @@ export function getNotificationConfigDetail(id) {
   })
 }
 
-// 更新通知配置
+// 鏇存柊閫氱煡閰嶇疆
 export function updateNotificationConfig(id, data) {
   return request({
     url: `/ui-automation/notification-configs/${id}/`,
@@ -871,7 +893,7 @@ export function updateNotificationConfig(id, data) {
   })
 }
 
-// 删除通知配置
+// 鍒犻櫎閫氱煡閰嶇疆
 export function deleteNotificationConfig(id) {
   return request({
     url: `/ui-automation/notification-configs/${id}/`,
@@ -879,7 +901,7 @@ export function deleteNotificationConfig(id) {
   })
 }
 
-// 设置为默认配置
+// 璁剧疆涓洪粯璁ら厤缃?
 export function setDefaultNotificationConfig(id) {
   return request({
     url: `/ui-automation/notification-configs/${id}/set_default/`,
@@ -887,9 +909,9 @@ export function setDefaultNotificationConfig(id) {
   })
 }
 
-// ==================== 通知日志相关API ====================
+// ==================== 閫氱煡鏃ュ織鐩稿叧API ====================
 
-// 获取通知日志列表
+// 鑾峰彇閫氱煡鏃ュ織鍒楄〃
 export function getNotificationLogs(params) {
   return request({
     url: '/ui-automation/notification-logs/',
@@ -898,7 +920,7 @@ export function getNotificationLogs(params) {
   })
 }
 
-// 重试发送通知
+// 閲嶈瘯鍙戦€侀€氱煡
 export function retryNotification(id) {
   return request({
     url: `/ui-automation/notification-logs/${id}/retry/`,
@@ -906,9 +928,9 @@ export function retryNotification(id) {
   })
 }
 
-// ==================== 任务通知设置相关API ====================
+// ==================== 浠诲姟閫氱煡璁剧疆鐩稿叧API ====================
 
-// 获取任务通知设置
+// 鑾峰彇浠诲姟閫氱煡璁剧疆
 export function getTaskNotificationSettings(params) {
   return request({
     url: '/ui-automation/task-notification-settings/',
@@ -917,7 +939,7 @@ export function getTaskNotificationSettings(params) {
   })
 }
 
-// 创建任务通知设置
+// 鍒涘缓浠诲姟閫氱煡璁剧疆
 export function createTaskNotificationSetting(data) {
   return request({
     url: '/ui-automation/task-notification-settings/',
@@ -926,7 +948,7 @@ export function createTaskNotificationSetting(data) {
   })
 }
 
-// 更新任务通知设置
+// 鏇存柊浠诲姟閫氱煡璁剧疆
 export function updateTaskNotificationSetting(id, data) {
   return request({
     url: `/ui-automation/task-notification-settings/${id}/`,
@@ -935,7 +957,7 @@ export function updateTaskNotificationSetting(id, data) {
   })
 }
 
-// 获取用户列表（复用接口测试的用户接口）
+// 鑾峰彇鐢ㄦ埛鍒楄〃锛堝鐢ㄦ帴鍙ｆ祴璇曠殑鐢ㄦ埛鎺ュ彛锛?
 export function getUiUsers(params) {
   return request({
     url: '/api-testing/users/',
@@ -944,9 +966,9 @@ export function getUiUsers(params) {
   })
 }
 
-// ==================== AI 智能模式相关API ====================
+// ==================== AI 鏅鸿兘妯″紡鐩稿叧API ====================
 
-// 获取 AI 用例列表
+// 鑾峰彇 AI 鐢ㄤ緥鍒楄〃
 export function getAICases(params) {
   return request({
     url: '/ui-automation/ai-cases/',
@@ -955,7 +977,7 @@ export function getAICases(params) {
   })
 }
 
-// 创建 AI 用例
+// 鍒涘缓 AI 鐢ㄤ緥
 export function createAICase(data) {
   return request({
     url: '/ui-automation/ai-cases/',
@@ -964,7 +986,7 @@ export function createAICase(data) {
   })
 }
 
-// 获取 AI 用例详情
+// 鑾峰彇 AI 鐢ㄤ緥璇︽儏
 export function getAICaseDetail(id) {
   return request({
     url: `/ui-automation/ai-cases/${id}/`,
@@ -972,7 +994,7 @@ export function getAICaseDetail(id) {
   })
 }
 
-// 更新 AI 用例
+// 鏇存柊 AI 鐢ㄤ緥
 export function updateAICase(id, data) {
   return request({
     url: `/ui-automation/ai-cases/${id}/`,
@@ -981,7 +1003,7 @@ export function updateAICase(id, data) {
   })
 }
 
-// 删除 AI 用例
+// 鍒犻櫎 AI 鐢ㄤ緥
 export function deleteAICase(id) {
   return request({
     url: `/ui-automation/ai-cases/${id}/`,
@@ -989,7 +1011,7 @@ export function deleteAICase(id) {
   })
 }
 
-// 运行 AI 用例
+// 杩愯 AI 鐢ㄤ緥
 export function runAICase(id) {
   return request({
     url: `/ui-automation/ai-cases/${id}/run/`,
@@ -997,7 +1019,7 @@ export function runAICase(id) {
   })
 }
 
-// 获取 AI 执行记录列表
+// 鑾峰彇 AI 鎵ц璁板綍鍒楄〃
 export function getAIExecutionRecords(params) {
   return request({
     url: '/ui-automation/ai-execution-records/',
@@ -1006,7 +1028,7 @@ export function getAIExecutionRecords(params) {
   })
 }
 
-// 获取 AI 执行记录详情
+// 鑾峰彇 AI 鎵ц璁板綍璇︽儏
 export function getAIExecutionRecordDetail(id) {
   return request({
     url: `/ui-automation/ai-execution-records/${id}/`,
@@ -1014,7 +1036,7 @@ export function getAIExecutionRecordDetail(id) {
   })
 }
 
-// 执行临时 AI 任务
+// 鎵ц涓存椂 AI 浠诲姟
 export function runAdhocAITask(data) {
   return request({
     url: '/ui-automation/ai-execution-records/run_adhoc/',
@@ -1023,7 +1045,7 @@ export function runAdhocAITask(data) {
   })
 }
 
-// 停止 AI 任务
+// 鍋滄 AI 浠诲姟
 export function stopAITask(id) {
   return request({
     url: `/ui-automation/ai-execution-records/${id}/stop/`,
@@ -1031,7 +1053,7 @@ export function stopAITask(id) {
   })
 }
 
-// 批量删除 AI 执行记录
+// 鎵归噺鍒犻櫎 AI 鎵ц璁板綍
 export function batchDeleteAIExecutionRecords(ids) {
   return request({
     url: '/ui-automation/ai-execution-records/batch_delete/',
@@ -1040,7 +1062,7 @@ export function batchDeleteAIExecutionRecords(ids) {
   })
 }
 
-// 获取 AI 执行报告
+// 鑾峰彇 AI 鎵ц鎶ュ憡
 export function getAIExecutionReport(id, params = {}) {
   return request({
     url: `/ui-automation/ai-execution-records/${id}/report/`,
@@ -1049,12 +1071,80 @@ export function getAIExecutionReport(id, params = {}) {
   })
 }
 
-// 导出 AI 执行报告为 PDF
+// 瀵煎嚭 AI 鎵ц鎶ュ憡涓?PDF
 export function exportAIExecutionReportPDF(id, params = {}) {
   return request({
     url: `/ui-automation/ai-execution-records/${id}/export-pdf/`,
     method: 'get',
     params,
     responseType: 'blob'
+  })
+}
+
+
+// ===== ???? API =====
+
+// ??????
+export function startRecording(data) {
+  return request({
+    url: '/ui-automation/recording/',
+    method: 'post',
+    data
+  })
+}
+
+// ????
+export function stopRecording(sessionId) {
+  return request({
+    url: `/ui-automation/recording/${sessionId}/stop/`,
+    method: 'post'
+  })
+}
+
+// ??????
+export function getRecordingActions(sessionId) {
+  return request({
+    url: '/ui-automation/recording/actions/',
+    method: 'get',
+    params: { session_id: sessionId }
+  })
+}
+
+// ???????????????
+export function sendRecordingActions(data) {
+  return request({
+    url: '/ui-automation/recording/actions/',
+    method: 'post',
+    data
+  })
+}
+
+// ??????
+export function checkRecordingStatus(sessionId) {
+  return request({
+    url: `/ui-automation/recording/${sessionId}/status-check/`,
+    method: 'get'
+  })
+}
+
+// ?????????
+export function saveRecordingAsTestCase(sessionId, name, targetTestCaseId = null, options = {}) {
+  return request({
+    url: `/ui-automation/recording/${sessionId}/save-as-test-case/`,
+    method: 'post',
+    data: {
+      name,
+      project_id: options.projectId,
+      target_test_case_id: targetTestCaseId,
+      selected_action_indexes: options.selectedActionIndexes || []
+    }
+  })
+}
+export function runAIAssertion(data) {
+  return request({
+    url: '/ui-automation/ai-assertion/',
+    method: 'post',
+    data,
+    timeout: 120000  // AI鏂█鍙兘闇€瑕佽緝闀挎椂闂?
   })
 }

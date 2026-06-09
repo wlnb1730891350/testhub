@@ -78,6 +78,10 @@
                 <el-icon><Plus /></el-icon>
                 {{ t('uiAutomation.testCase.addStep') }}
               </el-button>
+              <el-button size="small" type="danger" @click="showRecordPanel = true">
+                <el-icon><VideoCamera /></el-icon>
+                录制
+              </el-button>
               <el-button size="small" type="primary" @click="saveTestCase">
                 <el-icon><Check /></el-icon>
                 {{ t('uiAutomation.testCase.saveTestCase') }}
@@ -168,9 +172,9 @@
                             @change="onElementChange(element)"
                           >
                             <el-option
-                              v-for="elem in availableElements"
+                              v-for="elem in stepElementOptions"
                               :key="elem.id"
-                              :label="`${elem.name} (${elem.locator_value})`"
+                              :label="formatElementOptionLabel(elem)"
                               :value="elem.id"
                             />
                           </el-select>
@@ -498,16 +502,26 @@
       @select="handleDataFactorySelect"
     />
   </div>
+
+  <!-- 录制面板 -->
+  <RecordControlPanel
+    v-model="showRecordPanel"
+    :project-id="projectId"
+    :current-test-case-id="selectedTestCase?.id || ''"
+    :current-test-case-name="selectedTestCase?.name || ''"
+    @saved="onRecordSaved"
+  />
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Search, Plus, Edit, Delete, Check, CaretRight, ArrowUp, ArrowDown, Rank, Picture, Warning, View, ZoomIn, Refresh, WarningFilled, MagicStick
+  Search, Plus, Edit, Delete, Check, CaretRight, ArrowUp, ArrowDown, Rank, Picture, Warning, View, ZoomIn, Refresh, WarningFilled, MagicStick, VideoCamera
 } from '@element-plus/icons-vue'
 import draggable from 'vuedraggable'
 import DataFactorySelector from '@/components/DataFactorySelector.vue'
+import RecordControlPanel from './RecordControlPanel.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -546,6 +560,8 @@ const selectedEngine = ref('playwright')  // 默认使用Playwright
 const selectedBrowser = ref('chrome')  // 默认使用Chrome
 const headlessMode = ref(false)  // 默认使用有头模式
 const showVariableHelper = ref(false)
+const showRecordDialog = ref(false)
+const showRecordPanel = ref(false)
 const currentEditingStep = ref(null)
 const currentEditingField = ref('')
 const showDataFactorySelector = ref(false)
@@ -573,6 +589,31 @@ const filteredTestCases = computed(() => {
 })
 
 // 解析执行日志
+const stepElementOptions = computed(() => {
+  const optionMap = new Map()
+
+  availableElements.value.forEach((elem) => {
+    const id = Number(elem.id)
+    if (!Number.isNaN(id)) {
+      optionMap.set(id, { ...elem, id })
+    }
+  })
+
+  currentSteps.value.forEach((step) => {
+    const id = Number(step.element_id || step.element)
+    if (!id || optionMap.has(id)) return
+
+    optionMap.set(id, {
+      id,
+      name: step.element_name || `元素 #${id}`,
+      locator_value: step.element_locator || '',
+      locator_strategy: step.locator_strategy || null
+    })
+  })
+
+  return Array.from(optionMap.values())
+})
+
 const parsedExecutionLogs = computed(() => {
   if (!executionResult.value || !executionResult.value.logs) return []
   try {
@@ -617,11 +658,25 @@ const loadElements = async () => {
   }
 
   try {
-    const response = await getElements({ project: projectId.value })
+    const response = await getElements({ project: projectId.value, page_size: 1000 })
     availableElements.value = response.data.results || response.data
   } catch (error) {
     console.error('获取元素列表失败:', error)
   }
+}
+
+const onRecordSaved = async (payload = {}) => {
+  await loadTestCases()
+
+  const targetId = payload?.test_case_id || selectedTestCase.value?.id
+  if (targetId) {
+    const refreshedTestCase = testCases.value.find(tc => tc.id === targetId)
+    if (refreshedTestCase) {
+      selectTestCase(refreshedTestCase, { force: true })
+    }
+  }
+
+  ElMessage.success('???????')
 }
 
 const onProjectChange = async () => {
@@ -635,9 +690,11 @@ const onProjectChange = async () => {
   ])
 }
 
-const selectTestCase = (testCase) => {
+const selectTestCase = (testCase, options = {}) => {
+  const { force = false } = options
+
   // 如果点击的是同一个用例，不做任何处理
-  if (selectedTestCase.value && selectedTestCase.value.id === testCase.id) {
+  if (!force && selectedTestCase.value && selectedTestCase.value.id === testCase.id) {
     return
   }
 
@@ -646,7 +703,7 @@ const selectTestCase = (testCase) => {
   if (testCase.steps && testCase.steps.length > 0) {
     currentSteps.value = testCase.steps.map(step => ({
       ...step,
-      element_id: step.element || '',
+      element_id: step.element ? Number(step.element) : '',
       expanded: false
     }))
   } else {
@@ -697,10 +754,21 @@ const onActionTypeChange = (step) => {
 
 const onElementChange = (step) => {
   // 元素变化时的处理
-  const element = availableElements.value.find(e => e.id === step.element_id)
+  const element = stepElementOptions.value.find(e => Number(e.id) === Number(step.element_id))
+  if (element) {
+    step.element_name = element.name
+    step.element_locator = element.locator_value
+  }
   if (element && !step.description) {
     step.description = `${getActionTypeText(step.action_type)}${element.name}`
   }
+}
+
+const formatElementOptionLabel = (element) => {
+  if (!element) return ''
+  return element.locator_value
+    ? `${element.name} (${element.locator_value})`
+    : element.name
 }
 
 const needsInputValue = (actionType) => {

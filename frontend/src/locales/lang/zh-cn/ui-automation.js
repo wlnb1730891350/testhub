@@ -153,6 +153,7 @@ export default {
     statusFilter: '状态筛选',
     searchPlaceholder: '搜索项目名称',
     projectDetail: '项目详情',
+    selectProject: '请选择项目',
     noDescription: '暂无描述',
     notSet: '未设置',
     none: '暂无',
@@ -371,6 +372,7 @@ export default {
     executionDetail: '执行详情',
     executionLogs: '执行日志',
     failedScreenshots: '失败截图',
+    successScreenshots: '成功截图',
     errorInfo: '错误信息',
     noLogs: '暂无执行日志',
     noScreenshots: '暂无失败截图',
@@ -429,6 +431,7 @@ export default {
     caseDetail: '用例详情',
     executionLogs: '执行日志',
     failedScreenshots: '失败截图',
+    successScreenshots: '成功截图',
     errorInfo: '错误信息',
     noScreenshots: '没有截图',
     noError: '没有错误信息',
@@ -1108,8 +1111,13 @@ export default {
     actionScroll: '滚动',
     actionScreenshot: '截图',
     actionAssert: '断言',
+    actionAiAssert: 'AI智能断言',
+    actionPress: '按键',
+    aiAssertDesc: '断言描述',
+    aiAssertPlaceholder: '用自然语言描述期望的页面状态，如：页面显示登录成功',
     actionWait: '等待',
     actionSwitchTab: '切换标签页',
+    pressPlaceholder: '请输入按键或快捷键，如 Enter、Tab、Escape、Control+A',
     selectElement: '选择元素',
     inputValue: '输入值：',
     inputPlaceholder: '请输入内容，支持变量如 \'{random_phone()}\'',
@@ -1131,6 +1139,7 @@ export default {
     executionFailed: '执行失败',
     executionLogs: '执行日志',
     failedScreenshots: '失败截图',
+    successScreenshots: '成功截图',
     errorInfo: '错误信息',
     noLogs: '暂无执行日志',
     step: '步骤',
@@ -1228,6 +1237,8 @@ export default {
       scroll: '滚动',
       screenshot: '截图',
       assert: '断言',
+      aiAssert: 'AI智能断言',
+      press: '按键',
       wait: '等待'
     },
     // 操作文本（用于执行日志中显示操作描述）
@@ -1240,6 +1251,8 @@ export default {
       scroll: '滚动',
       screenshot: '截图',
       assert: '断言',
+      aiAssert: 'AI智能断言',
+      press: '按键',
       wait: '等待'
     },
     // 状态文本
@@ -1255,6 +1268,9 @@ export default {
     form: {
       nameRequired: '请输入测试用例名称'
     },
+    // 对话框步骤相关
+    noStepsHint: '暂无测试步骤',
+    stepsHint: '点击下方按钮添加测试步骤',
     // 保存操作消息
     save: {
       success: '测试用例保存成功',
@@ -1292,6 +1308,7 @@ export default {
     scroll: '滚动',
     screenshot: '截图',
     assert: '断言',
+    aiAssert: 'AI智能断言',
     wait: '等待'
   },
 

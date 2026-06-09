@@ -1,3 +1,4 @@
 # start_vite.ps1
-cd C:\Users\a\.qclaw\workspace\testhub_platform\frontend
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location (Join-Path $root "frontend")
 npm.cmd run dev

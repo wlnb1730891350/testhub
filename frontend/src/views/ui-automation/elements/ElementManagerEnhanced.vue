@@ -267,6 +267,7 @@
         <el-button type="primary" @click="updatePage">{{ $t('uiAutomation.common.save') }}</el-button>
       </template>
     </el-dialog>
+
   </div>
 </template>
 

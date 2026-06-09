@@ -41,7 +41,10 @@ class DocumentProcessor:
     
     @staticmethod
     def extract_images(document: RequirementDocument) -> List[Dict[str, str]]:
-        file_path = getattr(document.file, 'path', '')
+        try:
+            file_path = getattr(document.file, 'path', '')
+        except (ValueError, AttributeError):
+            return []
         if not file_path or not os.path.exists(file_path):
             return []
 
