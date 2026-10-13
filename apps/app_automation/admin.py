@@ -9,6 +9,7 @@ from .models import (
     AppPackage,
     AppTestCase,
     AppTestExecution,
+    AppTestBatchReport,
 )
 
 
@@ -69,3 +70,11 @@ class AppTestExecutionAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     search_fields = ('test_case__name',)
     readonly_fields = ('created_at', 'updated_at', 'started_at', 'finished_at', 'duration')
+
+
+@admin.register(AppTestBatchReport)
+class AppTestBatchReportAdmin(admin.ModelAdmin):
+    list_display = ('batch_id', 'test_suite', 'device', 'status', 'result', 'total_cases', 'created_at')
+    list_filter = ('status', 'result')
+    search_fields = ('batch_id', 'test_suite__name', 'device__device_id')
+    readonly_fields = ('batch_id', 'created_at', 'updated_at', 'started_at', 'finished_at', 'duration')

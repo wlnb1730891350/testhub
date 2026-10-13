@@ -216,7 +216,7 @@ def execute_test_case_ai(test_case_id, start_url=None, headless=False, callback=
                 task_description=task_prompt,
                 step_callback=step_callback,
                 should_stop=should_stop,
-                enable_gif=True,
+                enable_gif=False,
                 case_name=test_case.name
             )
 
@@ -318,8 +318,8 @@ def accept_ai_locators(execution_id):
             try:
                 step = steps.get(step_number=step_num)
                 if step.element and actual_locator:
-                    step.element.locator = actual_locator
-                    step.element.save(update_fields=['locator'])
+                    step.element.locator_value = actual_locator
+                    step.element.save(update_fields=['locator_value'])
                     updated += 1
             except TestCaseStep.DoesNotExist:
                 pass

@@ -531,8 +531,6 @@ export default {
           return result.length > 0 ? result : null
         }
       } catch (e) {
-        console.log('Trying to parse as plain text format')
-      }
 
       try {
         const result = []
@@ -561,6 +559,7 @@ export default {
       } catch (e) {
         console.error('Parse notification content failed:', e)
         return null
+      }
       }
     })
 

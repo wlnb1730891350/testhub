@@ -454,7 +454,6 @@ const loadUsers = async () => {
 
 // 新建按钮点击
 const handleCreateClick = () => {
-  console.log('新建按钮点击')
   editingTask.value = null
   resetTaskForm()
   showCreateDialog.value = true
@@ -637,12 +636,6 @@ const editTask = (task) => {
     notify_on_failure: task.notify_on_failure,
     notification_type: task.notification_type || 'email',
     notify_emails: task.notify_emails || []
-  })
-  console.log('编辑任务数据回显:', {
-    test_suite: task.test_suite,
-    environment: task.environment,
-    taskForm_test_suite: taskForm.test_suite,
-    taskForm_environment: taskForm.environment
   })
   showCreateDialog.value = true
 }

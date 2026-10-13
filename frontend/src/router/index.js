@@ -8,10 +8,8 @@ import Layout from '@/layout/index.vue'
 import ProjectList from '@/views/projects/ProjectList.vue'
 import Home from '@/views/Home.vue'
 import DataFactory from '@/views/data-factory/DataFactory.vue'
-import CommandCenter from '@/views/workspace/CommandCenter.vue'
 import ReportCenter from '@/views/workspace/ReportCenter.vue'
 import SchedulerCenter from '@/views/workspace/SchedulerCenter.vue'
-import TestAnalytics from '@/views/workspace/TestAnalytics.vue'
 import ApiDashboard from '@/views/api-testing/Dashboard.vue'
 import ApiProjectManagement from '@/views/api-testing/ProjectManagement.vue'
 import ApiInterfaceManagement from '@/views/api-testing/InterfaceManagement.vue'
@@ -36,6 +34,12 @@ import UiNotificationLogs from '@/views/ui-automation/notification/NotificationL
 import UiAITesting from '@/views/ui-automation/ai/AITesting.vue'
 import UiAICaseList from '@/views/ui-automation/ai/AICaseList.vue'
 import UiAIExecutionRecords from '@/views/ui-automation/ai/AIExecutionRecords.vue'
+import PerformanceDashboard from '@/views/performance-testing/Dashboard.vue'
+import PerformanceProjectManagement from '@/views/performance-testing/ProjectManagement.vue'
+import PerformanceScriptBuilder from '@/views/performance-testing/ScriptBuilder.vue'
+import PerformanceExecutionList from '@/views/performance-testing/ExecutionList.vue'
+import PerformanceReportView from '@/views/performance-testing/ReportView.vue'
+import PerformanceRealtimeReport from '@/views/performance-testing/RealtimeReport.vue'
 
 /** @type {import('vue-router').RouteRecordRaw[]} */
 const routes = [
@@ -56,13 +60,12 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: 'command-center'
+        redirect: '/home'
       },
       {
         path: 'command-center',
         name: 'CommandCenter',
-        component: CommandCenter,
-        meta: { title: 'Platform Command Center' }
+        redirect: '/home'
       },
       {
         path: 'report-center',
@@ -75,12 +78,6 @@ const routes = [
         name: 'SchedulerCenter',
         component: SchedulerCenter,
         meta: { title: 'Unified Scheduler Center' }
-      },
-      {
-        path: 'analytics',
-        name: 'TestAnalytics',
-        component: TestAnalytics,
-        meta: { title: 'Test Analytics' }
       }
     ]
   },
@@ -372,6 +369,47 @@ const routes = [
     ]
   },
   {
+    path: '/performance-testing',
+    component: Layout,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        redirect: 'dashboard'
+      },
+      {
+        path: 'dashboard',
+        name: 'PerformanceDashboard',
+        component: PerformanceDashboard
+      },
+      {
+        path: 'projects',
+        name: 'PerformanceProjects',
+        component: PerformanceProjectManagement
+      },
+      {
+        path: 'scripts',
+        name: 'PerformanceScripts',
+        component: PerformanceScriptBuilder
+      },
+      {
+        path: 'executions',
+        name: 'PerformanceExecutions',
+        component: PerformanceExecutionList
+      },
+      {
+        path: 'reports',
+        name: 'PerformanceReports',
+        component: PerformanceReportView
+      },
+      {
+        path: 'realtime-reports/:id',
+        name: 'PerformanceRealtimeReport',
+        component: PerformanceRealtimeReport
+      }
+    ]
+  },
+  {
     path: '/data-factory',
     name: 'DataFactory',
     component: DataFactory,
@@ -429,6 +467,11 @@ const routes = [
             path: 'dify',
             name: 'DifyConfig',
             component: () => import('@/views/configuration/DifyConfig.vue')
+          },
+          {
+            path: 'ocr',
+            name: 'OCRConfig',
+            component: () => import('@/views/configuration/OCRConfig.vue')
           }
         ]
       }

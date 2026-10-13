@@ -20,7 +20,8 @@ export default {
     businessType: '业务类型',
     signatureKey: '签名密钥',
     uiAutomation: 'UI自动化测试',
-    apiTesting: '接口测试'
+    apiTesting: '接口测试',
+    aiTestingReport: 'AI测试报告'
   },
 
   // 占位符

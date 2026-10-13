@@ -30,6 +30,13 @@
             </el-text>
           </div>
         </el-form-item>
+        <el-form-item label="执行引擎" prop="execution_engine">
+          <el-select v-model="form.execution_engine" style="width: 100%">
+            <el-option label="自动选择（原生优先）" value="auto" />
+            <el-option label="UIAutomator2（推荐）" value="uiautomator2" />
+            <el-option label="Airtest（图片识别兼容）" value="airtest" />
+          </el-select>
+        </el-form-item>
 
         <el-form-item>
           <el-button type="primary" @click="handleSave" :loading="saving">
@@ -49,6 +56,9 @@
         <el-descriptions title="当前配置信息" :column="1" border>
           <el-descriptions-item label="ADB 路径">
             <el-tag>{{ currentConfig.adb_path || 'adb' }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="执行引擎">
+            {{ currentConfig.execution_engine || 'auto' }}
           </el-descriptions-item>
           <el-descriptions-item label="更新时间">
             {{ formatTime(currentConfig.updated_at) }}
@@ -73,11 +83,13 @@ const formRef = ref(null)
 const saving = ref(false)
 
 const form = reactive({
-  adb_path: 'adb'
+  adb_path: 'adb',
+  execution_engine: 'auto'
 })
 
 const currentConfig = reactive({
   adb_path: '',
+  execution_engine: 'auto',
   created_at: '',
   updated_at: ''
 })

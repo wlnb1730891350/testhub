@@ -4,15 +4,8 @@
 语法：${function_name(args)}
 """
 import re
-import sys
 import json
 from datetime import datetime, timedelta
-
-# 设置标准输出编码为 UTF-8，避免 Windows 系统上的编码问题
-if sys.platform == 'win32':
-    import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # 导入数据工厂的工具类
 from apps.data_factory.tools.random_tools import RandomTools
@@ -170,6 +163,10 @@ class VariableResolver:
             args = self._parse_args(args_str)
         
         # 调用对应函数
+        if func_name in {'timestamp', 'timestamp_sec'}:
+            return self.functions[func_name]()
+        if func_name in {'datetime', 'date', 'time', 'date_offset'}:
+            return self.functions[func_name](*args)
         if func_name in self.functions:
             return self.functions[func_name](func_name, args)
         else:
@@ -255,7 +252,7 @@ class VariableResolver:
             if arg.startswith('[') and arg.endswith(']'):
                 try:
                     return json.loads(arg)
-                except:
+                except Exception:
                     pass
             # 移除引号
             return arg.strip('\'"')
@@ -318,7 +315,7 @@ class VariableResolver:
                         # JSON格式: ["a","b","c"]
                         try:
                             sequence_arg = json.loads(sequence_arg)
-                        except:
+                        except Exception:
                             # 如果JSON解析失败，尝试手动解析
                             sequence_arg = [item.strip().strip('"\'') for item in sequence_arg[1:-1].split(',')]
                     else:

@@ -45,11 +45,9 @@ api.interceptors.request.use(
         // 如果没有正在刷新，开始刷新
         if (!isRefreshing) {
           isRefreshing = true
-          console.log('Token即将过期，开始刷新...')
 
           try {
             const newToken = await userStore.refreshAccessToken()
-            console.log('Token刷新成功')
             processQueue(null, newToken)
 
             // 更新当前请求的token
@@ -64,7 +62,6 @@ api.interceptors.request.use(
           }
         } else {
           // 如果正在刷新，将请求加入队列
-          console.log('Token正在刷新，请求加入队列等待...')
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject })
           }).then(token => {
@@ -139,9 +136,7 @@ api.interceptors.response.use(
         isRefreshing = true
 
         try {
-          console.log('收到401响应，尝试刷新token...')
           const newToken = await userStore.refreshAccessToken()
-          console.log('Token刷新成功，重试原请求')
           processQueue(null, newToken)
 
           // 更新当前请求的token

@@ -342,7 +342,7 @@ const fetchBasicData = async () => {
     const [projectsRes, versionsRes, usersRes] = await Promise.all([
       api.get('/projects/'), // 只显示用户参与的项目
       api.get('/versions/'),
-      api.get('/users/users/') // 修正用户API路径
+      api.get('/auth/users/')
     ])
     
     projects.value = (projectsRes.data.results || projectsRes.data || []).filter(item => item !== null && item !== undefined)
@@ -366,13 +366,9 @@ const loadTestcasesByProjects = async (projectIds) => {
     const params = new URLSearchParams()
     projectIds.forEach(id => params.append('project_ids', id))
 
-    console.log('API URL:', `/executions/plans/testcases_by_projects/?${params.toString()}`)
-
     const response = await api.get(`/executions/plans/testcases_by_projects/?${params.toString()}`)
-    console.log('API Response:', response.data)
 
     filteredTestcases.value = response.data.results || []
-    console.log('Filtered testcases:', filteredTestcases.value)
   } catch (error) {
     console.error('Load testcases error:', error)
     if (error.response?.status === 400) {

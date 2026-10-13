@@ -1,22 +1,13 @@
 <template>
   <div class="scheduler-center page-container">
-    <section class="scheduler-hero">
-      <div>
-        <p class="hero-kicker">{{ copy.kicker }}</p>
-        <h1>{{ copy.title }}</h1>
-        <p>{{ copy.description }}</p>
-      </div>
-      <div class="hero-actions">
-        <el-button type="primary" size="large" @click="go('/workspace/command-center')">
-          {{ copy.backAction }}
-        </el-button>
-      </div>
-    </section>
+    <header class="page-header">
+      <h1>{{ copy.title }}</h1>
+      <el-button :loading="loading" @click="loadSchedulerCenter">{{ copy.refresh }}</el-button>
+    </header>
 
     <section class="card-container">
       <div class="section-header">
         <div>
-          <p>{{ copy.summaryEyebrow }}</p>
           <h2>{{ copy.summaryTitle }}</h2>
         </div>
         <span v-if="loading">{{ copy.loading }}</span>
@@ -27,7 +18,6 @@
         <article v-for="item in summaryCards" :key="item.key" class="summary-card">
           <span>{{ item.label }}</span>
           <strong>{{ item.value }}</strong>
-          <p>{{ item.description }}</p>
         </article>
       </div>
     </section>
@@ -35,7 +25,6 @@
     <section class="card-container">
       <div class="section-header">
         <div>
-          <p>{{ copy.channelEyebrow }}</p>
           <h2>{{ copy.channelTitle }}</h2>
         </div>
       </div>
@@ -64,7 +53,6 @@
     <section class="card-container">
       <div class="section-header">
         <div>
-          <p>{{ copy.activityEyebrow }}</p>
           <h2>{{ copy.activityTitle }}</h2>
         </div>
       </div>
@@ -112,15 +100,10 @@ const isChinese = computed(() => appStore.language === 'zh-cn')
 const copy = computed(() =>
   isChinese.value
     ? {
-        kicker: 'Unified Scheduling',
         title: '统一调度中心',
-        description: '从平台层统一查看 API、UI 和 APP 的定时任务，快速识别哪些任务在运行、暂停或失败。',
-        backAction: '返回平台工作台',
-        summaryEyebrow: 'Summary',
+        refresh: '刷新',
         summaryTitle: '调度全景',
-        channelEyebrow: 'Channels',
         channelTitle: '模块调度入口',
-        activityEyebrow: 'Recent Tasks',
         activityTitle: '最近调度任务',
         loading: '正在加载调度汇总',
         loadError: '调度汇总加载失败，请稍后重试',
@@ -136,15 +119,10 @@ const copy = computed(() =>
         empty: '当前还没有可展示的调度任务。'
       }
     : {
-        kicker: 'Unified Scheduling',
         title: 'Unified Scheduler Center',
-        description: 'Monitor API, UI and APP scheduled tasks in one place and quickly spot running, paused or failed jobs.',
-        backAction: 'Back to command center',
-        summaryEyebrow: 'Summary',
+        refresh: 'Refresh',
         summaryTitle: 'Scheduling overview',
-        channelEyebrow: 'Channels',
         channelTitle: 'Module scheduling entry points',
-        activityEyebrow: 'Recent Tasks',
         activityTitle: 'Latest scheduled tasks',
         loading: 'Loading scheduler aggregation',
         loadError: 'Failed to load scheduler aggregation',
@@ -171,52 +149,44 @@ const summaryCards = computed(() => {
         {
           key: 'total',
           label: '任务总数',
-          value: summary.total_tasks ?? 0,
-          description: '平台内已创建的全部定时任务'
+          value: summary.total_tasks ?? 0
         },
         {
           key: 'active',
           label: '运行中任务',
-          value: summary.active_tasks ?? 0,
-          description: '当前处于启用状态的任务'
+          value: summary.active_tasks ?? 0
         },
         {
           key: 'paused',
           label: '暂停任务',
-          value: summary.paused_tasks ?? 0,
-          description: '已保留但暂不执行的任务'
+          value: summary.paused_tasks ?? 0
         },
         {
           key: 'failed',
           label: '失败任务',
-          value: summary.failed_tasks ?? 0,
-          description: '需要排查配置或执行环境的任务'
+          value: summary.failed_tasks ?? 0
         }
       ]
     : [
         {
           key: 'total',
           label: 'Total tasks',
-          value: summary.total_tasks ?? 0,
-          description: 'All scheduled jobs created across the platform'
+          value: summary.total_tasks ?? 0
         },
         {
           key: 'active',
           label: 'Active tasks',
-          value: summary.active_tasks ?? 0,
-          description: 'Tasks currently enabled and ready to run'
+          value: summary.active_tasks ?? 0
         },
         {
           key: 'paused',
           label: 'Paused tasks',
-          value: summary.paused_tasks ?? 0,
-          description: 'Jobs kept for later execution'
+          value: summary.paused_tasks ?? 0
         },
         {
           key: 'failed',
           label: 'Failed tasks',
-          value: summary.failed_tasks ?? 0,
-          description: 'Jobs that likely need configuration or environment checks'
+          value: summary.failed_tasks ?? 0
         }
       ]
 })
@@ -290,46 +260,30 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .scheduler-center {
-  gap: 24px;
+  gap: 16px;
 }
 
-.scheduler-hero,
 .card-container {
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.14), transparent 32%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
-  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+  border: 1px solid #dfe3e8;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
-.scheduler-hero {
+.page-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 28px;
+  padding: 2px 0;
 }
 
-.hero-kicker,
-.section-header p {
-  margin: 0 0 10px;
-  color: #0f766e;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.scheduler-hero h1,
+.page-header h1,
 .section-header h2,
 .task-card h3 {
   margin: 0;
   color: #0f172a;
 }
 
-.scheduler-hero p:last-child,
 .task-card p {
   margin: 14px 0 0;
   color: #475569;
@@ -337,7 +291,7 @@ onMounted(() => {
 }
 
 .card-container {
-  padding: 26px;
+  padding: 18px;
 }
 
 .section-header {
@@ -345,7 +299,7 @@ onMounted(() => {
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 22px;
+  margin-bottom: 14px;
 }
 
 .section-header span {
@@ -356,7 +310,7 @@ onMounted(() => {
 .channel-grid,
 .task-grid {
   display: grid;
-  gap: 18px;
+  gap: 10px;
 }
 
 .summary-grid {
@@ -374,9 +328,9 @@ onMounted(() => {
 .summary-card,
 .channel-card,
 .task-card {
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: #ffffff;
 }
 
 .summary-card,
@@ -387,7 +341,7 @@ onMounted(() => {
 
 .channel-card,
 .task-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .channel-card {
@@ -397,9 +351,8 @@ onMounted(() => {
 .channel-card:hover,
 .channel-card:focus-visible,
 .task-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(29, 78, 216, 0.22);
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+  border-color: #93c5fd;
+  background: #f8fafc;
   outline: none;
 }
 
@@ -418,7 +371,6 @@ onMounted(() => {
   font-size: 1.6rem;
 }
 
-.summary-card p,
 .channel-card p {
   margin: 10px 0 0;
   color: #475569;
@@ -454,8 +406,8 @@ onMounted(() => {
 
 .empty-state {
   padding: 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.76);
+  border-radius: 4px;
+  background: #f8fafc;
   color: #64748b;
 }
 
@@ -468,17 +420,11 @@ onMounted(() => {
 }
 
 @media (max-width: 900px) {
-  .scheduler-hero {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 }
 
 @media (max-width: 640px) {
-  .scheduler-hero,
   .card-container {
-    padding: 18px;
-    border-radius: 22px;
+    padding: 14px;
   }
 
   .summary-grid,

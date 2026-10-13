@@ -30,9 +30,9 @@ click-repl==0.3.0
 cloudpickle==3.1.2
 colorama==0.4.6
 croniter==6.0.0
-cryptography==41.0.7
+cryptography==46.0.7
 distro==1.9.0
-Django==4.2.7
+Django==4.2.30
 django-cors-headers==4.3.1
 django-filter==23.5
 django-simpleui==2025.6.24
@@ -108,11 +108,13 @@ Pygments==2.19.2
 PyJWT==2.10.1
 PyMySQL==1.1.0
 pyotp==2.9.0
+pywinauto==0.6.9
 pyparsing==3.3.1
 pypdf==6.5.0
 PyPDF2==3.0.1
 PySocks==1.7.1
 pytest==8.4.1
+pytest-asyncio==1.1.0
 # python-barcode==0.16.1  # 需要python-bidi(MSVC编译)，开发环境跳过
 python-dateutil==2.9.0.post0
 python-decouple==3.8
@@ -164,22 +166,13 @@ yarl==1.22.0
 zstandard==0.25.0
 
 # UI自动化测试依赖包
-playwright>=1.40.0
-selenium==4.15.2
-webdriver-manager==4.0.1
-browser-use==0.10.1
-
-# JWT 安全机制
-djangorestframework-simplejwt==5.5.1
-PyJWT>=2.8.0
-
-# 测试数据生成
-fakerx>=0.1.0
 
 # APP自动化测试依赖包（暂不安装，需要numpy 1.26.4与Python 3.13不兼容）
 # airtest
 # loguru
 # Pillow
+# Android 原生 UI 自动化（openatx/uiautomator2）
+uiautomator2==3.7.0
 
 # OCR 文字识别支持（暂不安装，easyocr依赖python-bidi需要MSVC编译）
 # easyocr

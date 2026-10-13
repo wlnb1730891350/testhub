@@ -29,7 +29,14 @@
             {{ getSerialNumber($index) }}
           </template>
         </el-table-column>
-        <el-table-column prop="case_name" :label="$t('uiAutomation.ai.executionRecords.caseName')" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="case_name" :label="$t('uiAutomation.ai.executionRecords.caseName')" min-width="240" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span>{{ row.case_name }}</span>
+            <el-tag v-if="row.item_type === 'batch'" size="small" type="info" class="batch-count-tag">
+              {{ row.case_count }} 条
+            </el-tag>
+          </template>
+        </el-table-column>
 
         <el-table-column prop="status" :label="$t('uiAutomation.ai.executionRecords.status')" width="120">
           <template #default="{ row }">
@@ -44,14 +51,14 @@
           </template>
         </el-table-column>
         <el-table-column prop="start_time" :label="$t('uiAutomation.ai.executionRecords.startTime')" width="180" :formatter="formatDate" />
-        <el-table-column prop="executed_by.username" :label="$t('uiAutomation.ai.executionRecords.executor')" width="120" />
+        <el-table-column prop="executed_by_name" :label="$t('uiAutomation.ai.executionRecords.executor')" width="120" />
         <el-table-column :label="$t('uiAutomation.common.operation')" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="viewDetail(row)">
+            <el-button v-if="row.item_type !== 'batch'" size="small" @click="viewDetail(row)">
               {{ $t('uiAutomation.ai.executionRecords.viewDetail') }}
             </el-button>
             <el-button size="small" type="success" @click="viewReport(row)">
-              {{ $t('uiAutomation.ai.executionRecords.viewReport') }}
+              {{ row.item_type === 'batch' ? '批次报告' : $t('uiAutomation.ai.executionRecords.viewReport') }}
             </el-button>
           </template>
         </el-table-column>
@@ -92,6 +99,22 @@
           <span class="label">{{ $t('uiAutomation.ai.executionRecords.duration') }}:</span>
           <span>{{ currentRecord.duration ? currentRecord.duration.toFixed(2) + ' ' + $t('uiAutomation.ai.executionRecords.seconds') : $t('uiAutomation.ai.executionRecords.unknown') }}</span>
         </div>
+        <div v-if="currentRecord.cleanup_results" class="detail-item">
+          <span class="label">环境回收:</span>
+          <el-tag :type="currentRecord.cleanup_results.failed_count ? 'danger' : 'success'">
+            {{ currentRecord.cleanup_results.required
+              ? (currentRecord.cleanup_results.failed_count ? `失败 ${currentRecord.cleanup_results.failed_count} 项` : `已回收 ${currentRecord.cleanup_results.completed_count} 项`)
+              : '无需回收' }}
+          </el-tag>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">GIF录制:</span>
+          <el-button v-if="currentRecord.gif_path" type="primary" size="small" @click="showDetailGifDialog = true">
+            查看GIF
+          </el-button>
+          <el-tag v-else type="info">本次未生成GIF</el-tag>
+        </div>
 
         <!-- 任务描述 -->
         <div v-if="currentRecord.task_description" class="detail-item mt-15">
@@ -123,6 +146,16 @@
       v-model="showReportDialog"
       :record-id="reportRecordId"
     />
+    <AIBatchExecutionReport
+      v-model="showBatchReportDialog"
+      :batch-id="reportBatchId"
+    />
+
+    <el-dialog v-model="showDetailGifDialog" title="GIF回放" width="800px" append-to-body>
+      <div v-if="currentRecord && currentRecord.gif_path" class="gif-container">
+        <img :src="getGifUrl(currentRecord.gif_path)" alt="Execution GIF" class="gif-image" />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -131,8 +164,9 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
-import { getAIExecutionRecords, batchDeleteAIExecutionRecords } from '@/api/ui_automation'
+import { getAIExecutionReportList, batchDeleteAIExecutionRecords } from '@/api/ui_automation'
 import AIExecutionReport from './AIExecutionReport.vue'
+import AIBatchExecutionReport from './AIBatchExecutionReport.vue'
 
 const { t } = useI18n()
 const records = ref([])
@@ -144,6 +178,7 @@ const pagination = reactive({
 })
 
 const showDetailDialog = ref(false)
+const showDetailGifDialog = ref(false)
 const currentRecord = ref(null)
 let pollTimer = null
 
@@ -154,12 +189,14 @@ const tableRef = ref(null)
 // 报告相关状态
 const showReportDialog = ref(false)
 const reportRecordId = ref(null)
+const showBatchReportDialog = ref(false)
+const reportBatchId = ref('')
 
 // 加载记录列表
 const loadRecords = async () => {
   loading.value = true
   try {
-    const response = await getAIExecutionRecords({
+    const response = await getAIExecutionReportList({
       page: pagination.currentPage,
       page_size: pagination.pageSize
     })
@@ -194,6 +231,11 @@ const viewDetail = (row) => {
 
 // 查看报告
 const viewReport = (row) => {
+  if (row.item_type === 'batch') {
+    reportBatchId.value = String(row.batch_id)
+    showBatchReportDialog.value = true
+    return
+  }
   reportRecordId.value = row.id
   showReportDialog.value = true
 }
@@ -201,8 +243,7 @@ const viewReport = (row) => {
 // 从详情页打开报告
 const openReportFromDetail = () => {
   if (currentRecord.value) {
-    reportRecordId.value = currentRecord.value.id
-    showReportDialog.value = true
+    viewReport(currentRecord.value)
   }
 }
 
@@ -233,6 +274,14 @@ const formatDate = (row, column, cellValue) => {
   return new Date(cellValue).toLocaleString()
 }
 
+const getGifUrl = (path) => {
+  if (!path) return ''
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  if (path.startsWith('/')) return path
+  if (path.startsWith('media/')) return `/${path}`
+  return `/media/${path}`
+}
+
 // 获取序号
 const getSerialNumber = (index) => {
   return (pagination.currentPage - 1) * pagination.pageSize + index + 1
@@ -259,8 +308,9 @@ const batchDeleteRecords = async () => {
     )
 
     isDeleting.value = true
-    const ids = selectedRecords.value.map(item => item.id)
-    await batchDeleteAIExecutionRecords(ids)
+    const ids = selectedRecords.value.filter(item => item.item_type !== 'batch').map(item => item.id)
+    const batchIds = selectedRecords.value.filter(item => item.item_type === 'batch').map(item => item.batch_id)
+    await batchDeleteAIExecutionRecords(ids, batchIds)
 
     ElMessage.success(t('uiAutomation.ai.executionRecords.messages.deleteSuccess'))
 
@@ -287,14 +337,9 @@ const startPolling = () => {
   pollTimer = setInterval(() => {
     // 只有在第一页且没有打开详情框且没有正在加载时才轮询
     if (pagination.currentPage === 1 && !showDetailDialog.value && !loading.value) {
-      // 优化：检查当前列表是否有正在运行的任务，如果没有运行中的任务，则不轮询（或者降低频率）
-      const hasActiveTasks = records.value.some(r => r.status === 'running' || r.status === 'pending')
-      if (!hasActiveTasks) {
-        return
-      }
-
-      // 静默刷新，不显示 loading
-      getAIExecutionRecords({
+      // A completed rerun creates a new record after this screen may already
+      // have loaded. Keep refreshing so stale failures do not mask its result.
+      getAIExecutionReportList({
         page: 1,
         page_size: pagination.pageSize
       }).then(response => {
@@ -399,5 +444,19 @@ onUnmounted(() => {
 
 .mt-15 {
   margin-top: 15px;
+}
+
+.batch-count-tag {
+  margin-left: 8px;
+}
+
+.gif-container {
+  text-align: center;
+}
+
+.gif-image {
+  max-width: 100%;
+  border-radius: 6px;
+  border: 1px solid #ebeef5;
 }
 </style>

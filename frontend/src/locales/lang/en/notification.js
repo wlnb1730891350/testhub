@@ -20,7 +20,8 @@ export default {
     businessType: 'Business Type',
     signatureKey: 'Signature Key',
     uiAutomation: 'UI Automation Testing',
-    apiTesting: 'API Testing'
+    apiTesting: 'API Testing',
+    aiTestingReport: 'AI Test Report'
   },
 
   // Placeholders

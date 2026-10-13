@@ -242,6 +242,12 @@ def execute_app_test_task(execution_id, package_name: str = None, scheduled_task
         else:
             final_package_name = test_case.app_package.package_name if test_case.app_package else ""
 
+        from .services.device_preflight import preflight_device
+        preflight = preflight_device(device, final_package_name, recover_environment=True)
+        if not preflight.get('ready'):
+            failed_checks = [item.get('message', '') for item in preflight.get('checks', []) if not item.get('passed')]
+            raise RuntimeError(f"执行前设备预检未通过: {'；'.join(filter(None, failed_checks))}")
+
         executor = AppTestExecutor()
         report_result = executor.run_tests(
             test_case_id=test_case.id,
@@ -356,7 +362,7 @@ def execute_app_test_task(execution_id, package_name: str = None, scheduled_task
 
 
 @shared_task
-def execute_app_suite_task(suite_id, execution_ids, package_name=None, scheduled_task_id=None):
+def execute_app_suite_task(suite_id, execution_ids, package_name=None, scheduled_task_id=None, batch_report_id=None):
     """
     异步执行APP测试套件（顺序执行多个用例）
 
@@ -365,17 +371,21 @@ def execute_app_suite_task(suite_id, execution_ids, package_name=None, scheduled
         execution_ids: AppTestExecution ID 列表（按执行顺序）
         package_name: 可选的应用包名覆盖
         scheduled_task_id: 可选的定时任务 ID
+        batch_report_id: 批次汇总报告 ID
     """
-    from .models import AppTestSuite, AppTestExecution, AppDevice
+    from .models import AppTestSuite, AppTestExecution, AppDevice, AppTestBatchReport
     from .executors.test_executor import AppTestExecutor
 
     suite = None
     device = None
+    user = None
+    batch_report = None
     passed = 0
     failed = 0
 
     try:
-        suite = AppTestSuite.objects.get(id=suite_id)
+        suite = AppTestSuite.objects.get(id=suite_id) if suite_id else None
+        batch_report = AppTestBatchReport.objects.get(id=batch_report_id) if batch_report_id else None
         executions = list(
             AppTestExecution.objects.filter(id__in=execution_ids)
             .select_related('test_case', 'test_case__app_package', 'device', 'user')
@@ -386,16 +396,32 @@ def execute_app_suite_task(suite_id, execution_ids, package_name=None, scheduled
         executions = [exec_map[eid] for eid in execution_ids if eid in exec_map]
 
         if not executions:
-            logger.error(f"套件 {suite_id} 未找到执行记录")
+            logger.error(f"{'套件 ' + str(suite_id) if suite_id else '批量执行'} 未找到执行记录")
             return
 
         device = executions[0].device
         user = executions[0].user
 
-        # 锁定设备
+        if batch_report:
+            batch_report.status = 'running'
+            batch_report.started_at = timezone.now()
+            batch_report.total_cases = len(executions)
+            batch_report.error_message = ''
+            batch_report.save(update_fields=['status', 'started_at', 'total_cases', 'error_message'])
+
+        from .services.device_preflight import preflight_device
+        preflight = preflight_device(device, recover_environment=True)
+        if not preflight.get('ready'):
+            failed_checks = [item.get('message', '') for item in preflight.get('checks', []) if not item.get('passed')]
+            raise RuntimeError(f"执行前设备预检未通过: {'；'.join(filter(None, failed_checks))}")
+
+        # 提交阶段已预留设备；这里仍需保护定时任务等其他入口。
+        if device.status == 'locked' and device.locked_by != user:
+            raise RuntimeError(f"设备 {device.device_id} 已被其他用户锁定")
         if device.status != 'locked':
             device.lock(user)
-        logger.info(f"套件执行开始: {suite.name}, 设备: {device.device_id}, 共 {len(executions)} 个用例")
+        execution_name = suite.name if suite else '批量执行'
+        logger.info(f"套件执行开始: {execution_name}, 设备: {device.device_id}, 共 {len(executions)} 个用例")
 
         for idx, execution in enumerate(executions):
             test_case = execution.test_case
@@ -498,20 +524,56 @@ def execute_app_suite_task(suite_id, execution_ids, package_name=None, scheduled
                     result=None,
                 )
 
-        # 更新套件统计
-        suite.execution_status = 'completed'
-        if passed == 0 and failed == 0:
-            suite.execution_result = 'skipped'
-        elif failed == 0:
-            suite.execution_result = 'passed'
-        else:
-            suite.execution_result = 'failed'
-        suite.passed_count = passed
-        suite.failed_count = failed
-        suite.last_run_at = timezone.now()
-        suite.save(update_fields=['execution_status', 'execution_result', 'passed_count', 'failed_count', 'last_run_at'])
+        # 汇总子用例并生成一个批次 Allure 报告。子用例的独立报告仍保留在各自执行记录中。
+        if batch_report:
+            child_executions = AppTestExecution.objects.filter(batch_report=batch_report)
+            passed_cases = child_executions.filter(result='passed').count()
+            failed_cases = child_executions.filter(result='failed').count()
+            error_cases = child_executions.filter(status='error').count()
+            skipped_cases = child_executions.filter(result='skipped').count()
+            batch_report.passed_cases = passed_cases
+            batch_report.failed_cases = failed_cases
+            batch_report.error_cases = error_cases
+            batch_report.skipped_cases = skipped_cases
+            batch_report.status = 'completed'
+            if error_cases or failed_cases:
+                batch_report.result = 'failed'
+            elif passed_cases:
+                batch_report.result = 'passed'
+            else:
+                batch_report.result = 'skipped'
+            batch_report.finished_at = timezone.now()
+            if batch_report.started_at:
+                batch_report.duration = (batch_report.finished_at - batch_report.started_at).total_seconds()
+            try:
+                report_path = AppTestExecutor().generate_batch_allure_report(
+                    batch_report.id, execution_ids
+                )
+                if report_path:
+                    batch_report.report_path = report_path
+            except Exception as report_error:
+                logger.error('生成批次汇总报告失败: %s', report_error, exc_info=True)
+                batch_report.error_message = f'汇总报告生成失败: {report_error}'
+            batch_report.save(update_fields=[
+                'passed_cases', 'failed_cases', 'error_cases', 'skipped_cases',
+                'status', 'result', 'finished_at', 'duration', 'report_path', 'error_message',
+            ])
 
-        logger.info(f"套件执行完成: {suite.name}, 通过: {passed}, 失败: {failed}")
+        # 更新套件统计
+        if suite:
+            suite.execution_status = 'completed'
+            if passed == 0 and failed == 0:
+                suite.execution_result = 'skipped'
+            elif failed == 0:
+                suite.execution_result = 'passed'
+            else:
+                suite.execution_result = 'failed'
+            suite.passed_count = passed
+            suite.failed_count = failed
+            suite.last_run_at = timezone.now()
+            suite.save(update_fields=['execution_status', 'execution_result', 'passed_count', 'failed_count', 'last_run_at'])
+
+        logger.info(f"套件执行完成: {execution_name}, 通过: {passed}, 失败: {failed}")
 
         # 定时任务通知
         if scheduled_task_id:
@@ -524,8 +586,8 @@ def execute_app_suite_task(suite_id, execution_ids, package_name=None, scheduled
                 else:
                     st.failed_runs += 1
                 st.last_result = {
-                    'status': suite.execution_status,
-                    'result': suite.execution_result,
+                    'status': suite.execution_status if suite else 'completed',
+                    'result': suite.execution_result if suite else ('passed' if failed == 0 else 'failed'),
                     'message': f'通过: {passed}, 失败: {failed}'
                 }
                 st.save(update_fields=['successful_runs', 'failed_runs', 'last_result'])
@@ -544,12 +606,20 @@ def execute_app_suite_task(suite_id, execution_ids, package_name=None, scheduled
             suite.passed_count = passed
             suite.last_run_at = timezone.now()
             suite.save(update_fields=['execution_status', 'execution_result', 'passed_count', 'failed_count', 'last_run_at'])
+        if batch_report:
+            batch_report.status = 'error'
+            batch_report.result = None
+            batch_report.error_message = str(e)
+            batch_report.finished_at = timezone.now()
+            if batch_report.started_at:
+                batch_report.duration = (batch_report.finished_at - batch_report.started_at).total_seconds()
+            batch_report.save(update_fields=['status', 'result', 'error_message', 'finished_at', 'duration'])
     finally:
         # 释放设备
         try:
             if device:
                 device.refresh_from_db()
-                if device.status == 'locked':
+                if device.status == 'locked' and device.locked_by == user:
                     device.unlock()
                     logger.info(f"设备已释放: {device.device_id}")
         except Exception as e:

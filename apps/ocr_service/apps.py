@@ -1,0 +1,8 @@
+# -*- coding: utf-8 -*-
+from django.apps import AppConfig
+
+
+class OcrServiceConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'apps.ocr_service'
+    verbose_name = 'OCR 服务'

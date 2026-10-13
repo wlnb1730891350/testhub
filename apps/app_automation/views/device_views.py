@@ -14,21 +14,9 @@ from .test_case_views import AppPagination
 from ..models import AppDevice
 from ..serializers import AppDeviceSerializer
 from ..managers.device_manager import DeviceManager
+from ..services.device_preflight import get_adb_path, preflight_device
 
 logger = logging.getLogger(__name__)
-
-
-def get_adb_path() -> str:
-    """
-    获取 ADB 路径：优先使用数据库配置，否则使用默认值 'adb'
-    """
-    try:
-        from ..models import AppTestConfig
-        config = AppTestConfig.objects.first()
-        return config.adb_path if config else 'adb'
-    except Exception as e:
-        logger.warning(f"获取 ADB 配置失败，使用默认路径: {e}")
-        return 'adb'
 
 
 class AppDeviceViewSet(viewsets.ModelViewSet):
@@ -132,6 +120,26 @@ class AppDeviceViewSet(viewsets.ModelViewSet):
             'message': '设备释放成功',
             'device': AppDeviceSerializer(device).data
         })
+
+    @action(detail=True, methods=['post'])
+    def preflight(self, request, pk=None):
+        """实时校验 ADB、设备授权和可选的应用安装状态。"""
+        device = self.get_object()
+        package_name = (request.data.get('package_name') or '').strip()
+        try:
+            result = preflight_device(device, package_name)
+            device.refresh_from_db()
+            result['success'] = result['ready']
+            result['device_record'] = AppDeviceSerializer(device).data
+            return Response(result, status=status.HTTP_200_OK if result['ready'] else status.HTTP_400_BAD_REQUEST)
+        except Exception as exc:
+            logger.exception('设备预检失败: %s', device.device_id)
+            return Response({
+                'success': False,
+                'ready': False,
+                'message': f'设备预检失败: {exc}',
+                'checks': [],
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=True, methods=['post'])
     def disconnect(self, request, pk=None):

@@ -249,16 +249,11 @@ const loadElementTree = async () => {
     // 获取所有元素
     const elements = elementsResponse.data?.results || elementsResponse.data || []
 
-    console.log('=== Smart Script Generator - Loading Element Tree ===')
-    console.log('Page nodes count:', pageNodes.length)
-    console.log('Total elements:', elements.length)
-
     // 将元素添加到对应页面下
     const attachElementsToPages = (pages) => {
       pages.forEach(page => {
         // 找到属于当前页面的元素
         const pageElements = elements.filter(element => element.group_id === page.id)
-        console.log(`Page ${page.name} (ID: ${page.id}) found ${pageElements.length} elements`)
 
         const elementNodes = pageElements.map(element => ({
           ...element,

@@ -11,13 +11,14 @@ from playwright.async_api import async_playwright, Page, Browser, BrowserContext
 import logging
 from .variable_resolver import resolve_variables
 from .ai_assertion import AIAssertionService
+from .runtime_flags import coerce_bool
 
 logger = logging.getLogger(__name__)
 
 class PlaywrightTestEngine:
     """Playwright测试执行引擎"""
 
-    def __init__(self, browser_type='chromium', headless=True):
+    def __init__(self, browser_type='chromium', headless=True, storage_state=None):
         """
         初始化测试引擎
 
@@ -26,9 +27,14 @@ class PlaywrightTestEngine:
             headless: 是否无头模式
         """
         self.browser_type = browser_type
-        self.headless = headless
+        self.headless = coerce_bool(headless)
         self.playwright = None
         self.browser: Optional[Browser] = None
+        self.context: Optional[BrowserContext] = None
+        self.page: Optional[Page] = None
+        # A caller may provide a deliberately filtered authentication state.
+        # Each execution still receives a brand-new non-persistent context.
+        self.storage_state = storage_state
 
     @classmethod
     def check_execution_environment_sync(cls, browser_type='chromium'):
@@ -50,8 +56,6 @@ class PlaywrightTestEngine:
     def normalize_browser_type(browser_type):
         mapping = {'chrome': 'chromium', 'edge': 'chromium', 'firefox': 'firefox', 'webkit': 'webkit'}
         return mapping.get(browser_type, 'chromium')
-        self.context: Optional[BrowserContext] = None
-        self.page: Optional[Page] = None
 
     async def start(self):
         """启动浏览器"""
@@ -80,9 +84,14 @@ class PlaywrightTestEngine:
             )
 
             # 创建浏览器上下文
+            context_options = {
+                'viewport': {'width': 1920, 'height': 1080},
+                'user_agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+            }
+            if self.storage_state:
+                context_options['storage_state'] = self.storage_state
             self.context = await self.browser.new_context(
-                viewport={'width': 1920, 'height': 1080},
-                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+                **context_options,
             )
 
             # 创建页面
@@ -108,6 +117,142 @@ class PlaywrightTestEngine:
             logger.info("浏览器已关闭")
         except Exception as e:
             logger.error(f"关闭浏览器失败: {str(e)}")
+
+    async def _try_close_blocking_overlay(self) -> Tuple[bool, str]:
+        if not self.page:
+            return False, ""
+
+        try:
+            result = await self.page.evaluate(r"""() => {
+                const visible = (el) => {
+                    if (!(el instanceof Element)) return false;
+                    const style = window.getComputedStyle(el);
+                    const rect = el.getBoundingClientRect();
+                    return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+                };
+
+                const viewport = { width: window.innerWidth, height: window.innerHeight };
+                const roots = Array.from(document.querySelectorAll('body *'))
+                    .filter(visible)
+                    .map((el) => {
+                        const rect = el.getBoundingClientRect();
+                        const cls = String(el.className || '');
+                        const id = String(el.id || '');
+                        const text = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+                        const style = window.getComputedStyle(el);
+                        let score = 0;
+
+                        if (rect.width < 260 || rect.height < 160) return null;
+                        if (rect.width > viewport.width * 0.99 && rect.height > viewport.height * 0.99) return null;
+
+                        if (/(modal|dialog|popup|advert|banner|mask|overlay|guide|notice|float)/i.test(cls + ' ' + id)) score += 300;
+                        if (style.position === 'fixed' || style.position === 'absolute' || style.position === 'sticky') score += 80;
+
+                        const zIndex = Number(style.zIndex);
+                        if (Number.isFinite(zIndex)) score += Math.min(Math.max(zIndex, 0), 999);
+
+                        score += Math.min(rect.width * rect.height / 2500, 220);
+
+                        const centerX = rect.x + rect.width / 2;
+                        const centerY = rect.y + rect.height / 2;
+                        score -= Math.abs(centerX - viewport.width / 2) * 0.15;
+                        score -= Math.abs(centerY - viewport.height / 2) * 0.15;
+
+                        if (text) score += 20;
+
+                        return { el, rect, text, score };
+                    })
+                    .filter(Boolean)
+                    .sort((a, b) => b.score - a.score);
+
+                const candidateRoots = roots.filter((root) => root.score >= 120).slice(0, 5);
+                if (!candidateRoots.length) {
+                    return { found: false };
+                }
+
+                const closeGlyphs = new Set([0x00D7, 0x2715, 0x2716, 0x2717, 0x2718, 0x274C, 0x2573]);
+
+                for (const root of candidateRoots) {
+                    const rect = root.rect;
+                    const closeCandidates = Array.from(root.el.querySelectorAll('*'))
+                        .filter(visible)
+                        .map((el) => {
+                            const r = el.getBoundingClientRect();
+                            const txt = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+                            const cls = String(el.className || '');
+                            const id = String(el.id || '');
+                            const aria = el.getAttribute('aria-label') || '';
+                            const title = el.getAttribute('title') || '';
+                            let score = 0;
+
+                            if (r.width > 96 || r.height > 96) return null;
+                            if (r.x < rect.x || r.y < rect.y || r.right > rect.right || r.bottom > rect.bottom) return null;
+
+                            const nearTopRight = (rect.right - r.right) <= 64 && (r.y - rect.y) <= 64;
+                            if (nearTopRight) score += 420;
+
+                            const signalText = `${txt} ${cls} ${id} ${aria} ${title}`;
+                            const glyphs = Array.from(txt);
+                            const compactText = txt.replace(/\s+/g, '');
+                            const hasCloseGlyph = glyphs.some((ch) => ch === 'x' || ch === 'X' || closeGlyphs.has(ch.codePointAt(0)));
+
+                            if (compactText.length <= 3 && hasCloseGlyph) score += 520;
+                            if (/(close|dismiss|cancel|remove|delete|shutdown|guanbi|\u5173\u95ed)/i.test(signalText)) score += 260;
+                            if (/(close|dismiss|cancel|icon-close|btn-close|close-button|close-btn|guanbi|\u5173\u95ed)/i.test(cls + ' ' + id)) score += 220;
+                            if ((window.getComputedStyle(el).cursor || '').includes('pointer')) score += 40;
+
+                            return { el, score, txt, cls, aria, title };
+                        })
+                        .filter(Boolean)
+                        .sort((a, b) => b.score - a.score);
+
+                    const best = closeCandidates[0];
+                    if (best && best.score >= 260) {
+                        const token = 'testhub-auto-close-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+                        best.el.setAttribute('data-testhub-auto-close', token);
+                        return {
+                            found: true,
+                            method: 'selector',
+                            selector: `[data-testhub-auto-close="${token}"]`,
+                            summary: best.txt || best.aria || best.title || best.cls || 'close-button'
+                        };
+                    }
+
+                    if (rect.width >= 260 && rect.height >= 160 && root.score >= 160) {
+                        return {
+                            found: true,
+                            method: 'point',
+                            point: {
+                                x: Math.max(0, Math.round(rect.right - Math.min(24, rect.width / 10))),
+                                y: Math.max(0, Math.round(rect.y + Math.min(24, rect.height / 10)))
+                            },
+                            summary: 'top-right-close-area'
+                        };
+                    }
+                }
+
+                return { found: false };
+            }""")
+        except Exception as scan_error:
+            logger.warning(f"Auto-close overlay scan failed: {scan_error}")
+            return False, ""
+
+        if not result or not result.get('found'):
+            return False, ""
+
+        try:
+            if result.get('method') == 'selector' and result.get('selector'):
+                await self.page.locator(result['selector']).first.click(force=True, timeout=2000)
+            elif result.get('method') == 'point' and result.get('point'):
+                point = result['point']
+                await self.page.mouse.click(point['x'], point['y'])
+            else:
+                return False, ""
+            await asyncio.sleep(0.5)
+            return True, result.get('summary') or 'blocking-overlay'
+        except Exception as close_error:
+            logger.warning(f"Auto-close overlay click failed: {close_error}")
+            return False, ""
 
     async def execute_step(self, step, element_data: Dict) -> Tuple[bool, str, Optional[str]]:
         """
@@ -608,19 +753,55 @@ class PlaywrightTestEngine:
                             await locator.wait_for(state='attached', timeout=timeout_ms)
                         except:
                             pass  # 如果已经在 DOM 中，继续
-                    
-                    await locator.click(timeout=timeout_ms, force=force_action)
+                    auto_close_msg = ""
+                    try:
+                        await locator.click(timeout=timeout_ms, force=force_action)
+                    except Exception as click_error:
+                        error_msg = str(click_error)
+                        closed_overlay, overlay_summary = await self._try_close_blocking_overlay()
+                        if closed_overlay:
+                            auto_close_msg = f"  - 附加处理: 自动关闭遮挡弹窗（{overlay_summary}）\n"
+                            logger.warning(f"Detected blocking overlay before click retry: {overlay_summary}")
+                            try:
+                                await locator.click(timeout=timeout_ms, force=force_action)
+                                click_error = None
+                            except Exception as retry_error:
+                                click_error = retry_error
+                                error_msg = str(retry_error)
+                        if click_error is not None and 'intercepts pointer events' in error_msg:
+                            logger.warning(f"检测到浮层遮挡，尝试强制点击: {element_name}")
+                            try:
+                                await locator.click(timeout=timeout_ms, force=True)
+                                auto_close_msg = auto_close_msg or "  - 附加处理: 强制点击\n"
+                                click_error = None
+                            except Exception:
+                                logger.warning(f"强制点击失败，使用 JS 点击: {element_name}")
+                                await locator.evaluate("el => el.click()")
+                                auto_close_msg = auto_close_msg or "  - 附加处理: JS点击\n"
+                                click_error = None
+                        if click_error is not None:
+                            raise click_error
                     execution_time = round(time.time() - start_time, 2)
                     log = f"✓ 点击元素 '{element_name}' 成功\n"
                     log += f"  - 定位器: {locator_strategy}={locator_value}\n"
                     log += f"  - 超时设置: {timeout_ms/1000}秒\n"
                     if force_action:
                         log += f"  - 强制操作: 是（跳过可见性检查，等待attached）\n"
+                    log += auto_close_msg
                     log += f"  - 执行时间: {execution_time}秒"
                     return True, log, None
 
             elif action_type == 'fill':
-                await locator.fill(resolved_input_value, timeout=timeout_ms, force=force_action)
+                auto_close_msg = ""
+                try:
+                    await locator.fill(resolved_input_value, timeout=timeout_ms, force=force_action)
+                except Exception:
+                    closed_overlay, overlay_summary = await self._try_close_blocking_overlay()
+                    if not closed_overlay:
+                        raise
+                    auto_close_msg = f"  - 附加处理: 自动关闭遮挡弹窗（{overlay_summary}）\n"
+                    logger.warning(f"Detected blocking overlay before fill retry: {overlay_summary}")
+                    await locator.fill(resolved_input_value, timeout=timeout_ms, force=force_action)
                 execution_time = round(time.time() - start_time, 2)
 
                 # 输入成功后短暂等待，确保表单验证生效
@@ -635,6 +816,7 @@ class PlaywrightTestEngine:
                 log += f"  - 超时设置: {timeout_ms/1000}秒\n"
                 if force_action:
                     log += f"  - 强制操作: 是（忽略可见性检查）\n"
+                log += auto_close_msg
                 log += f"  - 执行时间: {execution_time}秒"
                 return True, log, None
 

@@ -94,7 +94,7 @@
             {{ row.finished_at ? formatDateTime(row.finished_at) : '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="row.status === 'running'"
@@ -122,6 +122,15 @@
               @click="viewError(row)"
             >
               查看错误
+            </el-button>
+            <el-button
+              v-if="row.status !== 'running' && !row.batch_report"
+              type="danger"
+              size="small"
+              text
+              @click="deleteExecution(row)"
+            >
+              删除
             </el-button>
           </template>
         </el-table-column>
@@ -165,6 +174,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getExecutionList,
   stopExecution as apiStopExecution,
+  deleteExecution as apiDeleteExecution,
   getAppProjects
 } from '@/api/app-automation'
 import { Search, Refresh } from '@element-plus/icons-vue'
@@ -226,6 +236,22 @@ const stopExecution = async (execution) => {
     if (error !== 'cancel') {
       ElMessage.error('停止失败: ' + (error.message || '未知错误'))
     }
+  }
+}
+
+const deleteExecution = async (execution) => {
+  try {
+    await ElMessageBox.confirm(
+      `确认删除执行记录「${execution.case_name || execution.id}」？删除后不可恢复。`,
+      '删除执行记录',
+      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
+    )
+    await apiDeleteExecution(execution.id)
+    ElMessage.success('执行记录已删除')
+    if (executions.value.length === 1 && currentPage.value > 1) currentPage.value -= 1
+    loadExecutions()
+  } catch (error) {
+    if (error !== 'cancel') ElMessage.error('删除失败: ' + (error.message || '未知错误'))
   }
 }
 

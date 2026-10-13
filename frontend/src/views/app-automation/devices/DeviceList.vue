@@ -93,8 +93,17 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="250" fixed="right">
+      <el-table-column label="操作" width="300" fixed="right">
         <template #default="{ row }">
+          <el-button
+            link
+            size="small"
+            type="primary"
+            :loading="preflightingDevices[row.id]"
+            @click="preflight(row)"
+          >
+            预检
+          </el-button>
           <el-button
             v-if="row.status === 'available' || row.status === 'online'"
             link
@@ -280,6 +289,7 @@ import {
   unlockDevice as apiUnlockDevice,
   connectDevice,
   disconnectDevice as apiDisconnectDevice,
+  preflightDevice,
   deleteDevice
 } from '@/api/app-automation'
 import { getDeviceStatusType, getDeviceStatusText, formatDateTime } from '@/utils/app-automation-helpers'
@@ -293,6 +303,7 @@ const loading = ref(false)
 const refreshing = ref(false)
 const connecting = ref(false)
 const reconnectingDevices = ref({})
+const preflightingDevices = ref({})
 const addRemoteDialogVisible = ref(false)
 const deviceInfoDialogVisible = ref(false)
 const selectedDevice = ref(null)
@@ -350,6 +361,28 @@ const refreshDevices = async () => {
     ElMessage.error('刷新设备列表失败: ' + (error.message || '未知错误'))
   } finally {
     refreshing.value = false
+  }
+}
+
+const preflight = async (device) => {
+  preflightingDevices.value[device.id] = true
+  try {
+    const res = await preflightDevice(device.id)
+    const checks = res.data?.checks || []
+    const details = checks.map(item => `${item.passed ? '通过' : '失败'}：${item.name} - ${item.message}`).join('\n')
+    ElMessageBox.alert(details || '设备预检通过', '设备预检通过', { confirmButtonText: '确定' })
+    await getDevices()
+  } catch (error) {
+    const data = error?.response?.data || {}
+    const checks = data.preflight?.checks || data.checks || []
+    const details = checks.filter(item => !item.passed).map(item => `${item.name}：${item.message}`).join('\n')
+    ElMessageBox.alert(details || data.message || error.message || '设备预检失败', '设备预检未通过', {
+      confirmButtonText: '确定',
+      type: 'error'
+    })
+    await getDevices()
+  } finally {
+    preflightingDevices.value[device.id] = false
   }
 }
 

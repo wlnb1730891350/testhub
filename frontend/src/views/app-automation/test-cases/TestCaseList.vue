@@ -7,6 +7,13 @@
         <el-button
           type="primary"
           size="small"
+          :icon="Plus"
+          @click="createCase"
+        >
+          新建用例
+        </el-button>
+        <el-button
+          size="small"
           :icon="Refresh"
           :loading="loading"
           @click="loadTestCases"
@@ -244,11 +251,13 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Refresh, Search } from '@element-plus/icons-vue'
+import { Plus, Refresh, Search } from '@element-plus/icons-vue'
 import {
   getTestCaseList,
   deleteTestCase as apiDeleteTestCase,
   executeTestCase as apiExecuteTestCase,
+  executeTestCasesBatch,
+  preflightDevice,
   getExecutionList,
   getExecutionDetail,
   stopExecution as apiStopExecution,
@@ -456,8 +465,13 @@ const runCase = async (testCase) => {
   }
 
   try {
+    const selectedDevice = availableDevices.value.find(d => d.id === form.value.deviceId)
+    if (!selectedDevice) {
+      ElMessage.error('所选设备不存在，请刷新设备列表后重试')
+      return
+    }
     const params = {
-      device_id: availableDevices.value.find(d => d.id === form.value.deviceId)?.device_id
+      device_id: selectedDevice.device_id
     }
 
     if (form.value.packageId) {
@@ -466,6 +480,8 @@ const runCase = async (testCase) => {
         params.package_name = selected.package_name
       }
     }
+
+    await runDevicePreflight(selectedDevice, params.package_name)
     
     const res = await apiExecuteTestCase(testCase.id, params)
     const data = res.data
@@ -485,7 +501,27 @@ const runCase = async (testCase) => {
       ElMessage.error('执行失败: ' + (data.message || '未知错误'))
     }
   } catch (error) {
-    ElMessage.error('执行失败: ' + (error.message || '未知错误'))
+    ElMessage.error('执行失败: ' + getApiErrorMessage(error))
+  }
+}
+
+const getApiErrorMessage = (error) => {
+  const data = error?.response?.data || {}
+  return data.message || error?.message || '未知错误'
+}
+
+const runDevicePreflight = async (device, packageName = '') => {
+  try {
+    const res = await preflightDevice(device.id, packageName ? { package_name: packageName } : {})
+    if (!res.data?.ready) {
+      throw new Error(res.data?.message || '设备预检未通过')
+    }
+    return res.data
+  } catch (error) {
+    const data = error?.response?.data || {}
+    const checks = data.preflight?.checks || data.checks || []
+    const details = checks.filter(item => !item.passed).map(item => item.message).join('；')
+    throw new Error(details || data.message || error.message || '设备预检未通过')
   }
 }
 
@@ -505,6 +541,10 @@ const checkExecutionStatus = (executionId) => {
 }
 
 // 编辑测试用例
+const createCase = () => {
+  router.push('/app-automation/scene-builder')
+}
+
 const editCase = (testCase) => {
   router.push({
     path: '/app-automation/scene-builder',
@@ -702,31 +742,33 @@ const batchRun = async () => {
       { confirmButtonText: '执行', cancelButtonText: '取消', type: 'info' }
     )
 
-    const deviceIdStr = availableDevices.value.find(d => d.id === form.value.deviceId)?.device_id
+    const selectedDevice = availableDevices.value.find(d => d.id === form.value.deviceId)
+    if (!selectedDevice) {
+      ElMessage.error('所选设备不存在，请刷新设备列表后重试')
+      return
+    }
+    const deviceIdStr = selectedDevice.device_id
     let packageName = null
     if (form.value.packageId) {
       const selected = appPackages.value.find(pkg => pkg.id === form.value.packageId)
       if (selected) packageName = selected.package_name
     }
 
-    // 逐个提交执行
-    let submitted = 0
-    for (const tc of selectedCases.value) {
-      try {
-        const params = { device_id: deviceIdStr }
-        if (packageName) params.package_name = packageName
-        await apiExecuteTestCase(tc.id, params)
-        submitted++
-      } catch (error) {
-        console.error(`执行用例 ${tc.name} 失败:`, error)
-      }
-    }
-
-    ElMessage.success(`已提交 ${submitted} 个用例执行`)
+    await runDevicePreflight(selectedDevice, packageName)
+    const res = await executeTestCasesBatch({
+      device_id: deviceIdStr,
+      package_name: packageName || undefined,
+      case_ids: selectedCases.value.map(item => item.id)
+    })
+    const executionIds = res.data?.data?.execution_ids || []
+    executionIds.forEach(trackExecution)
+    ElMessage.success(res.data?.message || `已提交 ${executionIds.length} 个用例执行`)
     clearSelection()
     setTimeout(() => loadExecutions(), 1500)
   } catch (error) {
-    // 用户取消
+    if (error !== 'cancel') {
+      ElMessage.error('批量执行失败: ' + getApiErrorMessage(error))
+    }
   }
 }
 

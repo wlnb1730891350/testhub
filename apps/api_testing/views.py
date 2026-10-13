@@ -62,6 +62,74 @@ class StandardPagination(PageNumberPagination):
     max_page_size = 1000
 
 
+def _next_suite_request_order(test_suite):
+    current = TestSuiteRequest.objects.filter(test_suite=test_suite).aggregate(
+        max_order=models.Max('order')
+    )['max_order']
+    return (current if current is not None else -1) + 1
+
+
+def _collect_collection_ids(collection):
+    collection_ids = []
+    pending_ids = [collection.id]
+
+    while pending_ids:
+        current_id = pending_ids.pop()
+        if current_id in collection_ids:
+            continue
+        collection_ids.append(current_id)
+        pending_ids.extend(
+            ApiCollection.objects.filter(parent_id=current_id).values_list('id', flat=True)
+        )
+
+    return collection_ids
+
+
+def _build_request_dependency_payload(request_queryset):
+    request_ids = list(request_queryset.values_list('id', flat=True))
+    if not request_ids:
+        return None
+
+    suite_links = list(
+        TestSuiteRequest.objects.filter(request_id__in=request_ids)
+        .select_related('test_suite', 'request')
+        .order_by('test_suite__name', 'order')
+    )
+    if not suite_links:
+        return None
+
+    suites = []
+    seen_suite_ids = set()
+    referenced_request_ids = {link.request_id for link in suite_links}
+    request_names = sorted({link.request.name for link in suite_links})
+    for link in suite_links:
+        if link.test_suite_id in seen_suite_ids:
+            continue
+        seen_suite_ids.add(link.test_suite_id)
+        suites.append({'id': link.test_suite_id, 'name': link.test_suite.name})
+
+    return {
+        'suite_count': len(suites),
+        'request_count': len(referenced_request_ids),
+        'request_names': request_names,
+        'suites': suites,
+    }
+
+
+def _build_dependency_error_message(resource_label, dependency_payload):
+    suite_names = '、'.join(item['name'] for item in dependency_payload['suites'][:5])
+    if dependency_payload['suite_count'] > 5:
+        suite_names = f"{suite_names} 等 {dependency_payload['suite_count']} 个自动化用例"
+
+    request_names = '、'.join(dependency_payload['request_names'][:3])
+    if len(dependency_payload['request_names']) > 3:
+        request_names = f"{request_names} 等 {dependency_payload['request_count']} 个接口"
+
+    if resource_label == 'request':
+        return f"当前接口已被自动化用例引用，无法删除。涉及用例：{suite_names}。受影响接口：{request_names}。"
+    return f"当前集合下的接口已被自动化用例引用，无法删除。涉及用例：{suite_names}。受影响接口：{request_names}。"
+
+
 class ApiProjectViewSet(viewsets.ModelViewSet):
     queryset = ApiProject.objects.all()
     serializer_class = ApiProjectSerializer
@@ -265,6 +333,22 @@ class ApiCollectionViewSet(viewsets.ModelViewSet):
             user=self.request.user
         )
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        collection_ids = _collect_collection_ids(instance)
+        dependency_payload = _build_request_dependency_payload(
+            ApiRequest.objects.filter(collection_id__in=collection_ids)
+        )
+        if dependency_payload:
+            return Response({
+                'message': _build_dependency_error_message('collection', dependency_payload),
+                'dependency_type': 'api_test_suite',
+                'dependencies': dependency_payload,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def perform_destroy(self, instance):
         """删除集合时记录日志"""
         log_operation(
@@ -337,6 +421,21 @@ class ApiRequestViewSet(viewsets.ModelViewSet):
             resource_name=instance.name,
             user=self.request.user
         )
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        dependency_payload = _build_request_dependency_payload(
+            ApiRequest.objects.filter(id=instance.id)
+        )
+        if dependency_payload:
+            return Response({
+                'message': _build_dependency_error_message('request', dependency_payload),
+                'dependency_type': 'api_test_suite',
+                'dependencies': dependency_payload,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance):
         """删除接口时记录日志"""
@@ -908,21 +1007,39 @@ class TestSuiteViewSet(viewsets.ModelViewSet):
         """添加请求到测试套件"""
         test_suite = self.get_object()
         request_ids = request.data.get('request_ids', [])
+        items = request.data.get('items')
+
+        if items is None:
+            items = [{'request_id': request_id} for request_id in request_ids]
+
+        if not isinstance(items, list) or not items:
+            return Response({'error': '请至少选择一个接口步骤'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            for request_id in request_ids:
+            created_ids = []
+            for item in items:
+                request_id = item.get('request_id')
+                if not request_id:
+                    continue
                 api_request = ApiRequest.objects.get(id=request_id)
-                TestSuiteRequest.objects.get_or_create(
+                suite_request = TestSuiteRequest.objects.create(
                     test_suite=test_suite,
                     request=api_request,
-                    defaults={
-                        'order': TestSuiteRequest.objects.filter(test_suite=test_suite).count(),
-                        'enabled': True,
-                        'assertions': []
-                    }
+                    display_name=(item.get('display_name') or '').strip(),
+                    order=_next_suite_request_order(test_suite),
+                    enabled=item.get('enabled', True),
+                    assertions=list(item.get('assertions') or []),
+                    extractors=list(item.get('extractors') or api_request.extractors or []),
+                    extract_variables=list(item.get('extract_variables') or []),
+                    skip_condition=item.get('skip_condition') or '',
+                    request_overrides=item.get('request_overrides') or {},
                 )
+                created_ids.append(suite_request.id)
+
+            if not created_ids:
+                return Response({'error': '未找到可添加的接口步骤'}, status=status.HTTP_400_BAD_REQUEST)
             
-            return Response({'message': '添加成功'})
+            return Response({'message': '添加成功', 'created_ids': created_ids})
             
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -2001,7 +2118,7 @@ class ScheduledTaskViewSet(viewsets.ModelViewSet):
                     status='failed',
                     error_message=str(e)
                 )
-            except:
+            except Exception:
                 pass
 
     def _send_webhook_notification(self, task, execution_log, notification_setting, notification_config, success):
@@ -2229,7 +2346,7 @@ class ScheduledTaskViewSet(viewsets.ModelViewSet):
                             error_message=str(e),
                             sent_at=timezone.now()
                         )
-                    except:
+                    except Exception:
                         pass
 
             logger.info("=== 结束发送Webhook通知 ===")

@@ -58,7 +58,7 @@ class TestRun(models.Model):
         """执行进度统计"""
         total = self.run_cases.count()
         if total == 0:
-            return {'total': 0, 'untested': 0, 'passed': 0, 'failed': 0, 'blocked': 0, 'retest': 0, 'progress': 0}
+            return {'total': 0, 'untested': 0, 'passed': 0, 'failed': 0, 'blocked': 0, 'retest': 0, 'tested': 0, 'progress': 0}
         
         stats = {
             'total': total,

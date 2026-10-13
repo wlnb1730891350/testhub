@@ -743,11 +743,7 @@ export default {
       try {
         const userStore = useUserStore()
         if (userStore.isTokenExpiringSoon && userStore.refreshToken) {
-          console.log('Refreshing token before generation...')
           await userStore.refreshAccessToken()
-          console.log('Token refreshed successfully, safe to start generation')
-        } else if (userStore.accessToken) {
-          console.log('Token status is good, no refresh needed')
         }
       } catch (error) {
         console.error('Token refresh failed:', error)
@@ -824,23 +820,12 @@ export default {
       // 而不是直接访问后端端口8000
       const currentOrigin = window.location.origin
       const apiUrl = `${currentOrigin}/api/requirement-analysis/testcase-generation/${this.currentTaskId}/stream_progress/`
-
-      console.log('SSE连接URL:', apiUrl)
-
       // 创建EventSource（不支持自定义headers，使用withCredentials发送cookie）
       this.eventSource = new EventSource(apiUrl, { withCredentials: true })
 
-      // 监听连接打开事件
-      this.eventSource.onopen = (event) => {
-        console.log('✅ SSE连接已打开', event)
-      }
-
       this.eventSource.onmessage = (event) => {
-        console.log('📨 收到SSE消息:', event.data)
-
         try {
           const data = JSON.parse(event.data)
-          console.log('📦 解析后的数据:', data)
 
           if (data.type === 'progress') {
             // Update progress status
@@ -856,25 +841,21 @@ export default {
             }
           } else if (data.type === 'content') {
             // Real-time streaming content (case generation)
-            console.log('✍️ Received streaming content:', data.content.length, 'characters')
             this.streamedContent += data.content
             this.currentStep = 2
             this.progressText = this.$t('requirementAnalysis.statusGenerating')
           } else if (data.type === 'review_content') {
             // Real-time review content
-            console.log('📝 Received review content:', data.content.length, 'characters', 'Total length:', this.streamedReviewContent.length + data.content.length)
             this.streamedReviewContent += data.content
             this.currentStep = 3
             this.progressText = this.$t('requirementAnalysis.statusReviewing')
           } else if (data.type === 'final_content') {
             // Real-time final test cases content
-            console.log('🎯 Received final cases content:', data.content.length, 'characters', 'Total length:', this.finalTestCases.length + data.content.length)
             this.finalTestCases += data.content
             this.currentStep = 3
             this.progressText = '🎯 ' + this.$t('requirementAnalysis.statusRevising')
           } else if (data.type === 'status') {
             // Final status
-            console.log('📊 Received status update:', data.status)
             if (data.status === 'completed') {
               this.progressText = this.$t('requirementAnalysis.statusCompleted')
               // Fetch final result
@@ -885,9 +866,7 @@ export default {
             }
           } else if (data.type === 'done') {
             // 流式结束，立即关闭EventSource，获取最终结果
-            console.log('✅ 流式传输完成')
             if (this.eventSource) {
-              console.log('🔒 关闭SSE连接')
               this.eventSource.close()
               this.eventSource = null
             }
@@ -899,22 +878,13 @@ export default {
       }
 
       this.eventSource.onerror = (error) => {
-        console.log('⚠️ SSE连接事件:', error)
-
         // 如果EventSource已经被关闭（在onmessage中关闭的），不做任何处理
         if (!this.eventSource) {
-          console.log('ℹ️ EventSource已关闭，忽略错误事件')
           return
         }
 
-        console.log('EventSource状态:', {
-          readyState: this.eventSource.readyState,
-          url: this.eventSource.url
-        })
-
         // 如果任务已经完成或不在生成中，不要降级
         if (this.showResults || !this.isGenerating) {
-          console.log('ℹ️ 任务已完成或不在生成中，不降级到轮询')
           // 清理EventSource
           if (this.eventSource) {
             this.eventSource.close()
@@ -933,7 +903,6 @@ export default {
           this.startPolling()
         } else if (this.eventSource.readyState === 0) {
           // EventSource正在重连，等待一段时间后检查
-          console.log('🔄 SSE正在重连...')
           setTimeout(() => {
             // 如果5秒后还是断开状态，降级到轮询
             if (this.eventSource && this.eventSource.readyState === 0) {
@@ -963,7 +932,6 @@ export default {
 
         // 设置最终版用例（如果还没有通过流式接收完整）
         if (task.final_test_cases) {
-          console.log('📝 Getting final cases from task object')
           // 无论this.finalTestCases是否已有值，都用最新的final_test_cases覆盖
           // 这样确保完整输出模式下也能正确显示最终版用例
           this.finalTestCases = task.final_test_cases
@@ -971,13 +939,11 @@ export default {
 
         // 如果评审内容为空，从task对象中获取
         if (!this.streamedReviewContent && task.review_feedback) {
-          console.log('📝 Getting review content from task object')
           this.streamedReviewContent = task.review_feedback
         }
 
         // 如果生成内容为空，从task对象中获取
         if (!this.streamedContent && task.generated_test_cases) {
-          console.log('✍️ Getting generated content from task object')
           this.streamedContent = task.generated_test_cases
         }
 
@@ -1017,8 +983,6 @@ export default {
           const response = await api.get(`/requirement-analysis/testcase-generation/${this.currentTaskId}/progress/`)
           const task = response.data
 
-          console.log(`${this.$t('requirementAnalysis.taskStatus')}: ${task.status}, ${this.$t('requirementAnalysis.progress')}: ${task.progress}%`)
-
           // 更新进度显示
           if (task.status === 'generating') {
             this.currentStep = 2
@@ -1037,15 +1001,12 @@ export default {
 
             // 设置显示内容（完整输出模式下需要）
             if (task.generated_test_cases) {
-              console.log('✍️ Polling mode - Setting generated content')
               this.streamedContent = task.generated_test_cases
             }
             if (task.review_feedback) {
-              console.log('📝 Polling mode - Setting review content')
               this.streamedReviewContent = task.review_feedback
             }
             if (task.final_test_cases) {
-              console.log('🎯 Polling mode - Setting final test cases')
               this.finalTestCases = task.final_test_cases
             }
 

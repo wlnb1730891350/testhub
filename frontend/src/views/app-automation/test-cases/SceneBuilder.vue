@@ -899,7 +899,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, Download, FolderAdd, DocumentCopy, Check, Search, Link, Refresh, Camera } from '@element-plus/icons-vue'
@@ -930,13 +930,13 @@ const router = useRouter()
 const saving = ref(false)
 const paletteTab = ref("base")
 const projectList = ref([])
-const sceneForm = ref({
+const sceneForm = reactive({
     name: "",
     description: "",
     project: null
 })
-const sceneVariables = ref([])
-const sceneRuntime = ref({
+const sceneVariables = reactive([])
+const sceneRuntime = reactive({
     base_url: "http://127.0.0.1:8000",
     retry_times: 0,
     retry_interval: 0.5
@@ -980,7 +980,7 @@ const editingCustomId = ref(null)
 const editingCustomSteps = ref([])
 const editingSelectedIndex = ref(null)
 const editStepType = ref("")
-const customForm = ref({
+const customForm = reactive({
     name: "",
     type: "",
     description: ""
@@ -1011,7 +1011,7 @@ const imageCategoryOptions = ref([])  // 图片分类选项
 
 // 关联元素信息追踪
 const elementSelectorTarget = ref('') // 当前选择器的目标：'selector' | 'fallback' | 'click' | 'ocr' | 'start' | 'end' | 'target'
-const linkedElements = ref({
+const linkedElements = reactive({
     selector: null,  // 通用定位关联的元素: { id, name, type }
     fallback: null,  // 备用定位关联的元素
     click: null,     // 点击定位关联的元素
@@ -1340,7 +1340,7 @@ const updateJsonField = (config, field, rawValue) => {
 }
 
 const addSceneVariable = () => {
-    sceneVariables.value.push({
+    sceneVariables.push({
         name: "",
         value: "",
         type: "string",
@@ -1350,11 +1350,11 @@ const addSceneVariable = () => {
 }
 
 const removeSceneVariable = (index) => {
-    sceneVariables.value.splice(index, 1)
+    sceneVariables.splice(index, 1)
 }
 
 const formatSceneVariables = () => {
-    return sceneVariables.value
+    return sceneVariables
         .filter(item => item && item.name)
         .map(item => ({
             name: item.name,
@@ -1391,10 +1391,10 @@ const parseSceneVariableValue = (value, type) => {
 
 const loadSceneVariables = (rawVariables) => {
     if (!Array.isArray(rawVariables)) {
-        sceneVariables.value = []
+        sceneVariables.splice(0, sceneVariables.length)
         return
     }
-    sceneVariables.value = rawVariables.map(item => ({
+    const mappedVariables = rawVariables.map(item => ({
         name: item.name || "",
         scope: item.scope || "local",
         type: item.type || "string",
@@ -1403,6 +1403,8 @@ const loadSceneVariables = (rawVariables) => {
             : (item.value !== undefined && item.value !== null ? String(item.value) : ""),
         description: item.description || ""
     }))
+    sceneVariables.splice(0, sceneVariables.length)
+    sceneVariables.push(...mappedVariables)
 }
 
 const generateStepId = () => {
@@ -1439,7 +1441,7 @@ const selectStep = (index) => {
         applyDefaultConfig(step)
     }
     // 清除所有关联元素信息（切换步骤时重置）
-    linkedElements.value = {
+    Object.assign(linkedElements, {
         selector: null,
         fallback: null,
         click: null,
@@ -1448,7 +1450,7 @@ const selectStep = (index) => {
         end: null,
         target: null,
         expected: null
-    }
+    })
 }
 
 const selectSubStep = (parentIndex, subIndex) => {
@@ -1458,10 +1460,10 @@ const selectSubStep = (parentIndex, subIndex) => {
     if (parentStep && parentStep.steps && parentStep.steps[subIndex]) {
         applyDefaultConfig(parentStep.steps[subIndex])
     }
-    linkedElements.value = {
+    Object.assign(linkedElements, {
         selector: null, fallback: null, click: null, ocr: null,
         start: null, end: null, target: null, expected: null
-    }
+    })
 }
 
 const toggleExpandCustomStep = (index) => {
@@ -1537,17 +1539,17 @@ const duplicateStep = (index) => {
 }
 
 const resetScene = () => {
-    sceneForm.value = {
+    Object.assign(sceneForm, {
         name: "",
         description: "",
         project: null
-    }
-    sceneVariables.value = []
-    sceneRuntime.value = {
+    })
+    sceneVariables.splice(0, sceneVariables.length)
+    Object.assign(sceneRuntime, {
         base_url: "http://127.0.0.1:8000",
         retry_times: 0,
         retry_interval: 0.5
-    }
+    })
     scenarioSteps.value = []
     selectedIndex.value = null
 }
@@ -1566,11 +1568,11 @@ const openCustomComponentDialog = () => {
 }
 
 const resetCustomDialog = () => {
-    customForm.value = {
+    Object.assign(customForm, {
         name: "",
         type: "",
         description: ""
-    }
+    })
     customDialogMode.value = "create"
     editingCustomId.value = null
     editingCustomSteps.value = []
@@ -1585,11 +1587,11 @@ const openEditCustomComponent = (item) => {
     customDialogMode.value = "edit"
     customDialogVisible.value = true
     editingCustomId.value = item.id
-    customForm.value = {
+    Object.assign(customForm, {
         name: item.name || "",
         type: item.type || "",
         description: item.description || ""
-    }
+    })
     const rawSteps = (item.steps && Array.isArray(item.steps))
         ? item.steps
         : (customComponentDefinitions.value[item.type] && customComponentDefinitions.value[item.type].steps) || []
@@ -1703,9 +1705,9 @@ const saveCustomComponent = () => {
                 config: step.config || {}
             }))
             const payload = {
-                name: customForm.value.name,
-                type: customForm.value.type,
-                description: customForm.value.description || ""
+                name: customForm.name,
+                type: customForm.type,
+                description: customForm.description || ""
             }
             if (customDialogMode.value === "create") {
                 payload.schema = {}
@@ -1834,16 +1836,25 @@ const loadCaseDetail = async (caseId) => {
         const data = response.data || response
         if (data && data.id) {
             // 直接从 data 对象读取字段，匹配后端模型
-            sceneForm.value.name = data.name || ""
-            sceneForm.value.description = data.description || ""
-            sceneForm.value.project = data.project || null
+            sceneForm.name = data.name || ""
+            sceneForm.description = data.description || ""
+            sceneForm.project = data.project || null
             loadSceneVariables(data.variables || [])
-            sceneRuntime.value = {
+            Object.assign(sceneRuntime, {
                 base_url: data.runtime?.base_url || "http://127.0.0.1:8000",
                 retry_times: data.runtime?.retry_times || 0,
                 retry_interval: data.runtime?.retry_interval || 0.5
-            }
-            scenarioSteps.value = (Array.isArray(data.ui_flow) ? data.ui_flow : []).map(step => {
+            })
+            // 兼容早期保存的 { steps: [...] } 格式；新建和保存统一使用数组格式。
+            const rawFlow = data.ui_flow
+            const rawSteps = Array.isArray(rawFlow)
+                ? rawFlow
+                : (Array.isArray(rawFlow?.steps) ? rawFlow.steps : [])
+            scenarioSteps.value = rawSteps.map(rawStep => {
+                const step = {
+                    ...rawStep,
+                    config: rawStep?.config || {}
+                }
                 // 确保每个步骤有 id
                 if (!step.id) step.id = generateStepId()
                 // 自定义组件初始化展开状态
@@ -2105,7 +2116,7 @@ const getFieldPlaceholder = (field) => {
             }
             
             const placeholders = {
-                selector: "image: 文件名 | pos: x,y | region: x1,y1,x2,y2",
+                selector: "text: 文本 | resource_id: 包名:id/控件 | description: 描述 | xpath: 路径 | pos: x,y",
                 fallback_selector: "image: 文件名 | pos: x,y | region: x1,y1,x2,y2",
                 start_selector: "image: 文件名 | pos: x,y",
                 end_selector: "image: 文件名 | pos: x,y",
@@ -2211,7 +2222,12 @@ const getFieldOptions = (field) => {
                     { label: "image", value: "image" },
                     { label: "pos", value: "pos" },
                     { label: "region", value: "region" },
-                    { label: "text", value: "text" }
+                    { label: "text", value: "text" },
+                    { label: "resource_id", value: "resource_id" },
+                    { label: "description", value: "description" },
+                    { label: "class_name", value: "class_name" },
+                    { label: "xpath", value: "xpath" },
+                    { label: "native", value: "native" }
                 ],
                 fallback_selector_type: [
                     { label: "image", value: "image" },
@@ -2577,7 +2593,7 @@ const downloadBlob = (blob, filename) => {
 }
 
 const saveScene = async () => {
-    if (!sceneForm.value.name) {
+    if (!sceneForm.name) {
         ElMessage.warning("请输入场景名称")
         return
     }
@@ -2595,9 +2611,9 @@ const saveScene = async () => {
             return step
         })
         const caseData = {
-            name: sceneForm.value.name,
-            description: sceneForm.value.description,
-            project: sceneForm.value.project || null,
+            name: sceneForm.name,
+            description: sceneForm.description,
+            project: sceneForm.project || null,
             ui_flow: cleanedSteps,
             variables: formatSceneVariables()
         }
@@ -2659,12 +2675,9 @@ const loadElementsForSelector = async () => {
 // 加载图片分类选项（从 Template 目录扫描）
 const loadImageCategoryOptions = async () => {
     try {
-        console.log('=== 开始加载图片分类选项（从Template目录） ===')
         const response = await getAppImageCategories()
-        console.log('API响应:', response)
         
         const categories = response.data?.data || response.data || []
-        console.log('获取到的分类:', categories)
         
         // 转换为选项格式
         // 如果 categories 是对象数组（包含 name 字段），则使用 name；否则直接使用值
@@ -2675,8 +2688,6 @@ const loadImageCategoryOptions = async () => {
                 value: categoryName
             }
         })
-        
-        console.log('最终选项:', imageCategoryOptions.value)
     } catch (error) {
         console.error('加载图片分类失败:', error)
         // 失败时使用默认值
@@ -2690,8 +2701,6 @@ const handleElementRowClick = (row) => {
 
 // 统一的字段填充函数
 const fillFieldsByTarget = (element, config, target) => {
-    console.log(`填充 ${target} 字段组`)
-    
     // 映射：target -> 字段前缀
     const prefixMap = {
         selector: '',       // 通用定位没有前缀
@@ -2801,7 +2810,6 @@ const applyElement = (element) => {
     
     const config = targetStep.config
     const target = elementSelectorTarget.value
-    console.log('config before:', JSON.stringify(config))
     
     // 保存关联信息
     const elementInfo = {
@@ -2810,16 +2818,13 @@ const applyElement = (element) => {
         type: element.element_type
     }
     
-    if (target && linkedElements.value[target] !== undefined) {
-        linkedElements.value[target] = elementInfo
+    if (target && linkedElements[target] !== undefined) {
+        linkedElements[target] = elementInfo
         // 填充对应的字段
         fillFieldsByTarget(element, config, target)
     } else {
         ElMessage.warning('未指定有效的字段组')
     }
-    
-    console.log('config after:', JSON.stringify(config))
-    console.log('=== applyElement 完成 ===')
     
     // 关闭选择器
     elementSelectorVisible.value = false
@@ -2827,7 +2832,7 @@ const applyElement = (element) => {
 
 // 统一的清除关联函数
 const clearLinkedElement = (target) => {
-    linkedElements.value[target] = null
+    linkedElements[target] = null
     
     const targetStep = (customDialogVisible.value && editingActiveStep.value)
         ? editingActiveStep.value

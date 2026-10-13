@@ -1,4 +1,4 @@
-﻿import request from '@/utils/api'
+import request from '@/utils/api'
 
 // 浠〃鐩樼浉鍏矨PI
 export function getDashboardStats() {
@@ -977,6 +977,76 @@ export function getAICases(params) {
   })
 }
 
+export function getAICaseCategories(params) {
+  return request({
+    url: '/ui-automation/ai-case-categories/',
+    method: 'get',
+    params
+  })
+}
+
+export function getDesktopAppProfiles(params) {
+  return request({
+    url: '/ui-automation/desktop-app-profiles/',
+    method: 'get',
+    params
+  })
+}
+
+export function createDesktopAppProfile(data) {
+  return request({
+    url: '/ui-automation/desktop-app-profiles/',
+    method: 'post',
+    data
+  })
+}
+
+export function updateDesktopAppProfile(id, data) {
+  return request({
+    url: `/ui-automation/desktop-app-profiles/${id}/`,
+    method: 'patch',
+    data
+  })
+}
+
+export function deleteDesktopAppProfile(id) {
+  return request({
+    url: `/ui-automation/desktop-app-profiles/${id}/`,
+    method: 'delete'
+  })
+}
+
+export function createAICaseCategory(data) {
+  return request({
+    url: '/ui-automation/ai-case-categories/',
+    method: 'post',
+    data
+  })
+}
+
+export function updateAICaseCategory(id, data) {
+  return request({
+    url: `/ui-automation/ai-case-categories/${id}/`,
+    method: 'patch',
+    data
+  })
+}
+
+export function deleteAICaseCategory(id) {
+  return request({
+    url: `/ui-automation/ai-case-categories/${id}/`,
+    method: 'delete'
+  })
+}
+
+export function batchConfigureAICaseCategory(data) {
+  return request({
+    url: '/ui-automation/ai-cases/batch-category/',
+    method: 'post',
+    data
+  })
+}
+
 // 鍒涘缓 AI 鐢ㄤ緥
 export function createAICase(data) {
   return request({
@@ -1012,10 +1082,11 @@ export function deleteAICase(id) {
 }
 
 // 杩愯 AI 鐢ㄤ緥
-export function runAICase(id) {
+export function runAICase(id, data = {}) {
   return request({
     url: `/ui-automation/ai-cases/${id}/run/`,
-    method: 'post'
+    method: 'post',
+    data
   })
 }
 
@@ -1023,6 +1094,14 @@ export function runAICase(id) {
 export function getAIExecutionRecords(params) {
   return request({
     url: '/ui-automation/ai-execution-records/',
+    method: 'get',
+    params
+  })
+}
+
+export function getAIExecutionReportList(params) {
+  return request({
+    url: '/ui-automation/ai-execution-records/report-list/',
     method: 'get',
     params
   })
@@ -1054,11 +1133,11 @@ export function stopAITask(id) {
 }
 
 // 鎵归噺鍒犻櫎 AI 鎵ц璁板綍
-export function batchDeleteAIExecutionRecords(ids) {
+export function batchDeleteAIExecutionRecords(ids, batchIds = []) {
   return request({
     url: '/ui-automation/ai-execution-records/batch_delete/',
     method: 'post',
-    data: { ids }
+    data: { ids, batch_ids: batchIds }
   })
 }
 
@@ -1068,6 +1147,15 @@ export function getAIExecutionReport(id, params = {}) {
     url: `/ui-automation/ai-execution-records/${id}/report/`,
     method: 'get',
     params
+  })
+}
+
+// 获取批量执行汇总报告
+export function getAIBatchExecutionReport(batchId) {
+  return request({
+    url: '/ui-automation/ai-execution-records/batch-report/',
+    method: 'get',
+    params: { batch_id: batchId }
   })
 }
 
@@ -1146,5 +1234,170 @@ export function runAIAssertion(data) {
     method: 'post',
     data,
     timeout: 120000  // AI鏂█鍙兘闇€瑕佽緝闀挎椂闂?
+  })
+}
+
+// ==================== Setup Templates ====================
+
+// 获取前置模板列表
+export function getSetupTemplates(params = {}) {
+  return request({
+    url: '/ui-automation/setup-templates/',
+    method: 'get',
+    params
+  })
+}
+
+// 获取单个前置模板
+export function getSetupTemplate(id) {
+  return request({
+    url: `/ui-automation/setup-templates/${id}/`,
+    method: 'get'
+  })
+}
+
+// 创建前置模板
+export function createSetupTemplate(data) {
+  return request({
+    url: '/ui-automation/setup-templates/',
+    method: 'post',
+    data
+  })
+}
+
+// 更新前置模板
+export function updateSetupTemplate(id, data) {
+  return request({
+    url: `/ui-automation/setup-templates/${id}/`,
+    method: 'put',
+    data
+  })
+}
+
+// 删除前置模板
+export function deleteSetupTemplate(id) {
+  return request({
+    url: `/ui-automation/setup-templates/${id}/`,
+    method: 'delete'
+  })
+}
+
+// ==================== 语音输入 / 自然语言 AI ====================
+
+// 语音转文字
+export function speechTranscribe(formData) {
+  return request({
+    url: '/ui-automation/speech/transcribe/',
+    method: 'post',
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+// 自然语言解析为步骤
+export function speechParse(data) {
+  return request({
+    url: '/ui-automation/speech/parse/',
+    method: 'post',
+    data
+  })
+}
+
+// 基于自然语音描述的元素定位
+export function speechElementLocate(data) {
+  return request({
+    url: '/ui-automation/speech/locate/',
+    method: 'post',
+    data,
+    timeout: 120000
+  })
+}
+
+
+// ==================== AI 用例批量/录制/导入 ====================
+
+// 批量执行 AI 用例
+export function batchRunAICases(data) {
+  return request({
+    url: '/ui-automation/ai-cases/batch-run/',
+    method: 'post',
+    data
+  })
+}
+
+// 批量录制 AI 用例
+export function batchRecordAICases(data) {
+  return request({
+    url: '/ui-automation/ai-cases/batch-record/',
+    method: 'post',
+    data
+  })
+}
+
+// 获取 AI 录制动作
+export function getAIRecordingActions(recordId) {
+  return request({
+    url: `/ui-automation/ai-execution-records/${recordId}/ai-recording-actions/`,
+    method: 'get'
+  })
+}
+
+// 保存 AI 录制
+export function saveAIRecording(recordId, data) {
+  return request({
+    url: `/ui-automation/ai-execution-records/${recordId}/save-ai-recording/`,
+    method: 'post',
+    data
+  })
+}
+
+// 导入 AI 用例
+export function importAICases(formData) {
+  return request({
+    url: '/ui-automation/ai-cases/import-cases/',
+    method: 'post',
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+// 在执行前编译并检查 AI 用例的断言计划
+export function previewAICaseAssertions(id, data = {}) {
+  return request({
+    url: `/ui-automation/ai-cases/${id}/assertion-preview/`,
+    method: 'post',
+    data
+  })
+}
+
+export function batchDeleteAICases(data) {
+  return request({
+    url: '/ui-automation/ai-cases/batch-delete/',
+    method: 'post',
+    data
+  })
+}
+
+export function batchEnableAICaseDualMode(data) {
+  return request({
+    url: '/ui-automation/ai-cases/batch-enable-dual-mode/',
+    method: 'post',
+    data
+  })
+}
+
+export function batchEnableAICaseBrowserMode(data) {
+  return request({
+    url: '/ui-automation/ai-cases/batch-enable-browser-mode/',
+    method: 'post',
+    data
+  })
+}
+
+export function batchConfigureAICaseSetupTemplate(data) {
+  return request({
+    url: '/ui-automation/ai-cases/batch-setup-template/',
+    method: 'post',
+    data
   })
 }

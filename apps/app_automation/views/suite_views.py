@@ -6,9 +6,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import transaction
 import logging
 
-from ..models import AppTestSuite, AppTestSuiteCase, AppTestCase, AppDevice, AppTestExecution
+from ..models import AppTestSuite, AppTestSuiteCase, AppTestCase, AppDevice, AppTestExecution, AppTestBatchReport
 from .test_case_views import AppPagination
 from ..serializers import (
     AppTestSuiteSerializer,
@@ -17,6 +18,8 @@ from ..serializers import (
     AppTestSuiteCaseSerializer,
     AppTestExecutionSerializer,
 )
+from ..services.device_preflight import preflight_device, resolve_package_name, validate_test_case
+from ..services.execution_queue import check_execution_queue
 
 logger = logging.getLogger(__name__)
 
@@ -150,6 +153,8 @@ class AppTestSuiteViewSet(viewsets.ModelViewSet):
     def run(self, request, pk=None):
         """执行测试套件（顺序执行所有用例）"""
         suite = self.get_object()
+        executions = []
+        reserved_device = None
         device_id = request.data.get('device_id')
         package_name = request.data.get('package_name')
 
@@ -158,28 +163,65 @@ class AppTestSuiteViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
         # 检查套件是否包含用例
-        suite_cases = suite.suite_cases.select_related('test_case').all()
+        suite_cases = suite.suite_cases.select_related('test_case', 'test_case__app_package').order_by('order', 'id')
         if not suite_cases.exists():
             return Response({'success': False, 'message': '该套件未包含任何测试用例'},
                             status=status.HTTP_400_BAD_REQUEST)
 
+        queue_ready, queue_message = check_execution_queue()
+        if not queue_ready:
+            return Response({'success': False, 'message': queue_message}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        executions = []
+        batch_report = None
+        reserved_device = None
         try:
             device = AppDevice.objects.get(device_id=device_id)
-            if device.status == 'locked' and device.locked_by != request.user:
-                return Response({'success': False, 'message': '设备已被其他用户锁定'},
-                                status=status.HTTP_400_BAD_REQUEST)
+            test_cases = [item.test_case for item in suite_cases]
+            invalid_cases = [case.name for case in test_cases if not validate_test_case(case)[0]]
+            if invalid_cases:
+                return Response({'success': False, 'message': f'以下用例没有可执行步骤: {"、".join(invalid_cases)}'}, status=status.HTTP_400_BAD_REQUEST)
+            packages = {resolve_package_name(case, package_name or '') for case in test_cases}
+            for resolved_package in packages:
+                preflight = preflight_device(device, resolved_package, recover_environment=True)
+                if not preflight.get('ready'):
+                    return Response({
+                        'success': False,
+                        'message': '执行前预检未通过',
+                        'preflight': preflight,
+                    }, status=status.HTTP_400_BAD_REQUEST)
 
-            # 为每个用例创建执行记录
-            executions = []
-            for sc in suite_cases:
-                execution = AppTestExecution.objects.create(
-                    test_case=sc.test_case,
+            with transaction.atomic():
+                device = AppDevice.objects.select_for_update().get(device_id=device_id)
+                active_exists = AppTestExecution.objects.filter(
+                    device=device, status__in=['pending', 'running']
+                ).exists()
+                if device.status == 'locked' and device.locked_by != request.user:
+                    return Response({'success': False, 'message': '设备已被其他用户锁定'}, status=status.HTTP_400_BAD_REQUEST)
+                if active_exists:
+                    return Response({'success': False, 'message': '设备已有正在排队或执行的任务，请等待当前任务完成'}, status=status.HTTP_400_BAD_REQUEST)
+                if device.status != 'locked':
+                    device.lock(request.user)
+                reserved_device = device
+
+                batch_report = AppTestBatchReport.objects.create(
                     test_suite=suite,
                     device=device,
                     user=request.user,
-                    status='pending'
+                    total_cases=suite_cases.count(),
+                    status='pending',
                 )
-                executions.append(execution)
+
+                for sc in suite_cases:
+                    execution = AppTestExecution.objects.create(
+                        test_case=sc.test_case,
+                        test_suite=suite,
+                        batch_report=batch_report,
+                        device=device,
+                        user=request.user,
+                        status='pending'
+                    )
+                    executions.append(execution)
 
             # 更新套件状态
             suite.execution_status = 'running'
@@ -191,13 +233,16 @@ class AppTestSuiteViewSet(viewsets.ModelViewSet):
             task = execute_app_suite_task.delay(
                 suite_id=suite.id,
                 execution_ids=execution_ids,
-                package_name=package_name
+                package_name=package_name,
+                batch_report_id=batch_report.id,
             )
 
             # 记录 task_id 到第一个执行
             if executions:
                 executions[0].task_id = task.id
                 executions[0].save(update_fields=['task_id'])
+            batch_report.task_id = task.id
+            batch_report.save(update_fields=['task_id'])
 
             logger.info(f"测试套件已提交执行: suite={suite.name}, "
                         f"cases={len(executions)}, task_id={task.id}")
@@ -208,6 +253,7 @@ class AppTestSuiteViewSet(viewsets.ModelViewSet):
                 'data': {
                     'suite_id': suite.id,
                     'task_id': task.id,
+                    'batch_report_id': batch_report.id,
                     'execution_ids': execution_ids,
                     'test_case_count': len(executions),
                 }
@@ -218,7 +264,20 @@ class AppTestSuiteViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"执行套件失败: {str(e)}", exc_info=True)
-            suite.execution_status = 'failed'
+            for execution in executions:
+                if execution.status == 'pending':
+                    execution.status = 'error'
+                    execution.error_message = f'任务提交失败: {e}'
+                    execution.save(update_fields=['status', 'error_message'])
+            if batch_report:
+                batch_report.status = 'error'
+                batch_report.error_message = f'任务提交失败: {e}'
+                batch_report.save(update_fields=['status', 'error_message'])
+            if reserved_device:
+                reserved_device.refresh_from_db()
+                if reserved_device.status == 'locked' and reserved_device.locked_by == request.user:
+                    reserved_device.unlock()
+            suite.execution_status = 'error'
             suite.save(update_fields=['execution_status'])
             return Response({'success': False, 'message': f'执行失败: {str(e)}'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)

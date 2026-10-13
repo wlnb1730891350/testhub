@@ -789,6 +789,34 @@ export default {
   },
 
   // 消息提示
+  importExport: {
+    title: '导入/导出',
+    import: '导入接口',
+    export: '导出接口',
+    importTitle: '导入接口',
+    format: '格式',
+    file: '文件',
+    curlCommand: 'cURL 命令',
+    curlPlaceholder: '粘贴 cURL 命令，支持多条（每行一条）',
+    dragOrClick: '拖拽文件到此处，或点击上传',
+    targetProject: '目标项目',
+    selectProject: '请选择目标项目',
+    selectProjectFirst: '请先选择一个项目',
+    selectFile: '请选择文件',
+    enterCurl: '请输入 cURL 命令',
+    preview: '解析预览',
+    back: '返回',
+    confirmImport: '确认导入 ({count} 个)',
+    cancel: '取消',
+    done: '完成',
+    totalApis: '共 {count} 个接口',
+    selectAtLeastOne: '请至少选择一个接口',
+    parseFailed: '解析失败',
+    importSuccess: '导入成功',
+    importFailed: '导入失败',
+    exportSuccess: '导出成功',
+    exportFailed: '导出失败'
+  },
   messages: {
     success: {
       create: '创建成功',

@@ -54,7 +54,9 @@ class UnifiedNotificationConfig(models.Model):
                     'enabled': bot_config.get('enabled', True),
                     # 业务类型勾选框
                     'enable_ui_automation': bot_config.get('enable_ui_automation', True),
-                    'enable_api_testing': bot_config.get('enable_api_testing', True)
+                    'enable_api_testing': bot_config.get('enable_api_testing', True),
+                    # AI 报告是新增的通知类型，旧配置默认关闭，避免升级后突然群发。
+                    'enable_ai_testing': bot_config.get('enable_ai_testing', False)
                 }
                 # 钉钉机器人需要额外包含secret字段
                 if bot_type == 'dingtalk' and bot_config.get('secret'):

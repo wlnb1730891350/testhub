@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.urls import path, include
-from .views.execution_views import serve_report_file
+from .views.execution_views import serve_report_file, serve_batch_report_file
 from rest_framework.routers import DefaultRouter
 
 from .views import (
@@ -17,6 +17,7 @@ from .views import (
     AppScheduledTaskViewSet,
     AppNotificationLogViewSet,
     AppTestExecutionViewSet,
+    AppTestBatchReportViewSet,
     AppDashboardViewSet,
 )
 
@@ -37,9 +38,12 @@ router.register(r'test-suites', AppTestSuiteViewSet, basename='app-test-suite')
 router.register(r'scheduled-tasks', AppScheduledTaskViewSet, basename='app-scheduled-task')
 router.register(r'notification-logs', AppNotificationLogViewSet, basename='app-notification-log')
 router.register(r'executions', AppTestExecutionViewSet, basename='app-execution')
+router.register(r'batch-reports', AppTestBatchReportViewSet, basename='app-batch-report')
 
 urlpatterns = [
     path('', include(router.urls)),
     path('executions/<int:execution_id>/report/', serve_report_file, name='app-execution-report'),
     path('executions/<int:execution_id>/report/<path:file_path>', serve_report_file, name='app-execution-report-file'),
+    path('batch-reports/<int:batch_report_id>/report/', serve_batch_report_file, name='app-batch-report'),
+    path('batch-reports/<int:batch_report_id>/report/<path:file_path>', serve_batch_report_file, name='app-batch-report-file'),
 ]

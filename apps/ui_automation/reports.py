@@ -14,6 +14,23 @@ logger = logging.getLogger('django')
 class AIExecutionReportGenerator:
     """AI执行报告生成器"""
 
+    ACTION_TYPE_LABELS = {
+        'goto': '访问页面',
+        'navigate': '访问页面',
+        'click': '点击',
+        'try_click': '尝试点击',
+        'fill': '输入',
+        'type': '输入',
+        'press': '按键',
+        'select': '选择',
+        'hover': '悬停',
+        'scroll': '滚动',
+        'assert': '断言',
+        'aiassert': 'AI断言',
+        'business_action': '业务操作',
+        'wait': '等待',
+    }
+
     def __init__(self, execution_record):
         """
         初始化报告生成器
@@ -37,7 +54,7 @@ class AIExecutionReportGenerator:
         task_statistics = self._calculate_task_statistics(planned_tasks)
 
         # 解析日志获取步骤信息
-        step_info = self._parse_execution_logs(logs)
+        step_info = self._build_step_info(self.record.steps_completed or [], logs)
 
         # 添加性能分析摘要数据
         steps_completed = self.record.steps_completed or []
@@ -63,16 +80,48 @@ class AIExecutionReportGenerator:
             'execution_details': {
                 'case_name': self.record.case_name,
                 'execution_mode': self.record.get_execution_mode_display(),
+                'execution_target': self._execution_target_display(),
                 'status': self.record.get_status_display(),
                 'start_time': self.record.start_time.isoformat() if self.record.start_time else None,
                 'end_time': self.record.end_time.isoformat() if self.record.end_time else None,
                 'duration': self.record.duration,
                 'total_tasks': len(planned_tasks),
+                'cleanup_results': getattr(self.record, 'cleanup_results', {}) or {},
             },
+            'cleanup_results': getattr(self.record, 'cleanup_results', {}) or {},
             'gif_path': self.record.gif_path  # 添加GIF路径
         }
 
         return report
+
+    def _execution_target_display(self) -> str:
+        target = str(getattr(self.record, 'execution_target', '') or 'web').lower()
+        return {
+            'desktop': 'Windows',
+            'dual': 'Browser + Windows',
+            'web': 'Browser',
+        }.get(target, target)
+
+    def _build_step_info(self, steps_completed: List[Dict[str, Any]], logs: str) -> Dict[str, Any]:
+        """Prefer structured execution evidence over the legacy log parser."""
+        structured_steps = []
+        for index, step in enumerate(steps_completed or [], 1):
+            if not isinstance(step, dict):
+                continue
+            description = self._clean_display_text(step.get('description') or step.get('action'))
+            if not description:
+                continue
+            structured_steps.append({
+                'step_number': self._coerce_step_number(step.get('step_number'), index),
+                'actions': description,
+            })
+        if structured_steps:
+            return {
+                'total_steps': len(structured_steps),
+                'total_actions': len(structured_steps),
+                'steps': structured_steps,
+            }
+        return self._parse_execution_logs(logs)
 
     def _calculate_task_statistics(self, planned_tasks: List[Dict]) -> Dict[str, Any]:
         """
@@ -189,15 +238,81 @@ class AIExecutionReportGenerator:
             时间线数据
         """
         timeline = []
-        for task in planned_tasks:
+        display_descriptions = self._resolve_task_display_descriptions(planned_tasks)
+        for index, task in enumerate(planned_tasks):
             timeline.append({
                 'id': task.get('id'),
-                'description': task.get('description', ''),
+                'description': display_descriptions[index] if index < len(display_descriptions) else task.get('description', ''),
                 'status': task.get('status', 'pending'),
                 'status_display': self._get_task_status_display(task.get('status', 'pending'))
             })
 
         return timeline
+
+    def _resolve_task_display_descriptions(self, planned_tasks: List[Dict]) -> List[str]:
+        if not planned_tasks:
+            return []
+
+        explicit_display = []
+        for task in planned_tasks:
+            text = self._clean_display_text(task.get('display_description'), max_length=500)
+            if not text:
+                explicit_display = []
+                break
+            explicit_display.append(text)
+        if len(explicit_display) == len(planned_tasks):
+            return explicit_display
+
+        template_lines = self._extract_setup_template_lines()
+        task_lines = self._extract_original_task_lines(getattr(self.record, 'task_description', ''))
+        combined = template_lines + task_lines
+
+        if len(combined) == len(planned_tasks):
+            return combined
+
+        if len(task_lines) == len(planned_tasks):
+            return task_lines
+
+        return []
+
+    def _extract_setup_template_lines(self) -> List[str]:
+        ai_case = getattr(self.record, 'ai_case', None)
+        setup_template = getattr(ai_case, 'setup_template', None) if ai_case else None
+        if not setup_template:
+            return []
+
+        lines = []
+        for step in getattr(setup_template, 'steps', []) or []:
+            if isinstance(step, dict):
+                text = (
+                    step.get('display_description')
+                    or step.get('description')
+                    or step.get('text')
+                    or step.get('name')
+                )
+            else:
+                text = step
+            cleaned = self._clean_display_text(text, max_length=500)
+            if cleaned:
+                lines.append(cleaned)
+        return lines
+
+    def _extract_original_task_lines(self, task_description: str) -> List[str]:
+        text = str(task_description or '').replace('\r\n', '\n').replace('\r', '\n').strip()
+        if not text:
+            return []
+
+        lines = [self._clean_display_text(line, max_length=500) for line in text.split('\n')]
+        lines = [line for line in lines if line]
+        if len(lines) > 1:
+            return lines
+
+        split_lines = [
+            self._clean_display_text(part, max_length=500)
+            for part in re.split(r'(?=\d+\s*[\.、])', text)
+        ]
+        split_lines = [line for line in split_lines if line]
+        return split_lines or [self._clean_display_text(text, max_length=500)]
 
     def _get_status_color(self, status: str) -> str:
         """获取状态对应的颜色"""
@@ -255,7 +370,7 @@ class AIExecutionReportGenerator:
         steps_completed = self.record.steps_completed or []
 
         # 解析详细步骤信息
-        detailed_steps = self._parse_detailed_steps(logs, steps_completed)
+        detailed_steps = self._parse_detailed_steps(logs, steps_completed, planned_tasks)
 
         # 解析错误信息
         errors = self._parse_errors(logs)
@@ -276,11 +391,14 @@ class AIExecutionReportGenerator:
             'execution_details': {
                 'case_name': self.record.case_name,
                 'execution_mode': self.record.get_execution_mode_display(),
+                'execution_target': self._execution_target_display(),
                 'status': self.record.get_status_display(),
                 'start_time': self.record.start_time.isoformat() if self.record.start_time else None,
                 'end_time': self.record.end_time.isoformat() if self.record.end_time else None,
                 'duration': self.record.duration,
+                'cleanup_results': getattr(self.record, 'cleanup_results', {}) or {},
             },
+            'cleanup_results': getattr(self.record, 'cleanup_results', {}) or {},
             'gif_path': self.record.gif_path  # 添加GIF路径
         }
 
@@ -314,26 +432,63 @@ class AIExecutionReportGenerator:
             'recommendations': self._generate_performance_recommendations(bottlenecks, metrics),
             'execution_details': {
                 'case_name': self.record.case_name,
+                'execution_target': self._execution_target_display(),
                 'duration': self.record.duration,
                 'total_steps': len(steps_completed),
             },
             'gif_path': self.record.gif_path  # 添加GIF路径
         }
 
-    def _parse_detailed_steps(self, logs: str, steps_completed: List) -> List[Dict[str, Any]]:
+    def _parse_detailed_steps(self, logs: str, steps_completed: List, planned_tasks: List[Dict[str, Any]] | None = None) -> List[Dict[str, Any]]:
         """解析详细步骤信息"""
         detailed_steps = []
+        display_descriptions = self._resolve_task_display_descriptions(planned_tasks or [])
 
         # 先从 steps_completed 中提取信息
-        for step in steps_completed:
+        for index, step in enumerate(steps_completed, start=1):
+            fallback_description = ''
+            step_number = index
+            if isinstance(step, dict):
+                step_number = self._coerce_step_number(step.get('step_number'), index)
+            if 0 < step_number <= len(display_descriptions):
+                fallback_description = display_descriptions[step_number - 1]
+            elif index <= len(display_descriptions):
+                fallback_description = display_descriptions[index - 1]
+
+            if not isinstance(step, dict):
+                action_text = self._clean_display_text(fallback_description) or self._clean_display_text(step)
+                if not action_text:
+                    continue
+                detailed_steps.append({
+                    'step_number': step_number,
+                    'action': action_text,
+                    'element': '',
+                    'status': 'completed',
+                    'timestamp': '',
+                    'thinking': '',
+                    'screenshot': '',
+                })
+                continue
+
+            action_text = self._build_step_action(step, fallback_description=fallback_description)
+            element_text = self._build_step_element(step.get('element'))
+            thinking_text = self._clean_display_text(step.get('thinking') or step.get('error'))
+            assertion = step.get('assertion') if isinstance(step.get('assertion'), dict) else None
+
+            if not any([action_text, element_text, thinking_text, step.get('screenshot')]):
+                continue
+
             detailed_steps.append({
-                'step_number': step.get('step_number', 0),
-                'action': step.get('action', ''),
-                'element': step.get('element', ''),
+                'step_number': step_number,
+                'action': action_text,
+                'element': element_text,
                 'status': step.get('status', 'completed'),
                 'timestamp': step.get('timestamp', ''),
-                'thinking': step.get('thinking', ''),
+                'thinking': thinking_text,
                 'screenshot': step.get('screenshot', ''),
+                'assertion': assertion,
+                'review_required': bool(step.get('review_required')),
+                'review_reason': self._clean_display_text(step.get('review_reason')),
             })
 
         # 如果没有 steps_completed，从日志中解析
@@ -342,14 +497,107 @@ class AIExecutionReportGenerator:
             matches = re.findall(step_pattern, logs)
 
             for step_num, action_str in matches:
+                step_num_int = int(step_num)
+                fallback_description = display_descriptions[step_num_int - 1] if 0 < step_num_int <= len(display_descriptions) else ''
                 detailed_steps.append({
-                    'step_number': int(step_num),
-                    'action': action_str,
+                    'step_number': step_num_int,
+                    'action': fallback_description or action_str,
                     'status': 'completed',
                     'timestamp': '',
                 })
 
         return detailed_steps
+
+    def _build_step_action(self, step: Dict[str, Any], fallback_description: str = '') -> str:
+        fallback_description = self._clean_display_text(fallback_description, max_length=500)
+        if fallback_description:
+            return fallback_description
+
+        display_description = self._clean_display_text(step.get('display_description'), max_length=500)
+        if display_description:
+            return display_description
+
+        description = self._clean_display_text(step.get('description'))
+        if description:
+            return description
+
+        action = self._clean_display_text(step.get('action'))
+        if action:
+            return action
+
+        action_type = self._clean_display_text(step.get('action_type')).lower()
+        if not action_type:
+            return ''
+
+        if action_type in {'fill', 'type'}:
+            input_value = self._clean_display_text(step.get('input_value'))
+            if input_value:
+                return f"输入 {input_value}"
+
+        if action_type in {'assert', 'aiassert'}:
+            assert_value = self._clean_display_text(step.get('assert_value') or step.get('input_value'))
+            if assert_value:
+                return f"断言 {assert_value}"
+
+        if action_type in {'goto', 'navigate'}:
+            target = self._clean_display_text(step.get('input_value'))
+            if target:
+                return f"访问页面 {target}"
+
+        return self.ACTION_TYPE_LABELS.get(action_type, action_type)
+
+    def _build_step_element(self, element: Any) -> str:
+        if not element:
+            return ''
+
+        if isinstance(element, str):
+            return self._clean_display_text(element)
+
+        if not isinstance(element, dict):
+            return self._clean_display_text(element)
+
+        detail = element.get('detail') if isinstance(element.get('detail'), dict) else {}
+        dialog = element.get('dialog') if isinstance(element.get('dialog'), dict) else {}
+
+        candidates = [
+            element.get('locator_description'),
+            element.get('element_name'),
+            element.get('text'),
+            element.get('placeholder'),
+            element.get('url'),
+            detail.get('text'),
+            element.get('selector'),
+            element.get('locator_value'),
+            detail.get('selector'),
+            dialog.get('selector'),
+            element.get('ariaLabel'),
+            element.get('name'),
+            element.get('tag'),
+        ]
+
+        for candidate in candidates:
+            text = self._clean_display_text(candidate)
+            if text:
+                return text
+
+        return ''
+
+    def _clean_display_text(self, value: Any, max_length: int = 160) -> str:
+        if value is None:
+            return ''
+        text = re.sub(r'\s+', ' ', str(value)).strip()
+        if not text or text.lower() in {'none', 'null'}:
+            return ''
+        if len(text) > max_length:
+            return text[:max_length - 3].rstrip() + '...'
+        return text
+
+    def _coerce_step_number(self, value: Any, fallback: int) -> int:
+        try:
+            number = int(value)
+            return number if number > 0 else fallback
+        except (TypeError, ValueError):
+            return fallback
 
     def _parse_errors(self, logs: str) -> List[Dict[str, Any]]:
         """解析错误信息"""
@@ -398,10 +646,11 @@ class AIExecutionReportGenerator:
     def _generate_task_progression(self, planned_tasks: List[Dict]) -> List[Dict[str, Any]]:
         """生成任务进度跟踪"""
         progression = []
-        for task in planned_tasks:
+        display_descriptions = self._resolve_task_display_descriptions(planned_tasks)
+        for index, task in enumerate(planned_tasks):
             progression.append({
                 'id': task.get('id'),
-                'description': task.get('description', ''),
+                'description': display_descriptions[index] if index < len(display_descriptions) else task.get('description', ''),
                 'status': task.get('status', 'pending'),
                 'status_display': self._get_task_status_display(task.get('status', 'pending')),
             })

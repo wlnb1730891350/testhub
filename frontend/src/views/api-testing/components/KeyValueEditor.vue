@@ -182,7 +182,6 @@ const loading = ref(false)
 const loadVariableFunctions = async () => {
   try {
     loading.value = true
-    console.log('开始加载变量函数...')
     const apiResponse = await getVariableFunctions()
     // console.log('变量函数响应:', apiResponse)
     // console.log('变量函数响应.data:', apiResponse.data)
@@ -206,7 +205,6 @@ const loadVariableFunctions = async () => {
     
     if (functionsData) {
       const groupedFunctions = functionsData
-      console.log('处理后的 groupedFunctions:', groupedFunctions)
 
       // 后端已经按分类分组了，直接转换为标签页所需的格式
       if (typeof groupedFunctions === 'object' && !Array.isArray(groupedFunctions)) {
@@ -291,7 +289,6 @@ const loadVariableFunctions = async () => {
         variableCategories.value = orderedCategories
       }
 
-      console.log('最终变量分类:', variableCategories.value)
     } else {
       console.error('响应数据格式错误，无法找到函数数据')
       console.error('完整响应:', apiResponse)
@@ -331,17 +328,14 @@ const useLocalVariableCategories = () => {
       ]
     }
   ]
-  console.log('使用本地变量分类数据:', variableCategories.value)
 }
 
 const initializeRows = () => {
   const data = props.modelValue || {}
-  console.log('KeyValueEditor initializeRows called with data:', data)
   const newRows = []
   
   // 检查数据是否为数组格式
   if (Array.isArray(data)) {
-    console.log('Data is array, processing...')
     // 如果是数组，直接使用
     newRows.push(...data.map(item => ({
       enabled: item.enabled !== false,
@@ -352,7 +346,6 @@ const initializeRows = () => {
       file: item.file || null
     })))
   } else {
-    console.log('Data is object, converting...')
     // 如果是对象，转换为行数据
     Object.keys(data).forEach(key => {
       if (key && data[key] !== undefined) {
@@ -380,7 +373,6 @@ const initializeRows = () => {
     })
   }
   
-  console.log('KeyValueEditor final rows:', newRows)
   rows.value = newRows
 }
 
@@ -394,7 +386,6 @@ const updateValue = () => {
     type: row.type || 'text'
   }))
   
-  console.log('KeyValueEditor updateValue result (full format):', result)
   emit('update:modelValue', result)
   
   // 如果最后一行有内容，自动添加新行

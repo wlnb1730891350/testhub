@@ -483,7 +483,6 @@ export default {
         }
       } catch (e) {
         // JSON解析失败,尝试作为纯文本解析(邮件通知)
-        console.log('Attempting to parse as plain text format')
       }
 
       // 解析纯文本格式的邮件内容

@@ -7,6 +7,8 @@ import sys
 import subprocess
 import glob
 import json
+import shutil
+import hashlib
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
@@ -79,6 +81,11 @@ class AppTestExecutor:
             env['APP_TEST_CASE_ID'] = str(test_case_id)
             env['APP_DEVICE_ID'] = device_id
             env['APP_PACKAGE_NAME'] = package_name
+            from ..models import AppTestCase
+            from ..services.execution_engine import resolve_execution_engine
+            test_case = AppTestCase.objects.only('id', 'ui_flow').get(id=test_case_id)
+            execution_engine = resolve_execution_engine(test_case)
+            env['APP_EXECUTION_ENGINE'] = execution_engine
             if execution_id:
                 env['APP_EXECUTION_ID'] = str(execution_id)
             if username:
@@ -91,13 +98,14 @@ class AppTestExecutor:
             # 构建 pytest 参数
             pytest_args = [
                 sys.executable, '-m', 'pytest',
-                'apps/app_automation/tests/',  # 测试目录
+                'apps/app_automation/tests/test_app_flow.py',
                 '-s', '-v',
                 '--alluredir', allure_results_dir,
                 '--tb=short',
             ]
             
             logger.info(f"执行命令: {' '.join(pytest_args)}")
+            logger.info(f"APP 执行引擎: {execution_engine}")
             logger.info(f"工作目录: {os.getcwd()}")
             logger.info(f"PYTHONPATH: {env['PYTHONPATH']}")
             
@@ -151,6 +159,10 @@ class AppTestExecutor:
             self._current_process = None
             
             logger.info(f"pytest 执行完成，退出码: {exit_code}")
+
+            # 所有逻辑用例共用 pytest 桥接方法。为避免 Allure 将不同用例错误折叠为重试，
+            # 使用 TestHub 用例 ID 覆盖结果身份标识。
+            self._assign_logical_case_identity(allure_results_dir, test_case_id)
             
             # 解析测试结果
             test_results = self._parse_allure_results(allure_results_dir)
@@ -217,6 +229,23 @@ class AppTestExecutor:
             return os.path.join(base_dir, f'execution_{execution_id}')
         
         return base_dir
+
+    def _assign_logical_case_identity(self, results_dir: str, test_case_id: int) -> None:
+        """为逻辑 APP 用例写入独立 Allure 标识，避免被聚合为同一测试的重试。"""
+        identity = hashlib.md5(f'app-test-case:{test_case_id}'.encode('utf-8')).hexdigest()
+        for result_path in glob.glob(os.path.join(results_dir, '*-result.json')):
+            try:
+                with open(result_path, 'r', encoding='utf-8') as result_file:
+                    result = json.load(result_file)
+                result['testCaseId'] = identity
+                result['historyId'] = identity
+                parameters = result.setdefault('parameters', [])
+                if not any(item.get('name') == 'app_test_case_id' for item in parameters):
+                    parameters.append({'name': 'app_test_case_id', 'value': str(test_case_id)})
+                with open(result_path, 'w', encoding='utf-8') as result_file:
+                    json.dump(result, result_file, ensure_ascii=False)
+            except (OSError, json.JSONDecodeError) as exc:
+                logger.warning('写入 APP 用例 Allure 标识失败: %s', exc)
     
     def _generate_allure_report(self, execution_id: Optional[int] = None) -> Optional[str]:
         """
@@ -228,21 +257,52 @@ class AppTestExecutor:
         Returns:
             报告目录路径，失败返回 None
         """
+        return self._generate_allure_report_from_dirs(
+            self._get_allure_results_dir(execution_id),
+            self._get_allure_report_dir(execution_id),
+        )
+
+    def generate_batch_allure_report(self, batch_report_id: int, execution_ids) -> Optional[str]:
+        """合并一个批次所有子用例的 Allure 结果并生成一份汇总报告。"""
+        batch_results_dir = os.path.join(
+            settings.MEDIA_ROOT, 'app-automation', 'allure-results', f'batch_{batch_report_id}'
+        )
+        batch_report_dir = os.path.join(
+            settings.MEDIA_ROOT, 'app-automation', 'allure-reports', f'batch_{batch_report_id}'
+        )
+        shutil.rmtree(batch_results_dir, ignore_errors=True)
+        os.makedirs(batch_results_dir, exist_ok=True)
+
+        copied_files = 0
+        for execution_id in execution_ids:
+            source_dir = self._get_allure_results_dir(execution_id)
+            if not os.path.isdir(source_dir):
+                continue
+            for filename in os.listdir(source_dir):
+                source_path = os.path.join(source_dir, filename)
+                if not os.path.isfile(source_path):
+                    continue
+                target_path = os.path.join(batch_results_dir, filename)
+                if os.path.exists(target_path):
+                    # Allure 文件通常为 UUID；发生冲突时保留两份，避免覆盖子用例结果。
+                    target_path = os.path.join(batch_results_dir, f'{execution_id}_{filename}')
+                shutil.copy2(source_path, target_path)
+                copied_files += 1
+
+        if not copied_files:
+            logger.warning('批次 %s 没有可聚合的 Allure 结果', batch_report_id)
+            return None
+        return self._generate_allure_report_from_dirs(batch_results_dir, batch_report_dir)
+
+    def _generate_allure_report_from_dirs(self, allure_results_dir: str, report_dir: str) -> Optional[str]:
+        """从指定的 Allure 结果目录生成报告。"""
         try:
-            allure_results_dir = self._get_allure_results_dir(execution_id)
-            report_dir = self._get_allure_report_dir(execution_id)
-            
-            # 确保目录存在
             os.makedirs(report_dir, exist_ok=True)
-            
-            # 查找 allure 命令
             allure_path = self._find_allure_command()
-            
             if not allure_path:
                 logger.warning("未找到 Allure 命令，跳过报告生成")
                 return None
-            
-            # 生成报告
+
             cmd = [allure_path, 'generate', allure_results_dir, '-o', report_dir, '--clean']
             
             logger.info(f"生成 Allure 报告: {' '.join(cmd)}")

@@ -778,6 +778,34 @@ export default {
   },
 
   // Messages
+  importExport: {
+    title: 'Import/Export',
+    import: 'Import',
+    export: 'Export',
+    importTitle: 'Import APIs',
+    format: 'Format',
+    file: 'File',
+    curlCommand: 'cURL Command',
+    curlPlaceholder: 'Paste cURL commands here (one per line)',
+    dragOrClick: 'Drop file here, or click to upload',
+    targetProject: 'Target Project',
+    selectProject: 'Select target project',
+    selectProjectFirst: 'Please select a project first',
+    selectFile: 'Please select a file',
+    enterCurl: 'Please enter cURL command',
+    preview: 'Preview',
+    back: 'Back',
+    confirmImport: 'Import ({count})',
+    cancel: 'Cancel',
+    done: 'Done',
+    totalApis: '{count} APIs total',
+    selectAtLeastOne: 'Please select at least one API',
+    parseFailed: 'Parse failed',
+    importSuccess: 'Import successful',
+    importFailed: 'Import failed',
+    exportSuccess: 'Export successful',
+    exportFailed: 'Export failed'
+  },
   messages: {
     success: {
       create: 'Created successfully',

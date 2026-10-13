@@ -57,6 +57,7 @@
                     <el-form-item :label="$t('notification.form.businessType')">
                       <el-checkbox v-model="webhookBots.feishu.enable_ui_automation">{{ $t('notification.form.uiAutomation') }}</el-checkbox>
                       <el-checkbox v-model="webhookBots.feishu.enable_api_testing">{{ $t('notification.form.apiTesting') }}</el-checkbox>
+                      <el-checkbox v-model="webhookBots.feishu.enable_ai_testing">{{ $t('notification.form.aiTestingReport') }}</el-checkbox>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -110,6 +111,7 @@
                     <el-form-item :label="$t('notification.form.businessType')">
                       <el-checkbox v-model="webhookBots.wechat.enable_ui_automation">{{ $t('notification.form.uiAutomation') }}</el-checkbox>
                       <el-checkbox v-model="webhookBots.wechat.enable_api_testing">{{ $t('notification.form.apiTesting') }}</el-checkbox>
+                      <el-checkbox v-model="webhookBots.wechat.enable_ai_testing">{{ $t('notification.form.aiTestingReport') }}</el-checkbox>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -176,6 +178,7 @@
                     <el-form-item :label="$t('notification.form.businessType')">
                       <el-checkbox v-model="webhookBots.dingtalk.enable_ui_automation">{{ $t('notification.form.uiAutomation') }}</el-checkbox>
                       <el-checkbox v-model="webhookBots.dingtalk.enable_api_testing">{{ $t('notification.form.apiTesting') }}</el-checkbox>
+                      <el-checkbox v-model="webhookBots.dingtalk.enable_ai_testing">{{ $t('notification.form.aiTestingReport') }}</el-checkbox>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -227,14 +230,16 @@ export default {
         webhook_url: '',
         enabled: true,
         enable_ui_automation: true,
-        enable_api_testing: true
+        enable_api_testing: true,
+        enable_ai_testing: false
       },
       wechat: {
         name: '',
         webhook_url: '',
         enabled: true,
         enable_ui_automation: true,
-        enable_api_testing: true
+        enable_api_testing: true,
+        enable_ai_testing: false
       },
       dingtalk: {
         name: '',
@@ -242,7 +247,8 @@ export default {
         secret: '',
         enabled: true,
         enable_ui_automation: true,
-        enable_api_testing: true
+        enable_api_testing: true,
+        enable_ai_testing: false
       }
     })
 
@@ -266,6 +272,21 @@ export default {
       return configTypeMap[botType]
     }
 
+    const isValidWebhookUrl = (botType, value) => {
+      try {
+        const url = new URL(String(value || '').trim())
+        if (botType === 'wechat') {
+          return url.protocol === 'https:' &&
+              url.hostname === 'qyapi.weixin.qq.com' &&
+              url.pathname.replace(/\/$/, '') === '/cgi-bin/webhook/send' &&
+              Boolean(url.searchParams.get('key'))
+        }
+        return url.protocol === 'https:'
+      } catch {
+        return false
+      }
+    }
+
     // 保存Webhook机器人配置
     const saveWebhookBot = async (botType) => {
       const formRef = botType === 'feishu' ? feishuFormRef.value :
@@ -284,6 +305,16 @@ export default {
       try {
         const configType = getConfigType(botType)
         const botTypeName = getBotTypeName(botType)
+        const botConfig = webhookBots[botType]
+        if (botConfig.enabled && !isValidWebhookUrl(botType, botConfig.webhook_url)) {
+          const hintKey = botType === 'wechat'
+              ? 'notification.hints.wechatWebhook'
+              : botType === 'feishu'
+                  ? 'notification.hints.feishuWebhook'
+                  : 'notification.hints.dingtalkWebhook'
+          ElMessage.error(t(hintKey))
+          return
+        }
 
         // 检查是否已存在对应类型的机器人配置
         let webhookConfigId = null
@@ -293,10 +324,9 @@ export default {
             webhookConfigId = response.data.results[0].id
           }
         } catch (error) {
-          console.log(t('notification.messages.notFoundCreating'))
+          // Config not found, will create new
         }
 
-        const botConfig = webhookBots[botType]
         let requestData
 
         if (webhookConfigId) {
@@ -310,7 +340,8 @@ export default {
             webhook_url: botConfig.webhook_url,
             enabled: botConfig.enabled,
             enable_ui_automation: botConfig.enable_ui_automation,
-            enable_api_testing: botConfig.enable_api_testing
+            enable_api_testing: botConfig.enable_api_testing,
+            enable_ai_testing: botConfig.enable_ai_testing
           }
 
           if (botType === 'dingtalk' && botConfig.secret) {
@@ -335,7 +366,8 @@ export default {
             webhook_url: botConfig.webhook_url,
             enabled: botConfig.enabled,
             enable_ui_automation: botConfig.enable_ui_automation,
-            enable_api_testing: botConfig.enable_api_testing
+            enable_api_testing: botConfig.enable_api_testing,
+            enable_ai_testing: botConfig.enable_ai_testing
           }
 
           if (botType === 'dingtalk' && botConfig.secret) {
@@ -360,7 +392,9 @@ export default {
       } catch (error) {
         console.error('Save Webhook bot configuration failed:', error)
         const botTypeName = getBotTypeName(botType)
-        ElMessage.error(t('notification.messages.saveFailed', { type: botTypeName }) + ': ' + (error.response?.data?.detail || error.message))
+        const fieldError = error.response?.data?.webhook_bots
+        const errorText = Array.isArray(fieldError) ? fieldError.join('；') : (fieldError || error.response?.data?.detail || error.message)
+        ElMessage.error(t('notification.messages.saveFailed', { type: botTypeName }) + ': ' + errorText)
       }
     }
 
@@ -378,6 +412,7 @@ export default {
             webhookBots[botType].enabled = bot.enabled !== false
             webhookBots[botType].enable_ui_automation = bot.enable_ui_automation !== false
             webhookBots[botType].enable_api_testing = bot.enable_api_testing !== false
+            webhookBots[botType].enable_ai_testing = bot.enable_ai_testing === true
             if (botType === 'dingtalk' && bot.secret) {
               webhookBots[botType].secret = bot.secret
             }
@@ -402,9 +437,7 @@ export default {
     // 组件挂载时获取数据
     onMounted(async () => {
       try {
-        console.log('NotificationConfigs component initializing')
         await fetchAllWebhookConfigs()
-        console.log('NotificationConfigs component initialized')
       } catch (error) {
         console.error('NotificationConfigs component initialization failed:', error)
       }

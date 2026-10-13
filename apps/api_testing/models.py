@@ -94,6 +94,7 @@ class ApiRequest(models.Model):
     pre_request_script = models.TextField(blank=True, verbose_name='请求前脚本')
     post_request_script = models.TextField(blank=True, verbose_name='请求后脚本')
     assertions = models.JSONField(default=list, verbose_name='断言规则')
+    extractors = models.JSONField(default=list, blank=True, verbose_name='变量提取器')
     order = models.IntegerField(default=0, verbose_name='排序')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='创建者')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
@@ -187,19 +188,23 @@ class TestSuiteRequest(models.Model):
     """测试套件中的请求关联模型"""
     test_suite = models.ForeignKey(TestSuite, on_delete=models.CASCADE, verbose_name='测试套件')
     request = models.ForeignKey(ApiRequest, on_delete=models.CASCADE, verbose_name='API请求')
+    display_name = models.CharField(max_length=200, blank=True, default='', verbose_name='步骤名称')
     order = models.IntegerField(default=0, verbose_name='执行顺序')
     assertions = models.JSONField(default=list, verbose_name='断言规则')
+    extractors = models.JSONField(default=list, blank=True, verbose_name='变量提取器')
     enabled = models.BooleanField(default=True, verbose_name='是否启用')
+    extract_variables = models.JSONField(default=list, blank=True, verbose_name='变量提取规则')
+    skip_condition = models.TextField(blank=True, default='', verbose_name='跳过条件')
+    request_overrides = models.JSONField(default=dict, blank=True, verbose_name='请求覆盖配置')
 
     class Meta:
         db_table = 'api_test_suite_requests'
         verbose_name = '套件请求'
         verbose_name_plural = '套件请求'
-        unique_together = ['test_suite', 'request']
         ordering = ['order']
 
     def __str__(self):
-        return f"{self.test_suite.name} - {self.request.name}"
+        return f"{self.test_suite.name} - {self.display_name or self.request.name}"
 
 
 class TestExecution(models.Model):

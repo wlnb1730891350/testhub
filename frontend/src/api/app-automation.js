@@ -85,6 +85,18 @@ export function captureDeviceScreenshot(id) {
 }
 
 /**
+ * 执行设备实时预检（ADB、连接授权、可选应用安装状态）
+ */
+export function preflightDevice(id, data = {}) {
+  return request({
+    url: `/app-automation/devices/${id}/preflight/`,
+    method: 'post',
+    data,
+    timeout: 20000
+  })
+}
+
+/**
  * 删除设备
  */
 export function deleteDevice(id) {
@@ -358,6 +370,17 @@ export function executeTestCase(id, data) {
   })
 }
 
+/**
+ * 在同一设备上按顺序批量执行测试用例
+ */
+export function executeTestCasesBatch(data) {
+  return request({
+    url: '/app-automation/test-cases/execute-batch/',
+    method: 'post',
+    data
+  })
+}
+
 // ========== 执行记录管理 ==========
 
 /**
@@ -409,6 +432,16 @@ export function stopExecution(id) {
     url: `/app-automation/executions/${id}/stop/`,
     method: 'post'
   })
+}
+
+// ========== 批次汇总报告 ===========
+
+export function getBatchReportList(params) {
+  return request({ url: '/app-automation/batch-reports/', method: 'get', params })
+}
+
+export function getBatchReportExecutions(id) {
+  return request({ url: `/app-automation/batch-reports/${id}/executions/`, method: 'get' })
 }
 
 // ========== 测试套件管理 ==========

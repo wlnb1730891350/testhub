@@ -147,8 +147,7 @@
               <select
                 v-model="configForm.role"
                 class="form-select"
-                required
-                @change="console.log('Role changed to:', configForm.role)">
+                required>
                 <option value="">{{ $t('configuration.aiModel.selectRole') }}</option>
                 <option value="writer">{{ $t('configuration.aiModel.roles.writer') }}</option>
                 <option value="reviewer">{{ $t('configuration.aiModel.roles.reviewer') }}</option>
@@ -358,10 +357,6 @@ export default {
   computed: {
     shouldShowModal() {
       const show = this.showAddModal || this.showEditModal
-      console.log('Computed shouldShowModal:', show, {
-        showAddModal: this.showAddModal,
-        showEditModal: this.showEditModal
-      })
       return show
     }
   },
@@ -369,22 +364,14 @@ export default {
   watch: {
     configForm: {
       handler(newVal, oldVal) {
-        console.log('ConfigForm changed:', JSON.stringify(newVal))
       },
       deep: true
     },
     shouldShowModal(newVal, oldVal) {
-      console.log('Modal visibility changed:', newVal, 'was:', oldVal)
     }
   },
 
   mounted() {
-    console.log('AIModelConfig component mounted')
-    console.log('Initial showAddModal state:', this.showAddModal)
-    console.log('Initial showEditModal state:', this.showEditModal)
-    console.log('Initial configForm:', JSON.stringify(this.configForm))
-    
-    // 确保组件初始状态正确
     this.initializeComponent()
     
     this.loadConfigs()
@@ -393,12 +380,9 @@ export default {
   methods: {
     // 当模型类型改变时自动填充API Base URL
     onModelTypeChange(modelType) {
-      console.log('Model type changed to:', modelType)
-
       // 根据选择的模型类型自动填充base_url
       if (this.modelBaseUrlMap[modelType]) {
         this.configForm.base_url = this.modelBaseUrlMap[modelType]
-        console.log('Auto-filled base_url:', this.configForm.base_url)
       }
     },
 
@@ -412,33 +396,21 @@ export default {
       this.isTestingConnection = false
       this.testingConfigId = null
       this.editingConfigId = null
-      
-      console.log('Component initialized with states:', {
-        showAddModal: this.showAddModal,
-        showEditModal: this.showEditModal,
-        isEditing: this.isEditing
-      })
     },
     async loadConfigs() {
       try {
-        console.log('Loading configs...')
         const response = await api.get('/requirement-analysis/ai-models/')
-        console.log('API response:', response.data)
         
         // 处理分页API响应格式 {count: 1, next: null, previous: null, results: [...]}
         if (response.data && response.data.results && Array.isArray(response.data.results)) {
           this.configs = response.data.results.filter(config => config && config.id)
-          console.log('Loaded configs from results:', this.configs)
         } else if (response.data && Array.isArray(response.data)) {
           // 直接数组格式的fallback
           this.configs = response.data.filter(config => config && config.id)
-          console.log('Loaded configs from direct array:', this.configs)
         } else {
           console.warn('Unexpected API response format:', response.data)
           this.configs = []
         }
-        
-        console.log('Final configs count:', this.configs.length)
       } catch (error) {
         console.error('Failed to load configs:', error)
         this.configs = [] // 确保configs始终是数组
@@ -452,18 +424,13 @@ export default {
     },
 
     openAddModal() {
-      console.log('Opening add modal - button clicked')
       try {
         this.resetForm()
         this.isEditing = false
         this.showAddModal = true
-        console.log('Modal state set to true:', this.showAddModal)
-        console.log('Initial form after reset:', JSON.stringify(this.configForm))
         
         // 强制Vue重新渲染
         this.$nextTick(() => {
-          console.log('Modal should be visible now:', this.showAddModal)
-          console.log('Form in nextTick:', JSON.stringify(this.configForm))
         })
       } catch (error) {
         console.error('Error in openAddModal:', error)
@@ -485,7 +452,6 @@ export default {
         verify_ssl: true,
         is_active: true
       })
-      console.log('Form reset:', JSON.stringify(this.configForm))
     },
 
     editConfig(config) {
@@ -508,17 +474,6 @@ export default {
     },
 
     async saveConfig() {
-      console.log('Saving config with data:', this.configForm)
-      
-      // 详细检查每个字段
-      console.log('Field values:')
-      console.log('- name:', this.configForm.name, 'length:', this.configForm.name?.length)
-      console.log('- model_type:', this.configForm.model_type, 'length:', this.configForm.model_type?.length)
-      console.log('- role:', this.configForm.role, 'length:', this.configForm.role?.length)
-      console.log('- api_key:', this.configForm.api_key, 'length:', this.configForm.api_key?.length)
-      console.log('- base_url:', this.configForm.base_url, 'length:', this.configForm.base_url?.length)
-      console.log('- model_name:', this.configForm.model_name, 'length:', this.configForm.model_name?.length)
-      
       // 验证必填字段
       const requiredFields = [
         { name: 'name', value: this.configForm.name },
@@ -532,7 +487,6 @@ export default {
       const emptyFields = requiredFields.filter(field => !field.value || field.value.trim() === '')
       
       if (emptyFields.length > 0) {
-        console.log('Empty fields:', emptyFields)
         ElMessage.error(this.t('configuration.aiModel.messages.fillRequired', { fields: emptyFields.map(f => f.name).join(', ') }))
         return
       }
@@ -561,11 +515,9 @@ export default {
             delete updateData.api_key
           }
           
-          console.log('Updating with data:', updateData)
           await api.patch(`/requirement-analysis/ai-models/${this.editingConfigId}/`, updateData)
           ElMessage.success(this.t('configuration.aiModel.messages.updateSuccess'))
         } else {
-          console.log('Creating with data:', this.configForm)
           await api.post('/requirement-analysis/ai-models/', this.configForm)
           ElMessage.success(this.t('configuration.aiModel.messages.saveSuccess'))
         }
@@ -578,8 +530,6 @@ export default {
         
         // 强制重新渲染确保列表更新
         this.$forceUpdate()
-        
-        console.log('Config saved and list refreshed, total configs:', this.configs.length)
       } catch (error) {
         console.error('Failed to save config:', error)
         console.error('Error response:', error.response?.data)
@@ -666,12 +616,6 @@ export default {
     },
 
     closeModals() {
-      console.log('Closing modals - current states:', {
-        showAddModal: this.showAddModal,
-        showEditModal: this.showEditModal,
-        isEditing: this.isEditing
-      })
-      
       this.showAddModal = false
       this.showEditModal = false
       this.isEditing = false
@@ -680,20 +624,8 @@ export default {
       
       // 强制Vue重新渲染
       this.$nextTick(() => {
-        console.log('After nextTick - states:', {
-          showAddModal: this.showAddModal,
-          showEditModal: this.showEditModal,
-          shouldShow: this.shouldShowModal
-        })
-        
         // 强制更新组件
         this.$forceUpdate()
-      })
-      
-      console.log('After closing - states:', {
-        showAddModal: this.showAddModal,
-        showEditModal: this.showEditModal,
-        isEditing: this.isEditing
       })
     },
 

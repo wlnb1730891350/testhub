@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from django.db.models import Q
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.http import FileResponse, Http404
@@ -13,8 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 import logging
 import os
 
-from ..models import AppTestExecution
-from ..serializers import AppTestExecutionSerializer
+from ..models import AppTestExecution, AppTestBatchReport, AppDevice
+from ..serializers import AppTestExecutionSerializer, AppTestBatchReportSerializer
 from ..tasks import send_execution_update
 from .test_case_views import AppPagination
 
@@ -27,7 +28,7 @@ class AppTestExecutionViewSet(viewsets.ModelViewSet):
     serializer_class = AppTestExecutionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['status', 'test_case', 'device']
+    filterset_fields = ['status', 'test_case', 'device', 'batch_report']
     search_fields = ['test_case__name', 'device__name', 'device__device_id', 'user__username']
     pagination_class = AppPagination
     
@@ -38,6 +39,10 @@ class AppTestExecutionViewSet(viewsets.ModelViewSet):
         suite_isnull = self.request.query_params.get('test_suite__isnull')
         if suite_isnull is not None:
             queryset = queryset.filter(test_suite__isnull=(suite_isnull.lower() in ('true', '1')))
+
+        batch_isnull = self.request.query_params.get('batch_report__isnull')
+        if batch_isnull is not None:
+            queryset = queryset.filter(batch_report__isnull=(batch_isnull.lower() in ('true', '1')))
 
         # 支持按项目间接过滤（通过 test_case.project）
         project_id = self.request.query_params.get('project')
@@ -54,6 +59,33 @@ class AppTestExecutionViewSet(viewsets.ModelViewSet):
             Q(user__username__icontains=search_value)
         )
     
+    def destroy(self, request, *args, **kwargs):
+        """删除非运行中执行记录，并在最后一个任务删除后释放设备。"""
+        with transaction.atomic():
+            execution = self.get_object()
+            if execution.status == 'running':
+                return Response({
+                    'success': False,
+                    'message': '执行中的任务请先停止，停止后再删除记录',
+                }, status=status.HTTP_400_BAD_REQUEST)
+            if execution.batch_report_id:
+                return Response({
+                    'success': False,
+                    'message': '批次子记录请在批次报告中统一管理，不能单独删除',
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            device_id = execution.device_id
+            self.perform_destroy(execution)
+            if device_id:
+                device = AppDevice.objects.select_for_update().filter(id=device_id).first()
+                has_active_execution = AppTestExecution.objects.filter(
+                    device_id=device_id, status__in=['pending', 'running']
+                ).exists()
+                if device and not has_active_execution and device.status == 'locked' and device.locked_by == request.user:
+                    device.unlock()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=False, methods=['get'])
     def ws_status(self, request):
         """检查 WebSocket 是否可用"""
@@ -115,31 +147,64 @@ class AppTestExecutionViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@csrf_exempt
+class AppTestBatchReportViewSet(viewsets.ReadOnlyModelViewSet):
+    """APP 批量执行的汇总报告。"""
+    queryset = AppTestBatchReport.objects.select_related('test_suite', 'device', 'user')
+    serializer_class = AppTestBatchReportSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['status', 'test_suite', 'device']
+    search_fields = ['batch_id', 'test_suite__name', 'device__name', 'device__device_id']
+    pagination_class = AppPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        project_id = self.request.query_params.get('project')
+        if project_id:
+            queryset = queryset.filter(executions__test_case__project_id=project_id).distinct()
+        return queryset
+
+    @action(detail=True, methods=['get'])
+    def executions(self, request, pk=None):
+        batch_report = self.get_object()
+        executions = batch_report.executions.select_related('test_case', 'device', 'user').order_by('created_at', 'id')
+        return Response({'success': True, 'data': AppTestExecutionSerializer(executions, many=True).data})
+
+
+def _serve_report_path(report_path, file_path=''):
+    if not report_path:
+        raise Http404("报告路径不存在")
+    if not file_path:
+        file_path = 'index.html'
+
+    report_dir = report_path
+    full_path = os.path.join(report_dir, file_path)
+    report_dir_abs = os.path.abspath(report_dir)
+    full_path_abs = os.path.abspath(full_path)
+    if not full_path_abs.startswith(report_dir_abs + os.sep) and full_path_abs != report_dir_abs:
+        raise Http404("无效的文件路径")
+    if not os.path.exists(full_path_abs) or not os.path.isfile(full_path_abs):
+        raise Http404("文件不存在")
+    return FileResponse(open(full_path_abs, 'rb'), content_type=_get_content_type(file_path))
+
+
 def serve_report_file(request, execution_id, file_path=''):
     """提供 Allure 报告文件访问"""
     try:
         execution = AppTestExecution.objects.get(id=execution_id)
-        if not execution.report_path:
-            raise Http404("报告路径不存在")
-
-        if not file_path:
-            file_path = 'index.html'
-
-        report_dir = execution.report_path
-        full_path = os.path.join(report_dir, file_path)
-
-        report_dir_abs = os.path.abspath(report_dir)
-        full_path_abs = os.path.abspath(full_path)
-        if not full_path_abs.startswith(report_dir_abs):
-            raise Http404("无效的文件路径")
-
-        if not os.path.exists(full_path_abs) or not os.path.isfile(full_path_abs):
-            raise Http404("文件不存在")
-
-        return FileResponse(open(full_path_abs, 'rb'), content_type=_get_content_type(file_path))
+        return _serve_report_path(execution.report_path, file_path)
     except AppTestExecution.DoesNotExist:
         raise Http404("执行记录不存在")
+
+
+@csrf_exempt
+def serve_batch_report_file(request, batch_report_id, file_path=''):
+    """提供批次汇总 Allure 报告文件访问。"""
+    try:
+        batch_report = AppTestBatchReport.objects.get(id=batch_report_id)
+        return _serve_report_path(batch_report.report_path, file_path)
+    except AppTestBatchReport.DoesNotExist:
+        raise Http404("批次报告不存在")
 
 
 def _get_content_type(file_path):

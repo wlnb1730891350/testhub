@@ -782,7 +782,6 @@ const showAddRequest = async () => {
         
         // 设置已关联接口为已勾选状态
         requestTreeRef.value.setCheckedKeys(existingRequestIds, false)
-        console.log('设置已关联接口ID:', existingRequestIds)
       }
     }, 200)
   })

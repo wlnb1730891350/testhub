@@ -6,6 +6,7 @@
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     :modal="true"
+    append-to-body
     :destroy-on-close="false"
     @close="handleClose"
   >
@@ -60,6 +61,18 @@
               <div class="card-label">{{ $t('uiAutomation.ai.executionReport.executionSteps') }}</div>
               <div class="card-value">{{ reportData.overview.total_steps }} {{ $t('uiAutomation.ai.executionReport.steps') }}</div>
             </div>
+            <div class="overview-card">
+              <div class="card-label">运行端</div>
+              <div class="card-value">{{ reportData.execution_details?.execution_target || 'Browser' }}</div>
+            </div>
+          </div>
+          <div v-if="reportData.cleanup_results" class="cleanup-summary">
+            <span class="cleanup-label">环境回收:</span>
+            <el-tag :type="reportData.cleanup_results.failed_count ? 'danger' : 'success'">
+              {{ reportData.cleanup_results.required
+                ? (reportData.cleanup_results.failed_count ? `失败 ${reportData.cleanup_results.failed_count} 项` : `已回收 ${reportData.cleanup_results.completed_count} 项`)
+                : '无需回收' }}
+            </el-tag>
           </div>
         </div>
 
@@ -147,6 +160,13 @@
                 </div>
                 <div v-if="step.thinking" class="step-thinking">
                   <strong>{{ $t('uiAutomation.ai.executionReport.thinking') }}:</strong> {{ step.thinking }}
+                </div>
+                <div v-if="step.assertion" class="step-assertion">
+                  <strong>断言结果:</strong>
+                  <span>{{ formatAssertionResult(step.assertion) }}</span>
+                </div>
+                <div v-if="step.review_required" class="step-review">
+                  <strong>待复核:</strong> {{ step.review_reason || '该描述未能安全编译为可自动验证的断言。' }}
                 </div>
               </div>
             </el-card>
@@ -278,6 +298,14 @@ const showGifDialog = ref(false)
 const pieChartRef = ref(null)
 const barChartRef = ref(null)
 let pieChart = null
+
+const formatAssertionResult = (assertion) => {
+  const result = assertion?.result || {}
+  if (result.review_required) return '待复核'
+  if (result.summary) return result.summary
+  if (result.reason) return result.reason
+  return result.passed ? '通过' : '未通过'
+}
 let barChart = null
 
 // 报告类型显示名称
@@ -292,17 +320,12 @@ const reportTypeDisplay = computed(() => {
 
 // GIF URL
 const gifUrl = computed(() => {
-  if (reportData.value && reportData.value.gif_path) {
-    // gif_path格式：media/ai_recording/xxx.gif
-    const path = reportData.value.gif_path
-    // 如果路径已经包含media/，直接使用；否则添加media/
-    if (path.startsWith('media/')) {
-      return `/${path}`
-    } else {
-      return `/media/${path}`
-    }
-  }
-  return ''
+  const path = reportData.value?.gif_path
+  if (!path) return ''
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  if (path.startsWith('/')) return path
+  if (path.startsWith('media/')) return '/' + path
+  return '/media/' + path
 })
 
 // 监听 modelValue 变化
@@ -337,10 +360,8 @@ const loadReport = async (reportType = 'summary') => {
   loading.value = true
   try {
     const response = await getAIExecutionReport(props.recordId, { report_type: reportType })
-    console.log('API Response:', response.data)
     if (response.data.success) {
       reportData.value = response.data.data
-      console.log('Report Data:', reportData.value)
       await nextTick()
       // 等待DOM更新后再初始化图表
       setTimeout(() => {
@@ -621,7 +642,7 @@ const handleClose = () => {
 
 .overview-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
 }
 
@@ -747,6 +768,14 @@ const handleClose = () => {
 .step-thinking {
   color: #909399;
   font-style: italic;
+}
+
+.step-assertion {
+  color: #303133;
+}
+
+.step-review {
+  color: #b88230;
 }
 
 .performance-metrics {

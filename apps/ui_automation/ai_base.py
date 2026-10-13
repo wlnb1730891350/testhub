@@ -11,8 +11,10 @@ import asyncio
 import functools
 import json
 import re
+import time
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
+from .business_actions import _find_best_login_dialog, _find_login_field, evaluate_login_success
 
 # 加载环境变量
 load_dotenv()
@@ -198,6 +200,9 @@ def _contains_auth_failure_signal(text):
     return any(keyword in normalized for keyword in keywords)
 
 # ============================================================================
+
+# ============================================================================
+
 # PART 1: Common Patches (Pydantic, ActionModel, TokenCost, Basic Connection)
 # ============================================================================
 
@@ -503,11 +508,11 @@ try:
             parsed_data = None
             try:
                 parsed_data = json_module.loads(clean_content)
-            except:
+            except Exception:
                 try:
                     match = re.search(r'(\{.*\})', clean_content, re.DOTALL)
                     if match: parsed_data = json_module.loads(match.group(1))
-                except:
+                except Exception:
                     pass
 
             # Wrapper classes
@@ -631,7 +636,7 @@ try:
             if hasattr(wrapped, 'usage') and wrapped.usage:
                 try:
                     _token_service.add_usage(llm.model, wrapped.usage)
-                except:
+                except Exception:
                     pass
 
             return wrapped
@@ -666,7 +671,7 @@ try:
                 if '--remote-debugging-port=' in str(arg):
                     try:
                         port = int(arg.split('=')[1]); break
-                    except:
+                    except Exception:
                         pass
         if hasattr(browser_profile, 'remote_debugging_port'):
             port = browser_profile.remote_debugging_port
@@ -921,7 +926,7 @@ class RawResponseLogger(BaseCallbackHandler):
         try:
             generation = response.generations[0][0]
             logger.info(f"DEBUG: Raw LLM Response: {generation.text}")
-        except:
+        except Exception:
             pass
 
 
@@ -1008,7 +1013,7 @@ class BaseBrowserAgent:
         try:
             object.__setattr__(self.llm, 'provider', self.provider)
             object.__setattr__(self.llm, 'model', self.model_name)
-        except:
+        except Exception:
             if not hasattr(self.llm, '__pydantic_extra__') or self.llm.__pydantic_extra__ is None:
                 self.llm.__pydantic_extra__ = {}
             self.llm.__pydantic_extra__['provider'] = self.provider
@@ -1056,7 +1061,7 @@ class BaseBrowserAgent:
                 else:
                     descriptions.append(f"{name}")
             return " | ".join(descriptions)
-        except:
+        except Exception:
             return "执行操作"
 
     async def _verify_execution_llm(self):
@@ -1068,6 +1073,478 @@ class BaseBrowserAgent:
             )
         except Exception as e:
             raise RuntimeError(f"Execution LLM unavailable: {e}") from e
+
+    def _parse_nn_login_task(self, task_description: str):
+        """识别 NN Web 手机验证码登录任务，返回 url/phone/code；不匹配返回 None。"""
+        text = str(task_description or '')
+        if 'test6-web.nn.com' not in text and 'test-web.nn.com' not in text and 'nn.com' not in text:
+            return None
+        if not any(keyword in text for keyword in ['手机号', '手机', '验证码', '登录']):
+            return None
+        url_match = re.search(r'https?://[^\s，。；、]+', text)
+        phone_match = re.search(r'(?:手机号|手机号码|手机|账号)\D*(1\d{10})', text)
+        code_match = re.search(r'(?:验证码|校验码)\D*(\d{4,8})', text)
+        if not url_match or not phone_match or not code_match:
+            return None
+        return {
+            'url': url_match.group(0).rstrip('/'),
+            'phone': phone_match.group(1),
+            'code': code_match.group(1),
+        }
+
+    async def _run_nn_login_deterministic(self, task_description: str, planned_tasks=None, callback=None, should_stop=None):
+        """NN Web 登录确定性执行器：直接使用 Playwright，绕开通用 AI 乱点和 browser-use Page 包装差异。"""
+        task = self._parse_nn_login_task(task_description)
+        if not task:
+            return None
+
+        async def emit(payload):
+            if not callback:
+                return
+            if asyncio.iscoroutinefunction(callback):
+                await callback(payload)
+            else:
+                callback(payload)
+
+        async def mark(task_id, status):
+            if task_id:
+                await emit({'task_id': int(task_id), 'status': status})
+
+        def ensure_object(value):
+            if isinstance(value, str):
+                try:
+                    return json.loads(value)
+                except Exception:
+                    return {'raw': value}
+            return value or {}
+
+        def task_id_by_keywords(*keywords):
+            if not planned_tasks:
+                return None
+            # 优先匹配 pending/in_progress 状态的任务，避免误匹配已完成的任务
+            pending_match = None
+            for item in planned_tasks:
+                desc = str(item.get('description', ''))
+                if any(keyword in desc for keyword in keywords):
+                    if item.get('status', 'pending') in ('pending', 'in_progress'):
+                        return item.get('id')
+                    if pending_match is None:
+                        pending_match = item.get('id')
+            return pending_match
+
+        async def log_step(title):
+            await emit({'type': 'log', 'content': f'\n[Deterministic]\n{title}\n'})
+
+        gif_frames = []
+
+        async def capture_gif_frame(page, label):
+            """确定性 Playwright 路径的轻量 GIF 录制：关键节点截图，结束后合成 GIF。"""
+            if not self.enable_gif:
+                return
+            try:
+                frame = await page.screenshot(type='png', full_page=False)
+                gif_frames.append({'label': label, 'data': frame})
+                await emit({'type': 'log', 'content': f'\n[System] GIF录制帧: {label}\n'})
+            except Exception as frame_exc:
+                logger.warning(f"⚠️ Deterministic GIF frame capture failed ({label}): {frame_exc}")
+
+        def save_deterministic_gif():
+            if not self.enable_gif or not gif_frames:
+                return
+            try:
+                from io import BytesIO
+                from PIL import Image, ImageDraw
+                from .gif_utils import save_compact_gif
+                output_path = os.path.join(os.getcwd(), 'agent_history.gif')
+                frames = []
+                for idx, item in enumerate(gif_frames, 1):
+                    image = Image.open(BytesIO(item['data'])).convert('RGB')
+                    # 给画面加一个很轻的步骤标签，便于报告回看。
+                    draw = ImageDraw.Draw(image)
+                    label = f"{idx}. {item.get('label', '')}"
+                    draw.rectangle((8, 8, min(620, 18 + len(label) * 9), 36), fill=(0, 0, 0))
+                    draw.text((14, 14), label, fill=(255, 255, 255))
+                    frames.append(image)
+                if frames:
+                    save_compact_gif(frames, output_path, duration=900)
+                    logger.info(f"✅ Deterministic GIF generated: {output_path}, frames={len(frames)}")
+            except Exception as gif_exc:
+                logger.warning(f"⚠️ Failed to generate deterministic GIF: {gif_exc}")
+
+        await emit({'type': 'log', 'content': '\n[System] 检测到 NN 手机验证码登录任务，切换为确定性 Playwright 执行器。\n'})
+        if self.enable_gif:
+            await emit({'type': 'log', 'content': '\n[System] 已开启GIF录制，确定性执行器将按关键步骤截图合成GIF。\n'})
+
+        login_final_status_recorded = False
+        from playwright.async_api import async_playwright
+        playwright = None
+        browser = None
+        context = None
+        try:
+            playwright = await async_playwright().start()
+            headless = os.name != 'nt'
+            browser = await playwright.chromium.launch(
+                headless=headless,
+                args=['--disable-blink-features=AutomationControlled', '--disable-infobars', '--disable-notifications']
+            )
+            context = await browser.new_context(viewport={'width': 1280, 'height': 720})
+            page = await context.new_page()
+
+            await log_step(f"访问: {task['url']}")
+            await page.goto(task['url'], wait_until='domcontentloaded', timeout=45000)
+            try:
+                await page.wait_for_load_state('networkidle', timeout=15000)
+            except Exception:
+                pass
+            await page.wait_for_timeout(1500)
+            await capture_gif_frame(page, '访问页面')
+            await mark(task_id_by_keywords('访问'), 'completed')
+
+            async def record_real_action(action_type, description, input_value='', assert_value='', element=None, source='deterministic_recorder'):
+                """记录确定性执行器真实发生的浏览器动作，供 AI录制沉淀普通 UI 用例使用。"""
+                payload = {
+                    'type': 'record_action',
+                    'action': {
+                        'action_type': action_type,
+                        'description': description,
+                        'input_value': input_value or '',
+                        'assert_value': assert_value or '',
+                        'element_text': '',
+                        'element_tag': '',
+                        'locator_strategy': '',
+                        'locator_value': '',
+                        'locator_description': description,
+                        'page_url': '',
+                        'source': source,
+                        'timestamp': time.time(),
+                    }
+                }
+                try:
+                    payload['action']['page_url'] = page.url
+                except Exception:
+                    pass
+                if isinstance(element, dict):
+                    payload['action'].update({k: v for k, v in element.items() if v is not None})
+                await emit(payload)
+
+            await record_real_action(
+                'goto',
+                f"访问: {task['url']}",
+                input_value=task['url'],
+                element={'locator_description': f"访问: {task['url']}"},
+            )
+
+            close_result = await page.evaluate("""
+            () => {
+              const closeSelectors = [
+                'button[class*=close]', 'button[class*=Close]', '[aria-label*=关闭]', '[aria-label*=close]',
+                '.el-dialog__headerbtn', '.ant-modal-close', '.popup-close', '.ad-close',
+                'i[class*=close]', 'span[class*=close]', 'svg[class*=close]'
+              ];
+              for (const selector of closeSelectors) {
+                for (const el of document.querySelectorAll(selector)) {
+                  const r = el.getBoundingClientRect();
+                  if (r.width > 0 && r.height > 0) { el.click(); return 'clicked ' + selector; }
+                }
+              }
+              return 'no popup';
+            }
+            """)
+            await log_step(f'关闭弹窗: {close_result}')
+            await capture_gif_frame(page, '关闭弹窗')
+            if isinstance(close_result, str) and close_result != 'no popup':
+                await record_real_action(
+                    'click',
+                    f'关闭弹窗: {close_result}',
+                    element={
+                        'element_text': '关闭',
+                        'element_tag': 'button',
+                        'locator_strategy': 'xpath',
+                        'locator_value': "(//*[contains(@class,'close') or contains(@class,'Close') or contains(@aria-label,'关闭') or contains(@aria-label,'close')])[1]",
+                        'locator_description': '弹窗关闭按钮',
+                    },
+                )
+            await mark(task_id_by_keywords('弹窗', '关闭'), 'completed')
+
+            login_opened = await page.evaluate("""
+            async () => {
+              const sleep = ms => new Promise(r => setTimeout(r, ms));
+              const visible = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+              const hasLoginInput = () => Array.from(document.querySelectorAll('input')).some(i => {
+                const s = [i.placeholder, i.name, i.id, i.type].join(' ').toLowerCase();
+                return /手机|手机号|验证码|phone|mobile|code|tel/.test(s);
+              });
+              if (hasLoginInput()) return {opened: true, via: 'already'};
+              const candidates = [];
+              const push = el => { if (el && visible(el) && !candidates.includes(el)) candidates.push(el); };
+              push(document.querySelector('#aside-header-avatar'));
+              document.querySelectorAll('img[alt*=默认头像], [class*=avatar], [id*=avatar], [class*=login], [id*=login], button, a, div, span').forEach(el => {
+                const txt = (el.innerText || el.alt || el.getAttribute('aria-label') || '').trim();
+                const cls = String(el.className || '');
+                const id = String(el.id || '');
+                if (/登录|默认头像|login|avatar|user|我的/.test(txt + ' ' + cls + ' ' + id)) push(el);
+              });
+              candidates.sort((a,b) => {
+                const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect();
+                return (br.top < 140 ? 1 : 0) - (ar.top < 140 ? 1 : 0) || br.right - ar.right;
+              });
+              for (const el of candidates.slice(0, 30)) {
+                const r = el.getBoundingClientRect();
+                el.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, clientX:r.left+r.width/2, clientY:r.top+r.height/2}));
+                el.dispatchEvent(new MouseEvent('mouseup', {bubbles:true, clientX:r.left+r.width/2, clientY:r.top+r.height/2}));
+                el.click();
+                await sleep(800);
+                if (hasLoginInput()) return {opened: true, via: (el.innerText || el.alt || el.id || el.className || el.tagName).slice(0,80)};
+              }
+              return {opened: false, tried: candidates.length, text: document.body.innerText.slice(0,800), html: document.body.innerHTML.slice(0,800)};
+            }
+            """)
+            login_opened = ensure_object(login_opened)
+            dialog_info = await _find_best_login_dialog(page)
+            if dialog_info:
+                login_opened['dialog'] = dialog_info
+
+            await capture_gif_frame(page, '打开登录入口')
+            if not login_opened.get('opened'):
+                raise RuntimeError(f'未能打开登录弹窗: {login_opened}')
+            await record_real_action(
+                'click',
+                '打开登录入口/点击默认头像',
+                element={
+                    'element_text': str(login_opened.get('via', '登录入口'))[:80],
+                    'element_tag': 'button',
+                    'locator_strategy': 'css',
+                    'locator_value': '#aside-header-avatar, img[alt*="默认头像"], [class*="avatar"], [id*="login"], [class*="login"]',
+                    'locator_description': '登录入口/默认头像',
+                },
+            )
+            await mark(task_id_by_keywords('登录入口'), 'completed')
+
+            fill_result = await page.evaluate("""
+            async ({phone, code, dialogSelector}) => {
+              const sleep = ms => new Promise(r => setTimeout(r, ms));
+              const visible = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+              const root = dialogSelector ? document.querySelector(dialogSelector) : document;
+              const inputs = Array.from((root || document).querySelectorAll('input')).filter(visible);
+              const scorePhone = i => /手机|手机号|phone|mobile|tel/.test([i.placeholder,i.name,i.id,i.type].join(' ').toLowerCase()) ? 10 : (i.maxLength === 11 ? 6 : 0);
+              const scoreCode = i => /验证码|校验码|code|captcha/.test([i.placeholder,i.name,i.id].join(' ').toLowerCase()) ? 10 : ((i.maxLength >= 4 && i.maxLength <= 8) ? 5 : 0);
+              const phoneInput = inputs.slice().sort((a,b)=>scorePhone(b)-scorePhone(a))[0];
+              if (!phoneInput || scorePhone(phoneInput) <= 0) return {ok:false, reason:'phone input not found', inputs: inputs.map(i=>({ph:i.placeholder,name:i.name,id:i.id,type:i.type,max:i.maxLength}))};
+              phoneInput.focus(); phoneInput.value = phone;
+              phoneInput.dispatchEvent(new Event('input', {bubbles:true}));
+              phoneInput.dispatchEvent(new Event('change', {bubbles:true}));
+              await sleep(200);
+              const codeInputs = Array.from((root || document).querySelectorAll('input')).filter(visible).filter(i => i !== phoneInput);
+              const codeInput = codeInputs.slice().sort((a,b)=>scoreCode(b)-scoreCode(a))[0];
+              if (!codeInput || scoreCode(codeInput) <= 0) return {ok:false, reason:'code input not found', inputs: codeInputs.map(i=>({ph:i.placeholder,name:i.name,id:i.id,type:i.type,max:i.maxLength}))};
+              codeInput.focus(); codeInput.value = code;
+              codeInput.dispatchEvent(new Event('input', {bubbles:true}));
+              codeInput.dispatchEvent(new Event('change', {bubbles:true}));
+              await sleep(200);
+              return {ok:true, phonePlaceholder: phoneInput.placeholder, codePlaceholder: codeInput.placeholder, scopedToDialog: !!dialogSelector};
+            }
+            """, {**task, 'dialogSelector': (dialog_info or {}).get('selector')})
+            fill_result = ensure_object(fill_result)
+
+            await log_step(f'输入手机号/验证码: {fill_result}')
+            await capture_gif_frame(page, '输入手机号和验证码')
+            if not fill_result.get('ok'):
+                raise RuntimeError(f'输入失败: {fill_result}')
+
+            await record_real_action(
+                'fill',
+                f"输入手机号 {task['phone']}",
+                input_value=task['phone'],
+                element={
+                    'element_text': str(fill_result.get('phonePlaceholder', '手机号'))[:80],
+
+                    'locator_strategy': 'css',
+                    'locator_value': 'input[placeholder*="手机"], input[name*="phone"], input[name*="mobile"], input[type="tel"]',
+                    'locator_description': '手机号输入框',
+                },
+            )
+            await record_real_action(
+                'fill',
+                f"输入验证码 {task['code']}",
+                input_value=task['code'],
+                element={
+                    'element_text': str(fill_result.get('codePlaceholder', '验证码'))[:80],
+                    'element_tag': 'input',
+                    'locator_strategy': 'css',
+                    'locator_value': 'input[placeholder*="验证码"], input[name*="code"], input[id*="code"], input[autocomplete="one-time-code"]',
+                    'locator_description': '验证码输入框',
+                },
+            )
+            await mark(task_id_by_keywords('手机号', '手机'), 'completed')
+            await mark(task_id_by_keywords('验证码'), 'completed')
+
+            agree_result = await page.evaluate("""
+            async () => {
+              const sleep = ms => new Promise(r => setTimeout(r, ms));
+              const visible = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+              // 1) 原生 checkbox
+              const inputs = Array.from(document.querySelectorAll('input[type=checkbox]')).filter(visible);
+              if (inputs.length) {
+                const cb = inputs[0];
+                if (!cb.checked) { cb.click(); cb.dispatchEvent(new Event('change', {bubbles:true})); }
+                return {ok:true, via:'checkbox', checked:cb.checked};
+              }
+              // 2) 自定义 checkbox 组件（nn-checkbox, el-checkbox 等）
+              const customCbs = Array.from(document.querySelectorAll('[class*=checkbox],[class*=check-box],[role=checkbox],[aria-checked]')).filter(visible);
+              for (const el of customCbs) {
+                const cls = String(el.className || '');
+                const ariaChecked = el.getAttribute('aria-checked');
+                if (ariaChecked === 'true' || el.classList.contains('is-checked') || el.classList.contains('checked')) {
+                  return {ok:true, via:'custom-checkbox-already-checked', cls:cls.slice(0,80)};
+                }
+                el.click(); await sleep(300);
+                return {ok:true, via:'custom-checkbox', cls:cls.slice(0,80)};
+              }
+              // 3) 文本匹配兜底：找"我已阅读并同意"附近的可点击元素
+              const els = Array.from(document.querySelectorAll('label,span,div,i,svg,p')).filter(visible);
+              for (const el of els) {
+                const txt = (el.innerText || el.getAttribute('aria-label') || '').trim();
+                const cls = String(el.className || '');
+                if (/同意|阅读|协议|隐私|checkbox|check/.test(txt + ' ' + cls)) {
+                  el.click(); await sleep(300); return {ok:true, via:(txt || cls).slice(0,80)};
+                }
+              }
+              return {ok:false, reason:'agree control not found'};
+            }
+            """)
+            agree_result = ensure_object(agree_result)
+            await log_step(f'勾选协议: {agree_result}')
+            await capture_gif_frame(page, '勾选协议')
+            if not agree_result.get('ok'):
+                raise RuntimeError(f'勾选协议失败: {agree_result}')
+            await record_real_action(
+                'click',
+                '勾选同意协议',
+                element={
+                    'element_text': str(agree_result.get('via', '同意协议'))[:80],
+                    'element_tag': 'checkbox',
+                    'locator_strategy': 'css',
+                    'locator_value': 'input[type="checkbox"], .nn-checkbox, .nn-checkbox__input, .nn-checkbox__inner',
+                    'locator_description': '协议勾选框',
+                },
+            )
+            await mark(task_id_by_keywords('勾选', '同意', '用户手册', '协议'), 'completed')
+
+            submit_result = await page.evaluate("""
+            async () => {
+              const sleep = ms => new Promise(r => setTimeout(r, ms));
+              const visible = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+              // 优先找 button 元素（最精确），再找 a/div/span
+              const btns = Array.from(document.querySelectorAll('button')).filter(visible);
+              const btnCandidates = btns.filter(el => {
+                const txt = (el.innerText || el.value || '').trim();
+                return /^登录|^立即登录|^登录\s*\/\s*注册$|^确定$|^确认$/.test(txt);
+              });
+              if (btnCandidates.length) {
+                btnCandidates.sort((a,b) => a.getBoundingClientRect().width*a.getBoundingClientRect().height - b.getBoundingClientRect().width*b.getBoundingClientRect().height);
+                const el = btnCandidates[0];
+                const txt = (el.innerText || el.value || '').trim();
+                el.click();
+                await sleep(1800);
+                return {ok:true, clicked:txt.slice(0,80)};
+              }
+              // 兜底：搜索所有元素，按面积升序（优先点击最精确的元素）
+              const els = Array.from(document.querySelectorAll('button,a,div,span')).filter(visible);
+              const candidates = els.filter(el => /登录|立即登录|确定|确认/.test((el.innerText || el.value || '').trim()));
+              candidates.sort((a,b) => a.getBoundingClientRect().width*a.getBoundingClientRect().height - b.getBoundingClientRect().width*b.getBoundingClientRect().height);
+              for (const el of candidates) {
+                const txt = (el.innerText || el.value || '').trim();
+                // 跳过文本过长的容器元素（>20字符通常不是按钮）
+                if (txt.length > 20) continue;
+                el.click();
+                await sleep(1800);
+                return {ok:true, clicked:txt.slice(0,80)};
+              }
+              return {ok:false, reason:'login button not found', candidates:candidates.length, texts: els.map(e=>(e.innerText||'').trim()).filter(Boolean).filter(t=>t.length<50).slice(0,20)};
+            }
+            """)
+            submit_result = ensure_object(submit_result)
+            await log_step(f'点击登录: {submit_result}')
+            await capture_gif_frame(page, '点击登录')
+            if not submit_result.get('ok'):
+                raise RuntimeError(f'点击登录失败: {submit_result}')
+
+            await record_real_action(
+                'click',
+                '点击登录按钮',
+                element={
+                    'element_text': str(submit_result.get('clicked', '登录'))[:80],
+                    'element_tag': 'button',
+                    'locator_strategy': 'xpath',
+                    'locator_value': "(//button[contains(normalize-space(),'登录') or contains(normalize-space(),'注册')])[last()]",
+                    'locator_description': '登录按钮',
+                },
+            )
+            await mark(task_id_by_keywords('登录按钮', '登录 / 注册', '执行登录'), 'completed')
+
+            await page.wait_for_timeout(3000)
+            assertion_state = await evaluate_login_success(page)
+            assertion = {
+                'success': bool(assertion_state.get('passed')),
+                'reason': assertion_state.get('reason', ''),
+                'evidence': assertion_state.get('evidence', {}),
+            }
+
+            await log_step(f'登录断言: {assertion}')
+            await capture_gif_frame(page, '登录断言')
+            await record_real_action(
+                'aiAssert',
+                '断言登录成功',
+                input_value='断言登录成功',
+                assert_value='断言登录成功',
+                element={
+                    'element_text': '页面正文',
+                    'element_tag': 'body',
+                    'locator_strategy': 'css',
+                    'locator_value': 'body',
+                    'locator_description': '页面正文',
+                },
+            )
+            final_task_id = task_id_by_keywords('完成登录') or task_id_by_keywords('断言是否成功登录', '断言登录', '断言是否', '提交登录', '提交登录操作')
+            if assertion.get('success'):
+                await mark(final_task_id, 'completed')
+                login_final_status_recorded = True
+                await emit({'type': 'log', 'content': '\n[System] NN 登录确定性执行完成。\n'})
+                return True
+            else:
+                await mark(final_task_id, 'failed')
+                login_final_status_recorded = True
+                raise RuntimeError(f"登录断言失败: {assertion}")
+
+
+        except Exception as exc:
+            await emit({'type': 'log', 'content': f'\n[System] NN 登录确定性执行失败：{exc}\n'})
+            current = None
+            if planned_tasks:
+                for item in planned_tasks:
+                    if item.get('status', 'pending') in {'pending', 'in_progress'}:
+                        current = item.get('id')
+                        break
+            if current and not login_final_status_recorded:
+                await mark(current, 'failed')
+            raise
+        finally:
+            save_deterministic_gif()
+            try:
+                if context:
+                    await context.close()
+            except Exception:
+                pass
+            try:
+                if browser:
+                    await browser.close()
+            except Exception:
+                pass
+            try:
+                if playwright:
+                    await playwright.stop()
+            except Exception:
+                pass
 
     def _extract_structured_steps(self, text: str):
         """从原始任务文本中稳定提取步骤，作为 LLM 拆分失败时的兜底。"""
@@ -1483,6 +1960,17 @@ class BaseBrowserAgent:
         )
 
     async def run_task(self, task_description: str, planned_tasks=None, callback=None, should_stop=None):
+        # 固定高频流程（如 NN 手机验证码登录）必须先尝试确定性执行，
+        # 不能依赖 LLM 连通性；否则模型临时不可用时，Playwright 兜底永远跑不到。
+        deterministic_history = await self._run_nn_login_deterministic(
+            task_description,
+            planned_tasks=planned_tasks,
+            callback=callback,
+            should_stop=should_stop
+        )
+        if deterministic_history is not None:
+            return deterministic_history
+
         await self._verify_execution_llm()
 
         # Cleanup potential zombie processes before starting
@@ -1496,6 +1984,10 @@ class BaseBrowserAgent:
         controller = Controller()
         _task_was_done = False
         active_task_statuses = {'pending', 'in_progress'}
+        max_execution_seconds = int(os.getenv('AI_AGENT_MAX_EXECUTION_SECONDS', '180'))
+        max_agent_steps = int(os.getenv('AI_AGENT_MAX_STEPS', '30'))
+        no_progress_limit = int(os.getenv('AI_AGENT_NO_PROGRESS_LIMIT', '4'))
+        execution_started_at = time.monotonic()
 
         async def emit_callback(payload):
             if not callback:
@@ -1542,6 +2034,117 @@ class BaseBrowserAgent:
             nonlocal _task_was_done
             _task_was_done = True
             return f"Finished: {text}"
+
+        async def close_popup_in_session(browser_session=None):
+            """Close any active popup/dialog/modal on the current page, return diagnostic text."""
+            if not browser_session:
+                return "No browser session available"
+            try:
+                page = None
+                if hasattr(browser_session, 'get_current_page'):
+                    page = await browser_session.get_current_page()
+                if page is None and hasattr(browser_session, 'must_get_current_page'):
+                    page = await browser_session.must_get_current_page()
+                if page is None:
+                    return "No active page available"
+
+                await page.keyboard.press('Escape')
+                await asyncio.sleep(0.5)
+
+                close_popup_js = """
+                () => {
+                    const selector = [
+                        'button[class*="close"]', 'button[class*="Close"]',
+                        'button[aria-label*="关闭"]', 'button[aria-label*="close"]',
+                        'a[class*="close"]', 'i[class*="close"]',
+                        '[class*="close"][class*="btn"]',
+                        '.modal-header button', '.dialog-header button',
+                        '.el-dialog__headerbtn', '.ant-modal-close',
+                        '.popup-close', '.ad-close',
+                        '.layui-layer-close', '.layui-layer-btn0',
+                        'img[alt*="close"]', 'img[alt*="关闭"]',
+                        'svg[class*="close"]', 'span[class*="close"]'
+                    ].join(',');
+                    const btns = document.querySelectorAll(selector);
+                    for (const btn of btns) {
+                        const rect = btn.getBoundingClientRect();
+                        if (rect.width > 0 && rect.height > 0) {
+                            btn.click();
+                            return 'clicked close btn: ' + btn.outerHTML.slice(0, 80);
+                        }
+                    }
+
+                    const overlays = document.querySelectorAll(
+                        '[class*="modal"],[class*="dialog"],[class*="overlay"],[class*="popup"],[id*="modal"],[id*="dialog"]'
+                    );
+                    for (const el of overlays) {
+                        const style = getComputedStyle(el);
+                        const rect = el.getBoundingClientRect();
+                        const z = parseInt(style.zIndex) || 0;
+                        if (rect.width > 80 && rect.height > 80 && (z >= 100 || style.position === 'fixed')) {
+                            el.style.display = 'none';
+                            return 'hid overlay z=' + z;
+                        }
+                    }
+
+                    const all = Array.from(document.querySelectorAll('body *'));
+                    let highest = null;
+                    let highestZ = 0;
+                    for (const el of all) {
+                        const style = getComputedStyle(el);
+                        const rect = el.getBoundingClientRect();
+                        const z = parseInt(style.zIndex) || 0;
+                        if ((style.position === 'fixed' || style.position === 'absolute') && z >= highestZ && z >= 100 && rect.width > 80 && rect.height > 80) {
+                            highest = el;
+                            highestZ = z;
+                        }
+                    }
+                    if (highest) {
+                        highest.style.display = 'none';
+                        return 'hid fixed layer z=' + highestZ;
+                    }
+                    return 'no popup detected';
+                }
+                """
+                return await page.evaluate(close_popup_js)
+            except Exception as e:
+                logger.warning(f"⚠️ close_popup action failed: {e}")
+                return f"close_popup attempt failed: {e}"
+
+        @controller.action('close_popup')
+        async def close_popup(browser_session=None):
+            """Close any active popup/dialog/modal on the current page."""
+            logger.info("🧹 Executing close_popup: trying Escape key, JS, and element strategies")
+            js_result = await close_popup_in_session(browser_session)
+            logger.info(f"🧹 close_popup result: {js_result}")
+            return f"Closed popup: {js_result}"
+
+        @controller.action('search_page')
+        async def search_page(pattern: str = None, text: str = None, browser_session=None):
+            """Permissive page text search. Accepts both browser-use native `pattern` and common LLM mistake `text`."""
+            keyword = pattern or text or ""
+            logger.info(f"🔎 Executing compatible search_page: {keyword}")
+            if not keyword:
+                return "search_page skipped: empty pattern"
+            try:
+                page = None
+                if browser_session and hasattr(browser_session, 'get_current_page'):
+                    page = await browser_session.get_current_page()
+                if page is None:
+                    return f"search_page received pattern={keyword}, but no active page available"
+                result = await page.evaluate(
+                    """(kw) => {
+                        const bodyText = document.body ? document.body.innerText : '';
+                        const found = bodyText.includes(kw);
+                        try { window.find(kw); } catch(e) {}
+                        return {found, sample: bodyText.slice(0, 300)};
+                    }""",
+                    keyword
+                )
+                return f"search_page pattern={keyword}, found={result.get('found')}, sample={result.get('sample')}"
+            except Exception as e:
+                logger.warning(f"⚠️ compatible search_page failed: {e}")
+                return f"search_page failed but ignored: {e}"
 
         @controller.action('close_tab')
         async def close_tab(browser_session=None):
@@ -1677,8 +2280,10 @@ class BaseBrowserAgent:
         final_task += "8. DO NOT REPEAT: If a task is complete, mark it and MOVE ON. Never click the same search result or link twice unless you verified the first click failed.\n"
         final_task += "9. VERIFICATION: Task 15/16 usually require checking the list. Ensure you are on the correct page and the new data is visible before marking complete.\n"
         final_task += "10. ELEMENT IDENTIFICATION: Carefully identify elements before clicking. AVOID clicking 'close' or 'cancel' buttons when filling forms. Check button labels, aria-labels, and icons to ensure you're clicking the correct element.\n"
-        final_task += "11. ACTION PARAM FORMAT: For browser actions, always use browser-use native parameter names. Use 'index' for click/input/select actions, use 'text' for typed content, and never use aliases like 'element_id'.\n"
+        final_task += "11. ACTION PARAM FORMAT: For browser actions, always use browser-use native parameter names. Use 'index' for click/input/select actions, use 'text' for typed input content, use 'pattern' for search_page (NEVER use search_page text=...). Never use aliases like 'element_id'.\n"
         final_task += "12. CREDENTIALS RULE: NEVER invent, replace, or guess credentials. Only use the username/password explicitly provided in the task. If login keeps failing with an explicit error like '登录失败' or '用户名或密码错误', stop retrying after a small number of attempts and mark the current login task as failed.\n"
+        final_task += "13. POPUP/DISMISS: When you need to close a popup/ad/modal but cannot find its close button (X) in the interactive elements list, call 'close_popup()' action. It tries Escape key, JS-based close button detection, and overlay removal. If the popup still persists, close_popup again — do NOT get stuck.\n"
+        final_task += "14. AGGRESSIVE CLOSE: If test environment has distracting ads, popups, or overlays that block interaction, call close_popup() multiple times early in the process to clear the page.\n"
 
         if 'qwen' in self.model_name.lower() or 'deepseek' in self.model_name.lower():
             final_task += "13. EXTREMELY MINIMIZE output tokens for speed. Keep responses as short as possible while maintaining accuracy.\n"
@@ -1689,22 +2294,35 @@ class BaseBrowserAgent:
             # 在中文标点前加空格，避免它们成为 URL 的一部分
             final_task = re.sub(r'(https?://[^\s\u4e00-\u9fa5]+?)(?=[，；。、！])', r'\1 ', final_task)
             logger.info(f"🔧 Optimized task description for URL extraction")
-        except:
+        except Exception:
             pass
 
         browser_profile = self._create_browser_profile()
+
+        # 检测模型是否支持视觉
+        # 不支持视觉的模型关键字
+        no_vision_models = ['deepseek', 'qwen', 'glm', 'chatglm', 'baichuan', 'moonshot', 'kimi', 'doubao', 'mimo']
+        model_name_lower = self.model_name.lower()
+        model_supports_vision = not any(keyword in model_name_lower for keyword in no_vision_models)
+        
+        # 根据环境变量和模型能力决定是否使用视觉
+        env_use_vision = str(os.getenv('AI_AGENT_USE_VISION', 'true')).lower() not in ('0', 'false', 'no')
+        use_vision = env_use_vision and model_supports_vision
+        
+        if env_use_vision and not model_supports_vision:
+            logger.warning(f"模型 {self.model_name} 不支持视觉，已自动禁用视觉模式")
 
         agent = Agent(
             task=final_task,
             llm=self.llm,
             controller=controller,
             browser_profile=browser_profile,
-            use_vision=False,
+            use_vision=use_vision,
             max_actions_per_step=10,  # 增加步进密度，减少总步骤数，降低超时风险
             max_retries=1,  # 减少重试次数以提高速度 (从2改为1)
-            max_failures=2,  # 减少最大失败次数，避免过长等待 (从默认3改为2)
-            llm_timeout=60,  # 设置LLM调用超时为60秒（支持硅基流动等大模型API）
-            step_timeout=90,  # 设置每步超时为90秒
+            max_failures=4,  # 给弹窗/截图等偶发失败留出恢复空间，避免过早终止
+            llm_timeout=45,  # 降低LLM单次等待，避免整体任务长时间卡住
+            step_timeout=45,  # 降低单步超时，配合整单超时熔断
             generate_gif=self.enable_gif,  # 根据开关决定是否生成GIF
         )
         agent._task_was_done = False
@@ -1717,9 +2335,152 @@ class BaseBrowserAgent:
         last_processed_step = 0
         last_marked_task_id = 0  # 跟踪上一次标记的任务ID
         known_tab_ids = set()
+        consecutive_no_progress_steps = 0
+        visited_url_counts = {}
+        repeated_navigation_limit = int(os.getenv('AI_AGENT_REPEAT_NAVIGATION_LIMIT', '1'))
+
+        def normalize_url_for_guard(url):
+            normalized = str(url or '').strip()
+            if not normalized:
+                return ''
+            normalized = normalized.rstrip('/')
+            return normalized.lower()
+
+        def extract_navigation_urls(actions):
+            urls = []
+            for action in actions:
+                action_dict = action.model_dump() if hasattr(action, 'model_dump') else getattr(action, '_action_dict', {})
+                if isinstance(action_dict, dict):
+                    for key in ['go_to_url', 'navigate', 'open_new_tab']:
+                        if key in action_dict:
+                            params = action_dict.get(key)
+                            url = params.get('url') if isinstance(params, dict) else params
+                            normalized = normalize_url_for_guard(url)
+                            if normalized and not is_placeholder_url(normalized):
+                                urls.append(normalized)
+            return urls
+
+        def normalize_recorded_action(action_dict, page_url='', active_task_desc=''):
+            """把 browser-use 模型动作转换为可沉淀的真实动作草稿。"""
+            if not isinstance(action_dict, dict):
+                return None
+            skip_actions = {
+                'mark_task_complete', 'mark_task_failed', 'mark_task_skipped',
+                'update_task_status', 'done', 'Done', 'search_page'
+            }
+            for name, params in action_dict.items():
+                if name in skip_actions:
+                    continue
+                params = params if isinstance(params, dict) else {'value': params}
+                desc_suffix = f"（{active_task_desc}）" if active_task_desc else ''
+                if name in ['go_to_url', 'navigate', 'open_new_tab']:
+                    url = params.get('url') or params.get('value') or ''
+                    return {
+                        'action_type': 'goto',
+                        'description': f'访问: {url}',
+                        'input_value': url,
+                        'assert_value': '',
+                        'element_text': '',
+                        'element_tag': '',
+                        'locator_strategy': '',
+                        'locator_value': '',
+                        'locator_description': f'访问: {url}',
+                        'page_url': url or page_url,
+                        'source': 'browser_use_real_action',
+                        'timestamp': time.time(),
+                    }
+                if name in ['click_element', 'click']:
+                    index = params.get('index') or params.get('value') or ''
+                    return {
+                        'action_type': 'click',
+                        'description': f'点击页面元素[{index}]{desc_suffix}',
+                        'input_value': '',
+                        'assert_value': '',
+                        'element_text': str(params.get('text') or params.get('label') or active_task_desc or '')[:80],
+                        'element_tag': '',
+                        'locator_strategy': 'ai_index',
+                        'locator_value': str(index),
+                        'locator_description': active_task_desc or f'页面元素[{index}]',
+                        'page_url': page_url,
+                        'source': 'browser_use_real_action',
+                        'timestamp': time.time(),
+                    }
+                if name in ['input_text', 'input']:
+                    value = params.get('text') or params.get('value') or ''
+                    index = params.get('index') or ''
+                    return {
+                        'action_type': 'fill',
+                        'description': f'输入 {value}{desc_suffix}',
+                        'input_value': value,
+                        'assert_value': '',
+                        'element_text': str(params.get('label') or active_task_desc or '')[:80],
+                        'element_tag': 'input',
+                        'locator_strategy': 'ai_index',
+                        'locator_value': str(index),
+                        'locator_description': active_task_desc or f'输入框[{index}]',
+                        'page_url': page_url,
+                        'source': 'browser_use_real_action',
+                        'timestamp': time.time(),
+                    }
+                if name in ['select_dropdown_option', 'select_option']:
+                    value = params.get('text') or params.get('option') or params.get('value') or ''
+                    index = params.get('index') or ''
+                    return {
+                        'action_type': 'select',
+                        'description': f'选择 {value}{desc_suffix}',
+                        'input_value': value,
+                        'assert_value': '',
+                        'element_text': str(params.get('label') or active_task_desc or '')[:80],
+                        'element_tag': 'select',
+                        'locator_strategy': 'ai_index',
+                        'locator_value': str(index),
+                        'locator_description': active_task_desc or f'下拉元素[{index}]',
+                        'page_url': page_url,
+                        'source': 'browser_use_real_action',
+                        'timestamp': time.time(),
+                    }
+                if name in ['scroll_down', 'scroll_up']:
+                    return None
+                return {
+                    'action_type': 'click',
+                    'description': f'{name}{desc_suffix}',
+                    'input_value': str(params.get('text') or params.get('value') or ''),
+                    'assert_value': '',
+                    'element_text': str(active_task_desc or name)[:80],
+                    'element_tag': '',
+                    'locator_strategy': '',
+                    'locator_value': '',
+                    'locator_description': active_task_desc or name,
+                    'page_url': page_url,
+                    'source': 'browser_use_real_action',
+                    'timestamp': time.time(),
+                }
+            return None
+
+        async def current_page_url(agent_instance):
+            try:
+                browser_session = getattr(agent_instance, 'browser_session', None)
+                if browser_session and hasattr(browser_session, 'get_current_page'):
+                    page = await browser_session.get_current_page()
+                    return getattr(page, 'url', '') or ''
+            except Exception:
+                pass
+            return ''
 
         async def on_step_end(agent_instance):
-            nonlocal last_processed_step, last_marked_task_id, known_tab_ids
+            nonlocal last_processed_step, last_marked_task_id, known_tab_ids, consecutive_no_progress_steps, visited_url_counts
+
+            elapsed_seconds = time.monotonic() - execution_started_at
+            if elapsed_seconds > max_execution_seconds:
+                current_active_task = get_next_active_task()
+                current_active_task_id = current_active_task.get('id') if current_active_task else None
+                await emit_callback({
+                    'type': 'log',
+                    'content': f"\n[System] AI执行超过最大时长 {max_execution_seconds} 秒，已自动停止，避免长时间卡住。\n"
+                })
+                if current_active_task_id:
+                    await emit_callback({'task_id': int(current_active_task_id), 'status': 'failed'})
+                raise KeyboardInterrupt("AI execution timeout")
 
             if should_stop:
                 do_stop = await should_stop() if asyncio.iscoroutinefunction(should_stop) else should_stop()
@@ -1833,11 +2594,88 @@ class BaseBrowserAgent:
                         action_str = " | ".join([self._format_action(a) for a in actions])
                         log_content = f"\n[Step {i + 1}]\n执行: {action_str}\n"
 
+                        navigation_urls = extract_navigation_urls(actions)
+                        repeated_url = None
+                        for navigation_url in navigation_urls:
+                            visited_url_counts[navigation_url] = visited_url_counts.get(navigation_url, 0) + 1
+                            if visited_url_counts[navigation_url] > repeated_navigation_limit:
+                                repeated_url = navigation_url
+                                break
+
+                        if repeated_url:
+                            current_active_task = get_next_active_task()
+                            current_active_task_id = current_active_task.get('id') if current_active_task else None
+                            await emit_callback({
+                                'type': 'log',
+                                'content': (
+                                    f"\n[System] 检测到 AI 重复访问同一页面：{repeated_url}，"
+                                    "已自动停止，避免反复刷新网页。\n"
+                                )
+                            })
+                            if current_active_task_id:
+                                await emit_callback({'task_id': int(current_active_task_id), 'status': 'failed'})
+                            raise KeyboardInterrupt("AI repeated navigation guard")
+
+                        browser_session = getattr(agent_instance, 'browser_session', None)
+                        # 重复导航不是业务进展；单纯反复访问 URL 不能重置“无进展”计数。
+                        made_progress = bool((has_real_action and not navigation_urls) or step_has_task_complete or str(action_str).strip())
+                        if (not made_progress) and current_active_task_id and is_close_step(current_active_task_desc):
+                            close_result = await close_popup_in_session(browser_session)
+                            logger.info(f"🧹 Auto popup close for task {current_active_task_id}: {close_result}")
+                            await emit_callback({
+                                'type': 'log',
+                                'content': f"\n[System] 检测到当前子任务是关闭弹窗，已自动执行 close_popup：{close_result}\n"
+                            })
+                            await emit_callback({'task_id': int(current_active_task_id), 'status': 'completed'})
+                            if current_active_task:
+                                current_active_task['status'] = 'completed'
+                            made_progress = True
+                            step_has_task_complete = True
+
+                        if made_progress:
+                            consecutive_no_progress_steps = 0
+                        else:
+                            consecutive_no_progress_steps += 1
+                            if consecutive_no_progress_steps >= no_progress_limit:
+                                current_active_task = get_next_active_task()
+                                current_active_task_id = current_active_task.get('id') if current_active_task else None
+                                await emit_callback({
+                                    'type': 'log',
+                                    'content': (
+                                        f"\n[System] 连续 {no_progress_limit} 步未产生有效操作，已自动停止，"
+                                        "请检查任务描述、页面状态或模型输出。\n"
+                                    )
+                                })
+                                if current_active_task_id:
+                                    await emit_callback({'task_id': int(current_active_task_id), 'status': 'failed'})
+                                raise KeyboardInterrupt("AI no-progress guard")
+
                         if callback:
                             if asyncio.iscoroutinefunction(callback):
                                 await callback({'type': 'log', 'content': log_content})
                             else:
                                 callback({'type': 'log', 'content': log_content})
+
+                        page_url_for_record = await current_page_url(agent_instance)
+                        for action in actions:
+                            action_dict = action.model_dump() if hasattr(action, 'model_dump') else getattr(action, '_action_dict', {})
+                            recorded_action = normalize_recorded_action(
+                                action_dict,
+                                page_url=page_url_for_record,
+                                active_task_desc=current_active_task_desc,
+                            )
+                            if recorded_action:
+                                await emit_callback({'type': 'record_action', 'action': recorded_action})
+
+                        if planned_tasks and all(
+                            task.get('status') in ['completed', 'failed', 'skipped']
+                            for task in planned_tasks
+                        ):
+                            await emit_callback({
+                                'type': 'log',
+                                'content': "\n[System] 所有子任务均已进入终态，自动结束AI执行。\n"
+                            })
+                            raise KeyboardInterrupt("All planned tasks finished")
 
                         browser_session = getattr(agent_instance, 'browser_session', None)
                         if browser_session is not None:
@@ -1904,31 +2742,30 @@ class BaseBrowserAgent:
             import inspect
             sig = inspect.signature(agent.run)
             if 'on_step_end' in sig.parameters:
-                await agent.run(max_steps=100, on_step_end=on_step_end)
+                await asyncio.wait_for(
+                    agent.run(max_steps=max_agent_steps, on_step_end=on_step_end),
+                    timeout=max_execution_seconds + 15
+                )
             else:
-                await agent.run(max_steps=100)
+                await asyncio.wait_for(
+                    agent.run(max_steps=max_agent_steps),
+                    timeout=max_execution_seconds + 15
+                )
+        except asyncio.TimeoutError:
+            await emit_callback({
+                'type': 'log',
+                'content': f"\n[System] AI执行达到硬超时 {max_execution_seconds + 15} 秒，已强制结束。\n"
+            })
         except KeyboardInterrupt:
             pass
         except Exception as e:
             logger.error(f"Agent execution error: {e}")
             raise
 
-        # 在任务结束时检查不一致的任务状态
+        # 避免在 browser-use history 对象上做深度反射：部分版本的 history.steps/截图字段可能阻塞，
+        # 导致 Agent 已结束但执行记录一直 running。最终状态收敛统一交给 ViewSet 的 planned_tasks 检查。
         history = getattr(agent, 'history', [])
-        if history:
-            logger.info("🔍 Performing final task status consistency check")
-            # 检查是否有任务执行了但未标记完成
-            executed_tasks_info = self._find_executed_tasks(history)
-            if (
-                executed_tasks_info
-                and executed_tasks_info.get('executed_actions', 0) > len(executed_tasks_info.get('marked_tasks', []))
-                and executed_tasks_info.get('unmarked_actions')
-            ):
-                logger.warning(
-                    f"⚠️ Found {executed_tasks_info['executed_actions']} executed actions, but only {len(executed_tasks_info['marked_tasks'])} tasks were explicitly marked complete")
-                logger.warning(f"⚠️ Unmarked actions: {executed_tasks_info['unmarked_actions']}")
-                logger.warning("⚠️ This indicates the AI agent did not follow the 'mark_task_complete' rule properly.")
-
+        logger.info("🔍 Skipping deep final history scan; returning agent history for ViewSet finalization")
         return history
 
     def _find_executed_tasks(self, history):

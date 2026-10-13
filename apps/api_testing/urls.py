@@ -10,6 +10,7 @@ from .views import (
     TaskNotificationSettingViewSet, OperationLogViewSet,
     ApiDashboardViewSet, AIServiceConfigViewSet
 )
+from .import_export.views import ImportPreviewView, ImportConfirmView, ExportView
 
 router = DefaultRouter()
 router.register(r'dashboard', ApiDashboardViewSet, basename='dashboard')
@@ -31,6 +32,9 @@ router.register(r'ai-service-configs', AIServiceConfigViewSet, basename='aiservi
 
 urlpatterns = [
     path('api-testing/', include(router.urls)),
+    path('api-testing/import/preview/', ImportPreviewView.as_view(), name='api-import-preview'),
+    path('api-testing/import/confirm/', ImportConfirmView.as_view(), name='api-import-confirm'),
+    path('api-testing/export/<int:project_id>/', ExportView.as_view(), name='api-project-export'),
 ]
 
 # 添加媒体文件路由

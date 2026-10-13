@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+import uuid
 
 from .constants import DeviceStatus, ExecutionStatus, ExecutionResult, ElementType
 
@@ -44,11 +45,23 @@ class AppProject(models.Model):
 
 class AppTestConfig(models.Model):
     """APP自动化测试配置"""
+    EXECUTION_ENGINE_CHOICES = [
+        ('auto', '自动选择'),
+        ('uiautomator2', 'UIAutomator2（推荐）'),
+        ('airtest', 'Airtest（图片识别兼容）'),
+    ]
     adb_path = models.CharField(
         max_length=500, 
         default='adb', 
         verbose_name='ADB路径',
         help_text='Android Debug Bridge 工具路径，默认为 adb（系统PATH）'
+    )
+    execution_engine = models.CharField(
+        max_length=30,
+        choices=EXECUTION_ENGINE_CHOICES,
+        default='auto',
+        verbose_name='默认执行引擎',
+        help_text='自动选择会优先使用 UIAutomator2，图片识别流程回退到 Airtest'
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
@@ -536,6 +549,67 @@ class AppTestCase(models.Model):
         return self.name
 
 
+class AppTestBatchReport(models.Model):
+    """一次批量或套件执行产生的汇总报告。"""
+    STATUS_CHOICES = [
+        (ExecutionStatus.PENDING, '等待中'),
+        (ExecutionStatus.RUNNING, '执行中'),
+        (ExecutionStatus.COMPLETED, '已完成'),
+        (ExecutionStatus.ERROR, '执行异常'),
+        (ExecutionStatus.STOPPED, '已停止'),
+    ]
+    RESULT_CHOICES = [
+        (ExecutionResult.PASSED, '通过'),
+        (ExecutionResult.FAILED, '失败'),
+        (ExecutionResult.SKIPPED, '跳过'),
+    ]
+
+    batch_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, verbose_name='批次标识')
+    test_suite = models.ForeignKey(
+        'AppTestSuite', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='batch_reports', verbose_name='所属套件'
+    )
+    device = models.ForeignKey(
+        'AppDevice', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='batch_reports', verbose_name='执行设备'
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='app_test_batch_reports', verbose_name='执行用户'
+    )
+    task_id = models.CharField(max_length=255, blank=True, default='', verbose_name='Celery任务ID')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=ExecutionStatus.PENDING, verbose_name='执行状态')
+    result = models.CharField(max_length=20, choices=RESULT_CHOICES, null=True, blank=True, default=None, verbose_name='测试结果')
+    total_cases = models.IntegerField(default=0, verbose_name='总用例数')
+    passed_cases = models.IntegerField(default=0, verbose_name='通过用例数')
+    failed_cases = models.IntegerField(default=0, verbose_name='失败用例数')
+    error_cases = models.IntegerField(default=0, verbose_name='异常用例数')
+    skipped_cases = models.IntegerField(default=0, verbose_name='跳过用例数')
+    started_at = models.DateTimeField(null=True, blank=True, verbose_name='开始时间')
+    finished_at = models.DateTimeField(null=True, blank=True, verbose_name='结束时间')
+    duration = models.FloatField(default=0, verbose_name='执行时长(秒)')
+    report_path = models.CharField(max_length=500, blank=True, default='', verbose_name='汇总Allure报告路径')
+    error_message = models.TextField(blank=True, default='', verbose_name='错误信息')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'app_test_batch_reports'
+        verbose_name = 'APP批次测试报告'
+        verbose_name_plural = 'APP批次测试报告'
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['status']), models.Index(fields=['-created_at'])]
+
+    def __str__(self):
+        return f"批次 {self.batch_id}"
+
+    @property
+    def pass_rate(self):
+        if not self.total_cases:
+            return 0
+        return round(self.passed_cases * 100 / self.total_cases, 2)
+
+
 class AppTestExecution(models.Model):
     """APP测试执行记录"""
     STATUS_CHOICES = [
@@ -567,6 +641,14 @@ class AppTestExecution(models.Model):
         blank=True,
         related_name='executions',
         verbose_name='所属套件'
+    )
+    batch_report = models.ForeignKey(
+        AppTestBatchReport,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='executions',
+        verbose_name='所属批次报告'
     )
     device = models.ForeignKey(
         AppDevice, 

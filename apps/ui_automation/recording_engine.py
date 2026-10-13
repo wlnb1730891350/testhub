@@ -11,6 +11,7 @@ import time
 import uuid
 from typing import Optional
 from django.db import transaction
+from .runtime_flags import coerce_bool
 
 logger = logging.getLogger(__name__)
 
@@ -81,8 +82,11 @@ RECORDER_SCRIPT = """
 
     function getElementLabel(el) {
         if (!(el instanceof Element)) return '';
+        if (hasAvatarSignal(el)) return '用户头像';
         var ariaLabel = (el.getAttribute('aria-label') || '').trim();
         if (ariaLabel) return ariaLabel;
+        var alt = (el.getAttribute('alt') || '').trim();
+        if (alt) return alt;
         var placeholder = (el.getAttribute('placeholder') || '').trim();
         if (placeholder) return placeholder;
         var title = (el.getAttribute('title') || '').trim();
@@ -100,10 +104,26 @@ RECORDER_SCRIPT = """
         return '';
     }
 
+    function hasAvatarSignal(el) {
+        if (!(el instanceof Element)) return false;
+        var tag = (el.tagName || '').toLowerCase();
+        var id = (el.id || '').toLowerCase();
+        var className = typeof el.className === 'string' ? el.className.toLowerCase() : '';
+        var alt = (el.getAttribute('alt') || '').toLowerCase();
+        var ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
+        var title = (el.getAttribute('title') || '').toLowerCase();
+        var text = ((el.textContent || '') + ' ' + alt + ' ' + ariaLabel + ' ' + title).toLowerCase();
+        if (/(avatar|头像|profile|portrait|user-avatar|head-img|headicon|nnavatar)/.test(className)) return true;
+        if (/(avatar|头像|profile|portrait|user-avatar|head-img|headicon)/.test(id)) return true;
+        if (tag === 'img' && /(avatar|头像|profile|portrait)/.test(text)) return true;
+        return false;
+    }
+
     function isUsefulTarget(el) {
         if (!(el instanceof Element)) return false;
         var tag = (el.tagName || '').toLowerCase();
         if (['button', 'a', 'input', 'textarea', 'select', 'option', 'label'].indexOf(tag) >= 0) return true;
+        if (hasAvatarSignal(el)) return true;
         var role = (el.getAttribute('role') || '').toLowerCase();
         if (['button', 'link', 'tab', 'menuitem', 'option', 'checkbox', 'radio', 'switch', 'textbox'].indexOf(role) >= 0) return true;
         if (el.hasAttribute('onclick')) return true;
@@ -127,6 +147,50 @@ RECORDER_SCRIPT = """
 
     function getTextLength(el) {
         return getElementLabel(el).length;
+    }
+
+    function findPreferredAncestor(el, preferredTagNames) {
+        if (!(el instanceof Element)) return el;
+        var current = el;
+        var depth = 0;
+        while (current && current !== document.body && depth < 8) {
+            var tag = (current.tagName || '').toLowerCase();
+            if (preferredTagNames && preferredTagNames.indexOf(tag) >= 0) return current;
+            if (isUsefulTarget(current) && !isGenericContainer(current)) return current;
+            current = current.parentElement;
+            depth += 1;
+        }
+        return el;
+    }
+
+    function getEventPathTarget(e, preferredTagNames) {
+        if (e && typeof e.clientX === 'number' && typeof e.clientY === 'number' && typeof document.elementsFromPoint === 'function') {
+            var elements = document.elementsFromPoint(e.clientX, e.clientY) || [];
+            for (var j = 0; j < elements.length; j++) {
+                var pointCandidate = elements[j];
+                if (!(pointCandidate instanceof Element)) continue;
+                if (pointCandidate.id === '__testhub_record_indicator') continue;
+                return findPreferredAncestor(pointCandidate, preferredTagNames);
+            }
+        }
+        if (e && typeof e.composedPath === 'function') {
+            var path = e.composedPath();
+            for (var i = 0; i < path.length; i++) {
+                var candidate = path[i];
+                if (!(candidate instanceof Element)) continue;
+                if (candidate.id === '__testhub_record_indicator') continue;
+                return findPreferredAncestor(candidate, preferredTagNames);
+            }
+        }
+        var target = e && e.target instanceof Element ? e.target : null;
+        if (target instanceof Element) {
+            return findPreferredAncestor(target, preferredTagNames);
+        }
+        if (e && typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+            var pointTarget = document.elementFromPoint(e.clientX, e.clientY);
+            return findPreferredAncestor(pointTarget, preferredTagNames);
+        }
+        return null;
     }
 
     function scoreTargetCandidate(el, preferredTagNames) {
@@ -158,9 +222,20 @@ RECORDER_SCRIPT = """
 
     function findActionTarget(el, preferredTagNames) {
         if (!(el instanceof Element)) return el;
-        var best = el;
-        var bestScore = scoreTargetCandidate(el, preferredTagNames);
-        var current = el.parentElement;
+        var preferred = findPreferredAncestor(el, preferredTagNames);
+        if (preferred instanceof Element) {
+            var preferredTag = (preferred.tagName || '').toLowerCase();
+            if (
+                hasAvatarSignal(preferred) ||
+                (preferredTagNames && preferredTagNames.indexOf(preferredTag) >= 0) ||
+                (isUsefulTarget(preferred) && !isGenericContainer(preferred) && ['div', 'section', 'form'].indexOf(preferredTag) < 0)
+            ) {
+                return preferred;
+            }
+        }
+        var best = preferred instanceof Element ? preferred : el;
+        var bestScore = scoreTargetCandidate(best, preferredTagNames);
+        var current = best.parentElement;
         var depth = 0;
         while (current && current !== document.body && depth < 8) {
             var currentScore = scoreTargetCandidate(current, preferredTagNames) - depth * 3;
@@ -176,6 +251,12 @@ RECORDER_SCRIPT = """
 
     function getLocator(el) {
         if (!(el instanceof Element)) return { strategy: 'css', value: '', description: '' };
+        if (hasAvatarSignal(el)) {
+            var userInfoRegion = el.closest('#user-info-region');
+            if (userInfoRegion && userInfoRegion.querySelector('.NNAvatar')) {
+                return { strategy: 'css', value: '#user-info-region .NNAvatar', description: 'avatar' };
+            }
+        }
         var testAttrs = ['data-testid', 'data-cy', 'data-qa'];
         for (var ai = 0; ai < testAttrs.length; ai++) {
             var attr = testAttrs[ai];
@@ -270,6 +351,7 @@ RECORDER_SCRIPT = """
 
     var _pendingInput = null;
     var _inputTimer = null;
+    var _lastPointerDown = null;
 
     function flushPendingInput() {
         if (_pendingInput) {
@@ -299,9 +381,31 @@ RECORDER_SCRIPT = """
         return parts.filter(Boolean).join('+');
     }
 
+    document.addEventListener('mousedown', function(e) {
+        var downTarget = getEventPathTarget(e, ['button', 'a', 'input', 'textarea', 'select', 'label']);
+        if (!(downTarget instanceof Element) || downTarget.id === '__testhub_record_indicator') return;
+        _lastPointerDown = {
+            target: downTarget,
+            x: e.clientX,
+            y: e.clientY,
+            timestamp: Date.now()
+        };
+    }, true);
+
     document.addEventListener('click', function(e) {
         flushPendingInput();
-        var rawTarget = e.target instanceof Element ? e.target : document.elementFromPoint(e.clientX, e.clientY);
+        var rawTarget = null;
+        if (_lastPointerDown && (Date.now() - _lastPointerDown.timestamp) <= 1200) {
+            var deltaX = Math.abs((_lastPointerDown.x || 0) - e.clientX);
+            var deltaY = Math.abs((_lastPointerDown.y || 0) - e.clientY);
+            if (deltaX <= 12 && deltaY <= 12) {
+                rawTarget = _lastPointerDown.target;
+            }
+        }
+        if (!(rawTarget instanceof Element)) {
+            rawTarget = getEventPathTarget(e, ['button', 'a', 'input', 'textarea', 'select', 'label']);
+        }
+        _lastPointerDown = null;
         var el = findActionTarget(rawTarget, ['button', 'a', 'input', 'textarea', 'select', 'label']);
         if (el.id === '__testhub_record_indicator') return;
         var locator = getLocator(el);
@@ -466,6 +570,7 @@ class RecordingEngine:
     def start_recording(cls, session_id, start_url, project_id,
                         browser_type="chromium", headless=False, user=None, auth_token=""):
         from .models import RecordingSession, UiProject
+        headless = coerce_bool(headless)
 
         with _session_lock:
             if session_id in _active_sessions:
@@ -505,6 +610,7 @@ class RecordingEngine:
     @classmethod
     def _run_recording(cls, session_id, start_url, browser_type, headless, auth_token=""):
         from .models import RecordingSession
+        headless = coerce_bool(headless)
 
         def update_status(status, error=""):
             def _do_update():
@@ -713,7 +819,7 @@ class RecordingEngine:
                     if "Execution context was destroyed" not in str(poll_err) and "Target closed" not in str(poll_err):
                         logger.warning("[Recording] Poll error: %s", poll_err)
                 try:
-                    stop_event.wait(timeout=1.0)
+                    stop_event.wait(timeout=0.25)
                 except Exception:
                     pass
 
@@ -769,7 +875,7 @@ class RecordingEngine:
         with _session_lock:
             session_data = _active_sessions.get(session_id, {})
 
-        actions = session_data.get("actions", [])
+        actions = cls._clean_actions(session_data.get("actions", []))
         error = session_data.get("error")
 
         # 绛夊緟褰曞埗杩涚▼瀹屾垚
@@ -857,6 +963,8 @@ class RecordingEngine:
             return {"success": False, "error": "过滤后没有可保存的录制步骤"}
 
         created_steps = 0
+        steps_before_save = 0
+        total_steps_after_save = 0
         try:
             with transaction.atomic():
                 append_mode = bool(target_test_case_id)
@@ -876,6 +984,7 @@ class RecordingEngine:
                         created_by=user,
                     )
                     start_step_number = 0
+                steps_before_save = start_step_number
 
                 for i, action in enumerate(clean_actions):
                     strategy_name = action.get("locator_strategy", "css")
@@ -911,6 +1020,7 @@ class RecordingEngine:
                         description=cls.generate_step_description(action),
                     )
                     created_steps += 1
+                total_steps_after_save = steps_before_save + created_steps
         except Exception as e:
             logger.error("保存录制步骤失败，已回滚: %s", e, exc_info=True)
             return {"success": False, "error": f"保存录制步骤失败: {e}"}
@@ -923,6 +1033,8 @@ class RecordingEngine:
             "test_case_id": test_case.id,
             "test_case_name": test_case.name,
             "steps_created": created_steps,
+            "steps_before_save": steps_before_save,
+            "total_steps_after_save": total_steps_after_save,
             "save_mode": "append" if append_mode else "create",
         }
 
@@ -931,12 +1043,46 @@ class RecordingEngine:
         if not actions:
             return []
         cleaned = []
-        for action in actions:
-            at = action.get("action_type")
-            if at == "fill" and cleaned and cleaned[-1].get("action_type") == "fill":
-                if cleaned[-1].get("locator_value") == action.get("locator_value"):
+        for raw_action in actions:
+            action = dict(raw_action or {})
+            action_type = str(action.get("action_type", "")).lower().strip()
+            locator_value = str(action.get("locator_value", "")).strip()
+            element_text = str(action.get("element_text", "")).strip()
+            description = str(action.get("locator_description", "")).strip()
+            input_value = str(action.get("input_value", ""))
+
+            if action_type in {"", "goto", "navigate"}:
+                continue
+            if action_type == "press" and input_value in {"Shift", "Control", "Alt", "Meta"}:
+                continue
+            if action_type == "fill" and not locator_value and not element_text:
+                continue
+            if action_type == "click" and not locator_value and not element_text and not description:
+                continue
+
+            action["action_type"] = "fill" if action_type == "type" else action_type
+
+            if action["action_type"] == "fill" and cleaned:
+                prev = cleaned[-1]
+                if prev.get("action_type") == "fill" and prev.get("locator_value") == locator_value:
                     cleaned[-1] = action
                     continue
+                if prev.get("action_type") == "click" and prev.get("locator_value") == locator_value:
+                    cleaned[-1] = action
+                    continue
+
+            if action["action_type"] == "click" and cleaned:
+                prev = cleaned[-1]
+                same_locator = prev.get("locator_value") and prev.get("locator_value") == locator_value
+                same_text = prev.get("element_text") and prev.get("element_text") == element_text
+                if prev.get("action_type") == "click" and (same_locator or same_text):
+                    cleaned[-1] = action
+                    continue
+
+            if action["action_type"] == "wait" and cleaned and cleaned[-1].get("action_type") == "wait":
+                cleaned[-1] = action
+                continue
+
             cleaned.append(action)
         return cleaned
 

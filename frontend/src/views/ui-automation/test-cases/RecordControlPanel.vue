@@ -205,9 +205,10 @@ import {
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   projectId: { type: [Number, String], default: '' },
-  defaultUrl: { type: String, default: 'https://test6-web.nn.com/' },
+  defaultUrl: { type: String, default: '' },
   currentTestCaseId: { type: [Number, String], default: '' },
-  currentTestCaseName: { type: String, default: '' }
+  currentTestCaseName: { type: String, default: '' },
+  currentTestCaseStepCount: { type: [Number, String], default: 0 }
 })
 
 const emit = defineEmits(['update:modelValue', 'saved'])
@@ -223,9 +224,11 @@ const suggestedSkipReasons = ref({})
 const suggestedSegments = ref([])
 const pollTimer = ref(null)
 const actionsListRef = ref(null)
+const pollInFlight = ref(false)
+const lastRenderedActionsCount = ref(0)
 
 const recordForm = reactive({
-  startUrl: 'https://test6-web.nn.com/',
+  startUrl: '',
   browser: 'chromium',
   headless: false
 })
@@ -245,10 +248,12 @@ const isActionSelectionIndeterminate = computed(() => {
 const suggestedFilteredCount = computed(() => Object.keys(suggestedSkipReasons.value).length)
 
 function syncSaveMode() {
-  saveForm.mode = canAppendToCurrentCase.value ? 'append' : 'create'
+  if (saveForm.mode !== 'append' || !canAppendToCurrentCase.value) {
+    saveForm.mode = 'create'
+  }
   if (saveForm.mode === 'append') {
     saveForm.name = props.currentTestCaseName || ''
-  } else if (!saveForm.name && sessionId.value) {
+  } else if (!saveForm.name || saveForm.name === (props.currentTestCaseName || '')) {
     saveForm.name = `录制用例_${sessionId.value}`
   }
 }
@@ -258,6 +263,7 @@ function clearRecordingDraft() {
   selectedActionIndexes.value = []
   suggestedSkipReasons.value = {}
   suggestedSegments.value = []
+  lastRenderedActionsCount.value = 0
   sessionId.value = ''
   isRecording.value = false
   saveForm.name = ''
@@ -280,6 +286,7 @@ function stopPolling() {
     clearInterval(pollTimer.value)
     pollTimer.value = null
   }
+  pollInFlight.value = false
 }
 
 function scrollActionsToBottom() {
@@ -529,7 +536,10 @@ async function refreshRecordedActions({ autoSelect = false } = {}) {
 
   const actionsRes = await getRecordingActions(sessionId.value)
   const data = actionsRes.data || actionsRes
-  recordedActions.value = Array.isArray(data.actions) ? data.actions : []
+  const nextActions = Array.isArray(data.actions) ? data.actions : []
+  const hasNewActions = nextActions.length > recordedActions.value.length
+  recordedActions.value = nextActions
+  lastRenderedActionsCount.value = nextActions.length
   updateSuggestedSelection()
 
   if (autoSelect) {
@@ -543,23 +553,28 @@ async function refreshRecordedActions({ autoSelect = false } = {}) {
       .sort((a, b) => a - b)
   }
 
-  await nextTick()
-  scrollActionsToBottom()
+  if (hasNewActions) {
+    await nextTick()
+    scrollActionsToBottom()
+  }
 }
 
 function startPolling() {
   stopPolling()
   pollTimer.value = setInterval(async () => {
-    if (!sessionId.value) return
+    if (!sessionId.value || pollInFlight.value) return
 
     try {
+      pollInFlight.value = true
       const statusRes = await checkRecordingStatus(sessionId.value)
       const statusData = statusRes.data || statusRes
+      const latestActionsCount = Number(statusData.actions_count || 0)
 
       if (statusData.status === 'error') {
         isRecording.value = false
         stopPolling()
         ElMessage.error(statusData.error || '录制失败')
+        pollInFlight.value = false
         return
       }
 
@@ -567,20 +582,25 @@ function startPolling() {
         isRecording.value = false
         stopPolling()
         await refreshRecordedActions({ autoSelect: true })
+        pollInFlight.value = false
         return
       }
 
-      await refreshRecordedActions()
+      if (latestActionsCount !== lastRenderedActionsCount.value) {
+        await refreshRecordedActions()
+      }
+      pollInFlight.value = false
     } catch (error) {
+      pollInFlight.value = false
       console.error('检查录制状态失败', error)
     }
-  }, 1500)
+  }, 500)
 }
 
 watch(() => props.modelValue, (value) => {
   visible.value = value
   if (value) {
-    recordForm.startUrl = props.defaultUrl || 'https://test6-web.nn.com/'
+    recordForm.startUrl = props.defaultUrl || ''
     syncSaveMode()
   }
 })
@@ -619,6 +639,7 @@ async function startRecording() {
     isRecording.value = true
     recordedActions.value = []
     selectedActionIndexes.value = []
+    lastRenderedActionsCount.value = 0
     saveForm.name = ''
 
     ElMessage.success('录制会话已启动，请在浏览器中执行操作')
@@ -643,6 +664,7 @@ async function stopRecording() {
 
     const data = res.data || res
     recordedActions.value = Array.isArray(data.actions) ? data.actions : []
+    lastRenderedActionsCount.value = recordedActions.value.length
     updateSuggestedSelection()
     syncSelectedActions(true)
 
@@ -736,12 +758,16 @@ async function saveAsTestCase() {
     const data = res.data || res
 
     if (data.save_mode === 'append') {
-      ElMessage.success(`已向 ${data.test_case_name} 追加 ${data.steps_created} 个录制步骤`)
+      const stepsBeforeSave = Number(data.steps_before_save ?? props.currentTestCaseStepCount ?? 0)
+      const stepsCreated = Number(data.steps_created || 0)
+      const totalStepsAfterSave = Number(data.total_steps_after_save ?? (stepsBeforeSave + stepsCreated))
+      ElMessage.success(`已向 ${data.test_case_name} 追加 ${stepsCreated} 个录制步骤，保存后共 ${totalStepsAfterSave} 步`)
     } else {
-      ElMessage.success(`已保存为测试用例: ${data.test_case_name}`)
+      const totalStepsAfterSave = Number(data.total_steps_after_save ?? data.steps_created ?? selectedActionIndexes.value.length)
+      ElMessage.success(`已保存为测试用例: ${data.test_case_name}，共 ${totalStepsAfterSave} 步`)
     }
 
-    emit('saved', res)
+    emit('saved', data)
     visible.value = false
   } catch (error) {
     ElMessage.error(`保存失败: ${error.response?.data?.error || error.message}`)

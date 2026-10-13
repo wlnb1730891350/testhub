@@ -5,6 +5,35 @@ from .models import RequestHistory
 from .variable_resolver import VariableResolver
 
 
+def build_suite_request_runtime_data(suite_request):
+    """Build one executable request step with optional step-level overrides."""
+    api_request = suite_request.request
+    overrides = dict(getattr(suite_request, 'request_overrides', {}) or {})
+
+    return {
+        'id': api_request.id,
+        'suite_request_id': suite_request.id,
+        'name': suite_request.display_name or api_request.name,
+        'request_name': api_request.name,
+        'method': overrides.get('method') or api_request.method,
+        'url': overrides.get('url') or api_request.url,
+        'headers': overrides.get('headers') if 'headers' in overrides else api_request.headers,
+        'params': overrides.get('params') if 'params' in overrides else api_request.params,
+        'body': overrides.get('body') if 'body' in overrides else api_request.body,
+        'pre_request_script': overrides.get('pre_request_script') if 'pre_request_script' in overrides else api_request.pre_request_script,
+        'post_request_script': overrides.get('post_request_script') if 'post_request_script' in overrides else api_request.post_request_script,
+        'assertions': overrides.get('assertions') if 'assertions' in overrides else (api_request.assertions or []),
+        'extract_variables': overrides.get('extractors') if 'extractors' in overrides else (
+            overrides.get('extract_variables') if 'extract_variables' in overrides else (api_request.extractors or [])
+        ),
+        'suite_assertions': suite_request.assertions or [],
+        'suite_extractors': suite_request.extractors or [],
+        'skip_condition': suite_request.skip_condition or '',
+        'order': suite_request.order,
+        'request_overrides': overrides,
+    }
+
+
 def execute_assertions(response, assertions):
     """执行断言验证"""
     results = []
@@ -136,6 +165,7 @@ def execute_test_suite(test_suite, environment, executed_by):
         # 执行每个请求
         for suite_request in suite_requests:
             api_request = suite_request.request
+            runtime_request = build_suite_request_runtime_data(suite_request)
             
             try:
                 # 解析环境变量
@@ -144,42 +174,42 @@ def execute_test_suite(test_suite, environment, executed_by):
                     variables.update(environment.variables)
                 
                 # 替换URL中的变量（先解析动态函数，再替换环境变量）
-                url = _replace_variables(api_request.url, variables)
+                url = _replace_variables(runtime_request['url'], variables)
                 url = resolver.resolve(url)
                 
                 # 准备请求头
                 headers = {}
-                if isinstance(api_request.headers, list):
-                    for header_item in api_request.headers:
+                if isinstance(runtime_request['headers'], list):
+                    for header_item in runtime_request['headers']:
                         if header_item.get('enabled', True) and header_item.get('key'):
                             key = header_item['key']
                             value = _replace_variables(str(header_item.get('value', '')), variables)
                             value = resolver.resolve(value)
                             headers[key] = value
                 else:
-                    headers = api_request.headers.copy()
+                    headers = (runtime_request['headers'] or {}).copy()
                     for key, value in headers.items():
                         headers[key] = _replace_variables(str(value), variables)
                         headers[key] = resolver.resolve(headers[key])
                 
                 # 准备请求参数
-                params = api_request.params.copy() if api_request.params else {}
+                params = runtime_request['params'].copy() if runtime_request['params'] else {}
                 for key, value in params.items():
                     params[key] = _replace_variables(str(value), variables)
                     params[key] = resolver.resolve(params[key])
                 
                 # 准备请求体
                 body_data = None
-                if api_request.body and api_request.method in ['POST', 'PUT', 'PATCH']:
-                    if api_request.body.get('type') == 'json':
-                        body_data = api_request.body.get('data', {})
+                if runtime_request['body'] and runtime_request['method'] in ['POST', 'PUT', 'PATCH']:
+                    if runtime_request['body'].get('type') == 'json':
+                        body_data = runtime_request['body'].get('data', {})
                         body_data = _replace_variables_in_dict(body_data, variables)
                         body_data = _resolve_variables_in_dict(body_data, resolver)
                 
                 # 执行请求
                 start_time = time.time()
                 response = requests.request(
-                    method=api_request.method,
+                    method=runtime_request['method'],
                     url=url,
                     headers=headers,
                     params=params,
@@ -190,7 +220,7 @@ def execute_test_suite(test_suite, environment, executed_by):
                 response_time = (end_time - start_time) * 1000
                 
                 # 执行断言验证
-                assertions = api_request.assertions or []
+                assertions = runtime_request['assertions'] or []
                 for assertion in assertions:
                     if assertion.get('type') == 'response_time':
                         assertion['actual_time'] = response_time
@@ -224,8 +254,8 @@ def execute_test_suite(test_suite, environment, executed_by):
                     failed_count += 1
                 
                 results.append({
-                    'name': api_request.name,
-                    'method': api_request.method,
+                    'name': runtime_request['name'],
+                    'method': runtime_request['method'],
                     'url': url,
                     'status_code': response.status_code,
                     'response_time': response_time,

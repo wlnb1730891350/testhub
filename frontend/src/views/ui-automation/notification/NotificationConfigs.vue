@@ -56,6 +56,7 @@
                     <el-form-item :label="$t('uiAutomation.notification.configs.businessType')">
                       <el-checkbox v-model="webhookBots.feishu.enable_ui_automation">{{ $t('uiAutomation.notification.configs.uiAutomationTest') }}</el-checkbox>
                       <el-checkbox v-model="webhookBots.feishu.enable_api_testing">{{ $t('uiAutomation.notification.configs.apiTest') }}</el-checkbox>
+                      <el-checkbox v-model="webhookBots.feishu.enable_ai_testing">{{ $t('uiAutomation.notification.configs.aiTestingReport') }}</el-checkbox>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -109,6 +110,7 @@
                     <el-form-item :label="$t('uiAutomation.notification.configs.businessType')">
                       <el-checkbox v-model="webhookBots.wechat.enable_ui_automation">{{ $t('uiAutomation.notification.configs.uiAutomationTest') }}</el-checkbox>
                       <el-checkbox v-model="webhookBots.wechat.enable_api_testing">{{ $t('uiAutomation.notification.configs.apiTest') }}</el-checkbox>
+                      <el-checkbox v-model="webhookBots.wechat.enable_ai_testing">{{ $t('uiAutomation.notification.configs.aiTestingReport') }}</el-checkbox>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -175,6 +177,7 @@
                     <el-form-item :label="$t('uiAutomation.notification.configs.businessType')">
                       <el-checkbox v-model="webhookBots.dingtalk.enable_ui_automation">{{ $t('uiAutomation.notification.configs.uiAutomationTest') }}</el-checkbox>
                       <el-checkbox v-model="webhookBots.dingtalk.enable_api_testing">{{ $t('uiAutomation.notification.configs.apiTest') }}</el-checkbox>
+                      <el-checkbox v-model="webhookBots.dingtalk.enable_ai_testing">{{ $t('uiAutomation.notification.configs.aiTestingReport') }}</el-checkbox>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -225,14 +228,16 @@ export default {
         webhook_url: '',
         enabled: true,
         enable_ui_automation: true,
-        enable_api_testing: true
+        enable_api_testing: true,
+        enable_ai_testing: false
       },
       wechat: {
         name: '',
         webhook_url: '',
         enabled: true,
         enable_ui_automation: true,
-        enable_api_testing: true
+        enable_api_testing: true,
+        enable_ai_testing: false
       },
       dingtalk: {
         name: '',
@@ -240,7 +245,8 @@ export default {
         secret: '',
         enabled: true,
         enable_ui_automation: true,
-        enable_api_testing: true
+        enable_api_testing: true,
+        enable_ai_testing: false
       }
     })
 
@@ -252,6 +258,21 @@ export default {
         'dingtalk': 'webhook_dingtalk'
       }
       return configTypeMap[botType]
+    }
+
+    const isValidWebhookUrl = (botType, value) => {
+      try {
+        const url = new URL(String(value || '').trim())
+        if (botType === 'wechat') {
+          return url.protocol === 'https:' &&
+              url.hostname === 'qyapi.weixin.qq.com' &&
+              url.pathname.replace(/\/$/, '') === '/cgi-bin/webhook/send' &&
+              Boolean(url.searchParams.get('key'))
+        }
+        return url.protocol === 'https:'
+      } catch {
+        return false
+      }
     }
 
     // 获取机器人显示名称
@@ -275,6 +296,16 @@ export default {
       try {
         const configType = getConfigType(botType)
         const botDisplayName = getBotDisplayName(botType)
+        const botConfig = webhookBots[botType]
+        if (botConfig.enabled && !isValidWebhookUrl(botType, botConfig.webhook_url)) {
+          const hintKey = botType === 'wechat'
+              ? 'uiAutomation.notification.configs.wechatUrlHint'
+              : botType === 'feishu'
+                  ? 'uiAutomation.notification.configs.feishuUrlHint'
+                  : 'uiAutomation.notification.configs.dingtalkUrlHint'
+          ElMessage.error(t(hintKey))
+          return
+        }
 
         // 检查是否已存在对应类型的机器人配置
         let webhookConfigId = null
@@ -284,10 +315,8 @@ export default {
             webhookConfigId = response.data.results[0].id
           }
         } catch (error) {
-          console.log(t('uiAutomation.notification.configs.messages.noExistingConfig'))
         }
 
-        const botConfig = webhookBots[botType]
         let requestData
 
         if (webhookConfigId) {
@@ -302,7 +331,8 @@ export default {
             webhook_url: botConfig.webhook_url,
             enabled: botConfig.enabled,
             enable_ui_automation: botConfig.enable_ui_automation,
-            enable_api_testing: botConfig.enable_api_testing
+            enable_api_testing: botConfig.enable_api_testing,
+            enable_ai_testing: botConfig.enable_ai_testing
           }
 
           // 钉钉机器人需要额外保存secret字段
@@ -331,7 +361,8 @@ export default {
             webhook_url: botConfig.webhook_url,
             enabled: botConfig.enabled,
             enable_ui_automation: botConfig.enable_ui_automation,
-            enable_api_testing: botConfig.enable_api_testing
+            enable_api_testing: botConfig.enable_api_testing,
+            enable_ai_testing: botConfig.enable_ai_testing
           }
 
           // 钉钉机器人需要额外保存secret字段
@@ -360,7 +391,9 @@ export default {
         console.error('保存Webhook机器人配置失败:', error)
         const failedMsgKey = botType === 'feishu' ? 'feishuSaveFailed' :
             botType === 'wechat' ? 'wechatSaveFailed' : 'dingtalkSaveFailed'
-        ElMessage.error(t(`uiAutomation.notification.configs.messages.${failedMsgKey}`) + ': ' + (error.response?.data?.detail || error.message))
+        const fieldError = error.response?.data?.webhook_bots
+        const errorText = Array.isArray(fieldError) ? fieldError.join('；') : (fieldError || error.response?.data?.detail || error.message)
+        ElMessage.error(t(`uiAutomation.notification.configs.messages.${failedMsgKey}`) + ': ' + errorText)
       }
     }
 
@@ -379,6 +412,7 @@ export default {
             webhookBots[botType].enabled = bot.enabled !== false
             webhookBots[botType].enable_ui_automation = bot.enable_ui_automation !== false
             webhookBots[botType].enable_api_testing = bot.enable_api_testing !== false
+            webhookBots[botType].enable_ai_testing = bot.enable_ai_testing === true
             // 钉钉机器人需要额外读取secret字段
             if (botType === 'dingtalk' && bot.secret) {
               webhookBots[botType].secret = bot.secret
@@ -405,9 +439,7 @@ export default {
     // 组件挂载时获取数据
     onMounted(async () => {
       try {
-        console.log('NotificationConfigs 组件开始初始化')
         await fetchAllWebhookConfigs()
-        console.log('NotificationConfigs 组件初始化完成')
       } catch (error) {
         console.error('NotificationConfigs 组件初始化失败:', error)
       }

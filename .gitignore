@@ -16,6 +16,7 @@ logs/*/*
 !logs/*/.gitkeep
 # 忽略.env配置文件(但保留.env.example示例文件)
 .env
+.env.*
 .sql
 static_files/img/
 .bak
@@ -63,9 +64,15 @@ frontend/*.log
 frontend/dist/
 node_modules/
 *.log
+*.sqlite3
 *_debug*.txt
 _debug_*.txt
 fix_*.py
+check_*.py
+tmp_*.py
+_db_update_*.py
+_*.py
+!manage.py
 screenshot.png
 media/requirement_doc_images/
 

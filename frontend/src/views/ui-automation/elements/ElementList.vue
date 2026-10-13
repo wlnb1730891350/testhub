@@ -431,8 +431,6 @@ const showElementDetail = async (id) => {
 
     // 使用专门的详情API获取单个元素的完整信息
     const response = await getElementDetail(id)
-    console.log('API返回的元素详情:', response.data)
-
     currentElementDetail.value = response.data
     showDetailDialog.value = true
   } catch (error) {
@@ -509,7 +507,6 @@ const handleCreate = async () => {
       wait_timeout: createForm.wait_timeout // 添加缺失的字段
     }
     
-    console.log('提交的API数据:', apiFormData)
     await createElement(apiFormData)
     ElMessage.success(t('uiAutomation.element.messages.createSuccess'))
     showCreateDialog.value = false
@@ -564,7 +561,6 @@ const handleEdit = async () => {
       wait_timeout: editForm.wait_timeout // 添加缺失的字段
     }
     
-    console.log('提交的API数据:', apiFormData)
     await updateElement(currentEditId.value, apiFormData)
     ElMessage.success(t('uiAutomation.element.messages.updateSuccess'))
     showEditDialog.value = false

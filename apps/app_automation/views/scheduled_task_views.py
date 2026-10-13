@@ -84,14 +84,22 @@ class AppScheduledTaskViewSet(viewsets.ModelViewSet):
                                     status=status.HTTP_400_BAD_REQUEST)
 
                 # 创建执行记录并调用 Celery
-                from ..models import AppTestExecution
+                from ..models import AppTestExecution, AppTestBatchReport
                 from ..tasks import execute_app_suite_task
 
+                batch_report = AppTestBatchReport.objects.create(
+                    test_suite=task.test_suite,
+                    device=device,
+                    user=request.user,
+                    total_cases=suite_cases.count(),
+                    status='pending',
+                )
                 executions = []
                 for sc in suite_cases:
                     execution = AppTestExecution.objects.create(
                         test_case=sc.test_case,
                         test_suite=task.test_suite,
+                        batch_report=batch_report,
                         device=device,
                         user=request.user,
                         status='pending'
@@ -106,12 +114,19 @@ class AppScheduledTaskViewSet(viewsets.ModelViewSet):
                     execution_ids=[e.id for e in executions],
                     package_name=package_name,
                     scheduled_task_id=task.id,
+                    batch_report_id=batch_report.id,
                 )
+                batch_report.task_id = celery_task.id
+                batch_report.save(update_fields=['task_id'])
 
                 return Response({
                     'success': True,
                     'message': f'测试套件开始执行，共 {len(executions)} 个用例',
-                    'data': {'task_id': celery_task.id, 'test_case_count': len(executions)}
+                    'data': {
+                        'task_id': celery_task.id,
+                        'batch_report_id': batch_report.id,
+                        'test_case_count': len(executions),
+                    }
                 })
 
             elif task.task_type == 'TEST_CASE':

@@ -226,9 +226,7 @@ export default {
 
     async loadConfigs() {
       try {
-        console.log('Loading generation configs...')
         const response = await getGenerationConfigs()
-        console.log('Generation configs API response:', response.data)
 
         // 处理分页API响应格式
         if (response.data && response.data.results && Array.isArray(response.data.results)) {
@@ -240,7 +238,6 @@ export default {
           this.configs = []
         }
 
-        console.log('Final configs count:', this.configs.length)
       } catch (error) {
         console.error('Failed to load config:', error)
         this.configs = []

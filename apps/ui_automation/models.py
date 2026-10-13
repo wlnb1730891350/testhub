@@ -1,7 +1,8 @@
-﻿from django.db import models
+from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 import json
+import uuid
 
 User = get_user_model()
 
@@ -690,8 +691,6 @@ class TestCaseExecution(models.Model):
     screenshots = models.JSONField(default=list, blank=True, verbose_name='截图列表')
     ai_execution_details = models.JSONField(default=dict, blank=True, verbose_name='AI执行详情',
         help_text='AI引擎执行时的步骤级详情，包含每步的定位器、截图、实际结果等')
-    ai_execution_details = models.JSONField(default=dict, blank=True, verbose_name='AI执行详情',
-        help_text='AI引擎执行时的步骤级详情，包含每步的定位器、截图、实际结果等')
     execution_time = models.FloatField(null=True, blank=True, verbose_name='执行时长(秒)')
     started_at = models.DateTimeField(null=True, blank=True, verbose_name='开始时间')
     finished_at = models.DateTimeField(null=True, blank=True, verbose_name='完成时间')
@@ -877,6 +876,7 @@ class UiNotificationLog(models.Model):
         ('task_execution', '定时任务执行'),
         ('test_suite_execution', '测试套件执行'),
         ('test_case_execution', '测试用例执行'),
+        ('ai_test_report', 'AI测试报告'),
         ('system_alert', '系统警告'),
         ('manual', '手动通知'),
     ]
@@ -1012,12 +1012,126 @@ class UiTaskNotificationSetting(models.Model):
         return UnifiedNotificationConfig.objects.filter(is_default=True, is_active=True).first()
 
 
+class AICaseCategory(models.Model):
+    """Project-scoped functional category for AI test cases."""
+    project = models.ForeignKey(
+        UiProject,
+        on_delete=models.CASCADE,
+        related_name='ai_case_categories',
+        null=True,
+        blank=True,
+        verbose_name='所属项目',
+    )
+    name = models.CharField(max_length=100, unique=True, verbose_name='分类名称')
+    description = models.TextField(blank=True, default='', verbose_name='分类说明')
+    sort_order = models.PositiveIntegerField(default=0, verbose_name='排序')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'ui_ai_case_categories'
+        verbose_name = 'AI用例功能分类'
+        verbose_name_plural = 'AI用例功能分类'
+        ordering = ['sort_order', 'name', 'id']
+
+    def __str__(self):
+        return self.name
+
+
+class DesktopAppProfile(models.Model):
+    """Reusable launch and window matching rules for a Windows application."""
+    BACKEND_CHOICES = [
+        ('uia', 'UI Automation'),
+        ('win32', 'Win32'),
+    ]
+
+    name = models.CharField(max_length=100, unique=True, verbose_name='Desktop application name')
+    executable_path = models.CharField(max_length=500, blank=True, default='', verbose_name='Executable path')
+    process_name = models.CharField(max_length=255, blank=True, default='', verbose_name='Process name')
+    arguments = models.CharField(max_length=500, blank=True, default='', verbose_name='Launch arguments')
+    work_dir = models.CharField(max_length=500, blank=True, default='', verbose_name='Working directory')
+    window_title_regex = models.CharField(max_length=500, blank=True, default='', verbose_name='Window title regex')
+    backend = models.CharField(max_length=20, choices=BACKEND_CHOICES, default='uia', verbose_name='Automation backend')
+    is_active = models.BooleanField(default=True, verbose_name='Active')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Created by')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'ui_desktop_app_profiles'
+        verbose_name = 'Desktop application profile'
+        verbose_name_plural = 'Desktop application profiles'
+        ordering = ['name', 'id']
+
+    def to_execution_config(self):
+        config = {
+            'backend': self.backend,
+            'executable_path': self.executable_path,
+            'process_name': self.process_name,
+            'arguments': self.arguments,
+            'work_dir': self.work_dir,
+        }
+        if self.window_title_regex:
+            config['window'] = {'title_re': self.window_title_regex}
+        return {key: value for key, value in config.items() if value not in (None, '')}
+
+    def __str__(self):
+        return self.name
+
+
 class AICase(models.Model):
     """AI测试用例"""
+    EXECUTION_TARGET_CHOICES = [
+        ('web', 'Web Browser'),
+        ('desktop', 'Windows Desktop'),
+        ('dual', 'Browser and Windows Desktop'),
+    ]
+
     project = models.ForeignKey(UiProject, on_delete=models.CASCADE, null=True, blank=True, verbose_name='所属项目')
     name = models.CharField(max_length=200, verbose_name='用例名称')
     description = models.TextField(blank=True, null=True, verbose_name='描述')
+    category = models.ForeignKey(
+        AICaseCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='ai_cases',
+        verbose_name='功能分类',
+    )
+    setup_template = models.ForeignKey('SetupTemplate', on_delete=models.SET_NULL, null=True, blank=True, related_name='ai_cases', verbose_name='前置模板', help_text='执行前自动运行的前置步骤模板')
     task_description = models.TextField(verbose_name='任务描述', help_text='自然语言任务描述')
+    web_task_description = models.TextField(
+        blank=True,
+        default='',
+        verbose_name='Browser task description',
+        help_text='The browser-specific task description for a dual-mode case.',
+    )
+    desktop_task_description = models.TextField(
+        blank=True,
+        default='',
+        verbose_name='Windows desktop task description',
+        help_text='The Windows-specific task description for a dual-mode case.',
+    )
+    execution_target = models.CharField(
+        max_length=20,
+        choices=EXECUTION_TARGET_CHOICES,
+        default='web',
+        verbose_name='Execution target',
+    )
+    desktop_config = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name='Windows desktop configuration',
+        help_text='Executable, window locator, and structured desktop steps.',
+    )
+    desktop_app_profile = models.ForeignKey(
+        DesktopAppProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='ai_cases',
+        verbose_name='Desktop application profile',
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='创建者')
@@ -1046,7 +1160,16 @@ class AIExecutionRecord(models.Model):
     ai_case = models.ForeignKey(AICase, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='关联AI用例')
     case_name = models.CharField(max_length=200, verbose_name='用例名称快照')
     task_description = models.TextField(blank=True, default='', verbose_name='任务描述', help_text='用户输入的原始任务描述')
+    execution_target = models.CharField(
+        max_length=20,
+        choices=AICase.EXECUTION_TARGET_CHOICES,
+        default='web',
+        verbose_name='Execution target',
+    )
     execution_mode = models.CharField(max_length=20, choices=[('text', '文本模式')], default='text', verbose_name='执行模式')
+    batch_id = models.UUIDField(null=True, blank=True, db_index=True, verbose_name='批量执行标识')
+    batch_started_at = models.DateTimeField(null=True, blank=True, verbose_name='批量执行开始时间')
+    batch_run_mode = models.CharField(max_length=20, blank=True, default='', verbose_name='批量执行方式')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='执行状态')
     start_time = models.DateTimeField(auto_now_add=True, verbose_name='开始时间')
     end_time = models.DateTimeField(null=True, blank=True, verbose_name='结束时间')
@@ -1057,6 +1180,7 @@ class AIExecutionRecord(models.Model):
     executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='执行人')
     gif_path = models.CharField(max_length=500, null=True, blank=True, verbose_name='GIF录制路径')
     screenshots_sequence = models.JSONField(default=list, verbose_name='截图序列')
+    cleanup_results = models.JSONField(default=dict, blank=True, verbose_name='环境回收结果')
 
     class Meta:
         db_table = 'ui_ai_execution_records'
@@ -1099,3 +1223,24 @@ class RecordingSession(models.Model):
 
     def __str__(self):
         return self.session_id
+
+
+class SetupTemplate(models.Model):
+    """前置步骤模板 - 可复用的登录/导航等公共步骤"""
+    project = models.ForeignKey(UiProject, on_delete=models.CASCADE, related_name='setup_templates', verbose_name='所属项目')
+    name = models.CharField(max_length=200, verbose_name='模板名称')
+    description = models.TextField(blank=True, null=True, verbose_name='描述')
+    steps = models.JSONField(default=list, verbose_name='模板步骤', help_text='JSON数组，每步包含action_type和description')
+    target_url = models.CharField(max_length=500, blank=True, null=True, verbose_name='目标URL', help_text='模板执行完成后应到达的页面URL')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='创建者')
+
+    class Meta:
+        db_table = 'ui_setup_templates'
+        verbose_name = '前置步骤模板'
+        verbose_name_plural = '前置步骤模板'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.name} ({self.project.name if self.project else "N/A"})'

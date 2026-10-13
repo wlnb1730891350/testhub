@@ -6,7 +6,7 @@ from .models import (
     ElementGroup, PageObject, PageObjectElement, ScriptStep, ScriptElementUsage,
     TestCase, TestCaseStep, TestCaseExecution, OperationRecord,
     UiScheduledTask, UiNotificationLog, UiTaskNotificationSetting,
-    AICase, AIExecutionRecord
+    AICase, AICaseCategory, AIExecutionRecord, SetupTemplate, DesktopAppProfile
 )
 from django.contrib.auth import get_user_model
 
@@ -799,10 +799,45 @@ class UiScheduledTaskSerializer(serializers.ModelSerializer):
         return instance
 
 
+class AICaseCategorySerializer(serializers.ModelSerializer):
+    cases_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AICaseCategory
+        fields = [
+            'id', 'name', 'description', 'sort_order',
+            'cases_count', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ('created_at', 'updated_at', 'cases_count')
+
+    def get_cases_count(self, obj):
+        return getattr(obj, 'cases_count', obj.ai_cases.count())
+
+
+class DesktopAppProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DesktopAppProfile
+        fields = '__all__'
+        read_only_fields = ('created_by', 'created_at', 'updated_at')
+
+
 class AICaseSerializer(serializers.ModelSerializer):
     project = UiProjectSerializer(read_only=True)
     created_by = UserSerializer(read_only=True)
-    project_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    project_id = serializers.PrimaryKeyRelatedField(
+        source='project',
+        queryset=UiProject.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    setup_template_name = serializers.CharField(source='setup_template.name', read_only=True, default=None)
+    category_name = serializers.CharField(source='category.name', read_only=True, default=None)
+    desktop_app_profile_name = serializers.CharField(source='desktop_app_profile.name', read_only=True, default=None)
+    latest_execution_id = serializers.IntegerField(read_only=True, allow_null=True)
+    latest_execution_status = serializers.CharField(read_only=True, allow_null=True)
+    latest_execution_time = serializers.DateTimeField(read_only=True, allow_null=True)
+    latest_failure_reason = serializers.SerializerMethodField()
 
     class Meta:
         model = AICase
@@ -813,6 +848,130 @@ class AICaseSerializer(serializers.ModelSerializer):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Desktop cases created before dual-mode support stored their only
+        # executable description in task_description. Keep that content visible
+        # in the Windows editor until the data migration has run everywhere.
+        if data.get('execution_target') == 'desktop' and not data.get('desktop_task_description'):
+            data['desktop_task_description'] = data.get('task_description') or ''
+        # The generic task remains the browser source of truth for legacy
+        # dual-mode rows. Keep the Browser tab usable while old data is being
+        # backfilled, rather than rendering it as an empty task.
+        if data.get('execution_target') == 'dual' and not data.get('web_task_description'):
+            data['web_task_description'] = data.get('task_description') or ''
+        return data
+
+    def validate(self, attrs):
+        execution_target = attrs.get('execution_target')
+        if execution_target is None and self.instance is not None:
+            execution_target = self.instance.execution_target
+        if execution_target == 'desktop':
+            desktop_task_description = str(attrs.get(
+                'desktop_task_description',
+                getattr(self.instance, 'desktop_task_description', '') if self.instance is not None else '',
+            ) or '').strip()
+            task_description = str(attrs.get(
+                'task_description',
+                getattr(self.instance, 'task_description', '') if self.instance is not None else '',
+            ) or '').strip()
+            desktop_task_description = desktop_task_description or task_description
+            if desktop_task_description:
+                attrs['desktop_task_description'] = desktop_task_description
+                attrs['task_description'] = task_description or desktop_task_description
+        if execution_target == 'dual':
+            web_task_description = str(attrs.get(
+                'web_task_description',
+                getattr(self.instance, 'web_task_description', '') if self.instance is not None else '',
+            ) or '').strip()
+            desktop_task_description = str(attrs.get(
+                'desktop_task_description',
+                getattr(self.instance, 'desktop_task_description', '') if self.instance is not None else '',
+            ) or '').strip()
+            errors = {}
+            if not web_task_description:
+                errors['web_task_description'] = 'Provide a browser task description for a dual-mode case.'
+            if not desktop_task_description:
+                errors['desktop_task_description'] = 'Provide a Windows task description for a dual-mode case.'
+            if errors:
+                raise serializers.ValidationError(errors)
+        if execution_target in {'desktop', 'dual'}:
+            desktop_config = attrs.get('desktop_config')
+            if desktop_config is None and self.instance is not None:
+                desktop_config = self.instance.desktop_config
+            if not isinstance(desktop_config, dict):
+                raise serializers.ValidationError({
+                    'desktop_config': 'Desktop configuration must be a JSON object.'
+                })
+            desktop_app_profile = attrs.get('desktop_app_profile')
+            if desktop_app_profile is None and self.instance is not None:
+                desktop_app_profile = self.instance.desktop_app_profile
+            if desktop_app_profile and not desktop_app_profile.is_active:
+                raise serializers.ValidationError({
+                    'desktop_app_profile': 'The selected desktop application profile is disabled.'
+                })
+            request = self.context.get('request')
+            if request and desktop_app_profile and desktop_app_profile.created_by_id != request.user.id:
+                raise serializers.ValidationError({
+                    'desktop_app_profile': 'You do not have access to the selected desktop application profile.'
+                })
+        category = attrs.get('category')
+        project = attrs.get('project')
+        if project is None and self.instance is not None:
+            project = self.instance.project
+        setup_template = attrs.get('setup_template')
+        if setup_template is None and self.instance is not None:
+            setup_template = self.instance.setup_template
+        if setup_template and project is not None and setup_template.project_id != project.id:
+            unchanged_legacy_link = bool(
+                self.instance is not None
+                and setup_template.pk == self.instance.setup_template_id
+                and project.id == self.instance.project_id
+            )
+            if unchanged_legacy_link:
+                return attrs
+            raise serializers.ValidationError({
+                'setup_template': '前置模板必须属于该用例所属项目。'
+            })
+        return attrs
+
+    def get_latest_failure_reason(self, obj):
+        status = getattr(obj, 'latest_execution_status', '')
+        if status not in {'failed', 'error'}:
+            return ''
+        logs = getattr(obj, 'latest_execution_logs', '') or ''
+        lines = [str(line).strip() for line in str(logs).splitlines() if str(line).strip()]
+        if not lines:
+            return ''
+        for line in reversed(lines):
+            lowered = line.lower()
+            if any(marker in lowered for marker in ['错误', '失败', '异常', 'timeout', 'error', 'failed', 'exception']):
+                return line[:200]
+        return lines[-1][:200]
+
+
+class AIExecutionRecordListSerializer(serializers.ModelSerializer):
+    """AI执行记录列表序列化器（轻量版，排除大字段）"""
+    project_name = serializers.CharField(source='project.name', read_only=True, default='')
+    ai_case_name = serializers.CharField(source='ai_case.name', read_only=True, default='')
+    executed_by_name = serializers.CharField(source='executed_by.username', read_only=True, default='')
+    logs = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AIExecutionRecord
+        fields = [
+            'id', 'project_name', 'ai_case_name', 'case_name',
+            'task_description', 'execution_target', 'execution_mode', 'status',
+            'batch_id', 'batch_started_at', 'batch_run_mode',
+            'start_time', 'end_time', 'duration',
+            'logs', 'executed_by_name', 'gif_path', 'cleanup_results',
+        ]
+
+    def get_logs(self, obj):
+        """列表接口只返回日志摘要（最后500字符）"""
+        if not obj.logs:
+            return ''
+        return obj.logs[-500:] if len(obj.logs) > 500 else obj.logs
 
 class AIExecutionRecordSerializer(serializers.ModelSerializer):
     project = UiProjectSerializer(read_only=True)
@@ -829,11 +988,12 @@ class AIExecutionRecordSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'project', 'project_id', 'project_name', 'ai_case', 'ai_case_id', 'ai_case_name', 'case_name',
             'task_description',
-            'execution_mode', 'status', 'start_time', 'end_time', 'duration',
+            'execution_target', 'execution_mode', 'batch_id', 'batch_started_at', 'batch_run_mode',
+            'status', 'start_time', 'end_time', 'duration', 'cleanup_results',
             'logs', 'steps_completed', 'planned_tasks', 'executed_by', 'executed_by_name',
             'gif_path', 'screenshots_sequence'
         ]
-        read_only_fields = ('start_time', 'end_time', 'duration', 'executed_by', 'gif_path', 'screenshots_sequence')
+        read_only_fields = ('batch_id', 'batch_started_at', 'batch_run_mode', 'start_time', 'end_time', 'duration', 'executed_by', 'gif_path', 'screenshots_sequence', 'cleanup_results')
 
 
 
@@ -955,3 +1115,25 @@ class RecordingSessionSerializer(serializers.ModelSerializer):
     def get_actions_count(self, obj):
         actions = obj.recorded_actions or []
         return len(actions)
+
+class SetupTemplateSerializer(serializers.ModelSerializer):
+    """前置步骤模板序列化器"""
+    project_name = serializers.CharField(source='project.name', read_only=True, default='')
+    created_by_name = serializers.CharField(source='created_by.username', read_only=True, default='')
+    steps_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SetupTemplate
+        fields = [
+            'id', 'project', 'project_name', 'name', 'description',
+            'steps', 'target_url', 'created_by', 'created_by_name',
+            'steps_count', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ('created_by', 'created_at', 'updated_at')
+
+    def get_steps_count(self, obj):
+        return len(obj.steps) if obj.steps else 0
+
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)

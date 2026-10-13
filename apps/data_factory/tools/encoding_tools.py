@@ -305,7 +305,7 @@ class EncodingTools:
                         if detection['confidence'] > 0.6:
                             try:
                                 data_str = obj.data.decode(detection['encoding'])
-                            except:
+                            except Exception:
                                 pass
                     except ImportError:
                         pass

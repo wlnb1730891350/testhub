@@ -202,6 +202,7 @@ class AIReportPDFGenerator:
         info_data = [
             ['用例名称', execution_details.get('case_name', 'N/A')],
             ['执行状态', overview.get('status', 'N/A')],
+            ['运行端', execution_details.get('execution_target', 'Browser')],
             ['执行模式', execution_details.get('execution_mode', 'N/A')],
             ['执行时长', overview.get('duration_formatted', 'N/A')],
             ['完成率', f"{overview.get('completion_rate', 0)}%"],

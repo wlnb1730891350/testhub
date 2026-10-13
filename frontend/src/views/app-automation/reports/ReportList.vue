@@ -2,6 +2,98 @@
   <div class="report-list">
     <!-- Tab 切换 -->
     <el-tabs v-model="activeTab" @tab-change="onTabChange">
+      <!-- ==================== 批次报告 ==================== -->
+      <el-tab-pane label="批次报告" name="batch">
+        <div class="stats-row">
+          <el-card v-for="stat in batchStatsCards" :key="stat.label" class="stat-card" shadow="hover">
+            <div class="stat-content">
+              <div class="stat-number" :style="{ color: stat.color }">{{ stat.value }}</div>
+              <div class="stat-label">{{ stat.label }}</div>
+            </div>
+          </el-card>
+        </div>
+
+        <div class="filters">
+          <el-row :gutter="20">
+            <el-col :span="5">
+              <el-select v-model="batchProjectFilter" placeholder="全部项目" clearable filterable @change="loadBatchReports">
+                <el-option v-for="p in projectList" :key="p.id" :label="p.name" :value="p.id" />
+              </el-select>
+            </el-col>
+            <el-col :span="7">
+              <el-input v-model="batchSearch" placeholder="搜索批次、套件或设备" clearable @clear="loadBatchReports" @keyup.enter="loadBatchReports">
+                <template #prefix><el-icon><Search /></el-icon></template>
+              </el-input>
+            </el-col>
+            <el-col :span="4">
+              <el-select v-model="batchStatusFilter" placeholder="执行状态" clearable @change="loadBatchReports">
+                <el-option label="已完成" value="completed" />
+                <el-option label="执行异常" value="error" />
+                <el-option label="执行中" value="running" />
+              </el-select>
+            </el-col>
+            <el-col :span="6">
+              <el-button type="primary" @click="loadBatchReports"><el-icon><Search /></el-icon>查询</el-button>
+              <el-button @click="resetBatchFilters">重置</el-button>
+            </el-col>
+          </el-row>
+        </div>
+
+        <el-table :data="batchReports" v-loading="batchLoading" border stripe>
+          <el-table-column label="批次" min-width="175" show-overflow-tooltip>
+            <template #default="{ row }">
+              <div>{{ row.suite_name || '手动批量执行' }}</div>
+              <small class="batch-id">{{ row.batch_id }}</small>
+            </template>
+          </el-table-column>
+          <el-table-column label="设备" min-width="120">
+            <template #default="{ row }">{{ row.device_name || '-' }}</template>
+          </el-table-column>
+          <el-table-column label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="getDisplayStatus(row.status, row.result).type" size="small">
+                {{ getDisplayStatus(row.status, row.result).text }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="用例通过率" min-width="140">
+            <template #default="{ row }">
+              <el-progress :percentage="row.pass_rate || 0" :color="getPassRateColor(row.pass_rate)" :stroke-width="16" :text-inside="true" />
+            </template>
+          </el-table-column>
+          <el-table-column label="用例统计" min-width="230">
+            <template #default="{ row }">
+              <div class="step-stats">
+                <span style="color:#67c23a">通过 {{ row.passed_cases || 0 }}</span>
+                <el-divider direction="vertical" />
+                <span style="color:#f56c6c">失败 {{ (row.failed_cases || 0) + (row.error_cases || 0) }}</span>
+                <el-divider direction="vertical" />
+                <span>跳过 {{ row.skipped_cases || 0 }}</span>
+                <el-divider direction="vertical" />
+                <span>总计 {{ row.total_cases || 0 }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="总耗时" min-width="90">
+            <template #default="{ row }">{{ formatDuration(row.duration) }}</template>
+          </el-table-column>
+          <el-table-column label="执行时间" min-width="155">
+            <template #default="{ row }">{{ formatDateTime(row.started_at || row.created_at) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" min-width="165" fixed="right">
+            <template #default="{ row }">
+              <el-button type="primary" link size="small" @click="viewBatchDetail(row)">查看明细</el-button>
+              <el-button v-if="row.report_path" type="success" link size="small" @click="viewBatchAllureReport(row)">汇总报告</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div class="pagination">
+          <el-pagination v-model:current-page="batchPagination.current" v-model:page-size="batchPagination.size" :total="batchPagination.total"
+            :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next" @size-change="loadBatchReports" @current-change="loadBatchReports" />
+        </div>
+      </el-tab-pane>
+
       <!-- ==================== 套件报告 ==================== -->
       <el-tab-pane label="套件报告" name="suite">
         <!-- 统计 -->
@@ -215,6 +307,22 @@
       </el-tab-pane>
     </el-tabs>
 
+    <el-dialog v-model="batchDetailVisible" :title="`批次执行明细 - ${selectedBatch?.suite_name || '手动批量执行'}`" width="1000px">
+      <el-descriptions v-if="selectedBatch" :column="3" border>
+        <el-descriptions-item label="批次标识">{{ selectedBatch.batch_id }}</el-descriptions-item>
+        <el-descriptions-item label="设备">{{ selectedBatch.device_name || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="总耗时">{{ formatDuration(selectedBatch.duration) }}</el-descriptions-item>
+      </el-descriptions>
+      <el-table :data="batchExecRecords" v-loading="batchExecLoading" border stripe max-height="500" style="margin-top:16px">
+        <el-table-column label="测试用例" min-width="210"><template #default="{ row }">{{ row.case_name || '-' }}</template></el-table-column>
+        <el-table-column label="状态" width="90"><template #default="{ row }"><el-tag :type="getDisplayStatus(row.status, row.result).type" size="small">{{ getDisplayStatus(row.status, row.result).text }}</el-tag></template></el-table-column>
+        <el-table-column label="步骤统计" min-width="190"><template #default="{ row }">通过 {{ row.passed_steps || 0 }} / 失败 {{ row.failed_steps || 0 }} / 总计 {{ row.total_steps || 0 }}</template></el-table-column>
+        <el-table-column label="耗时" width="90"><template #default="{ row }">{{ formatDuration(row.duration) }}</template></el-table-column>
+        <el-table-column label="操作" width="135" fixed="right"><template #default="{ row }"><el-button type="primary" link size="small" @click="viewCaseDetail(row)">查看详情</el-button><el-button v-if="row.report_path" type="success" link size="small" @click="viewAllureReport(row)">查看报告</el-button></template></el-table-column>
+      </el-table>
+      <template #footer><el-button @click="batchDetailVisible = false">关闭</el-button><el-button v-if="selectedBatch?.report_path" type="primary" @click="viewBatchAllureReport(selectedBatch)">查看汇总报告</el-button></template>
+    </el-dialog>
+
     <!-- ==================== 套件详情弹窗 ==================== -->
     <el-dialog v-model="suiteDetailVisible" title="套件报告详情" width="750px">
       <div v-if="selectedSuite">
@@ -385,23 +493,96 @@ import { Search, DataAnalysis } from '@element-plus/icons-vue'
 import {
   getExecutionList, deleteExecution,
   getTestSuiteList, getTestSuiteExecutions,
+  getBatchReportList, getBatchReportExecutions,
   getAppProjects,
 } from '@/api/app-automation.js'
 import { getExecutionStatusType, getExecutionStatusText, getDisplayStatus, formatDateTime } from '@/utils/app-automation-helpers.js'
 
 // ==================== 公共 ====================
-const activeTab = ref('suite')
+const activeTab = ref('batch')
 const projectList = ref([])
 
 function onTabChange(tab) {
+  if (tab === 'batch' && batchReports.value.length === 0) loadBatchReports()
   if (tab === 'suite' && suiteReports.value.length === 0) loadSuiteReports()
   if (tab === 'case' && caseReports.value.length === 0) loadCaseReports()
 }
 
 onMounted(() => {
   getAppProjects({ page_size: 100 }).then(res => { projectList.value = res.data.results || res.data || [] }).catch(() => {})
-  loadSuiteReports()
+  loadBatchReports()
 })
+
+// ==================== 批次报告 ====================
+const batchLoading = ref(false)
+const batchReports = ref([])
+const batchSearch = ref('')
+const batchStatusFilter = ref('')
+const batchProjectFilter = ref(null)
+const batchPagination = reactive({ current: 1, size: 20, total: 0 })
+const batchDetailVisible = ref(false)
+const batchExecLoading = ref(false)
+const batchExecRecords = ref([])
+const selectedBatch = ref(null)
+
+const batchStatsCards = computed(() => {
+  const data = batchReports.value
+  const passed = data.filter(row => row.result === 'passed').length
+  const failed = data.filter(row => row.result === 'failed' || row.status === 'error').length
+  const avgRate = data.length
+    ? Math.round(data.reduce((sum, row) => sum + (row.pass_rate || 0), 0) / data.length)
+    : 0
+  return [
+    { label: '批次总数', value: batchPagination.total, color: '#409eff' },
+    { label: '本页通过', value: passed, color: '#67c23a' },
+    { label: '本页失败', value: failed, color: '#f56c6c' },
+    { label: '本页平均通过率', value: `${avgRate}%`, color: '#e6a23c' },
+  ]
+})
+
+async function loadBatchReports() {
+  batchLoading.value = true
+  try {
+    const params = { page: batchPagination.current, page_size: batchPagination.size }
+    if (batchProjectFilter.value) params.project = batchProjectFilter.value
+    if (batchSearch.value) params.search = batchSearch.value
+    if (batchStatusFilter.value) params.status = batchStatusFilter.value
+    const res = await getBatchReportList(params)
+    batchReports.value = res.data.results || res.data || []
+    batchPagination.total = res.data.count || batchReports.value.length
+  } catch {
+    ElMessage.error('加载批次报告失败')
+  } finally {
+    batchLoading.value = false
+  }
+}
+
+function resetBatchFilters() {
+  batchSearch.value = ''
+  batchStatusFilter.value = ''
+  batchProjectFilter.value = null
+  batchPagination.current = 1
+  loadBatchReports()
+}
+
+async function viewBatchDetail(batch) {
+  selectedBatch.value = batch
+  batchDetailVisible.value = true
+  batchExecLoading.value = true
+  try {
+    const res = await getBatchReportExecutions(batch.id)
+    batchExecRecords.value = res.data.data || res.data.results || res.data || []
+  } catch {
+    ElMessage.error('加载批次执行明细失败')
+  } finally {
+    batchExecLoading.value = false
+  }
+}
+
+function viewBatchAllureReport(batch) {
+  if (!batch?.report_path) return ElMessage.warning('该批次尚未生成汇总报告')
+  window.open(`/api/app-automation/batch-reports/${batch.id}/report/`, '_blank')
+}
 
 // ==================== 套件报告 ====================
 const suiteLoading = ref(false)
@@ -467,16 +648,17 @@ async function viewSuiteExecutions(suite) {
 }
 
 async function viewSuiteAllureReport(suite) {
-  // 获取该套件最近的执行记录，找到有 Allure 报告的
   try {
-    const res = await getTestSuiteExecutions(suite.id)
-    const records = res.data.data || res.data.results || res.data || []
-    const withReport = records.find(r => r.report_path)
-    if (withReport) {
-      window.open(`/api/app-automation/executions/${withReport.id}/report/`, '_blank')
-    } else {
-      ElMessage.warning('该套件暂无 Allure 报告')
-    }
+    const batchResponse = await getBatchReportList({ test_suite: suite.id, page_size: 1 })
+    const latestBatch = (batchResponse.data.results || batchResponse.data || [])[0]
+    if (latestBatch?.report_path) return viewBatchAllureReport(latestBatch)
+
+    // 兼容历史套件执行：旧记录没有批次汇总时仍可打开子用例报告。
+    const executionResponse = await getTestSuiteExecutions(suite.id)
+    const records = executionResponse.data.data || executionResponse.data.results || executionResponse.data || []
+    const childReport = records.find(record => record.report_path)
+    if (childReport) return viewAllureReport(childReport)
+    ElMessage.warning('该套件暂无 Allure 报告')
   } catch { ElMessage.error('获取报告失败') }
 }
 
@@ -544,6 +726,7 @@ async function loadCaseReports() {
       page_size: casePagination.size,
       ordering: '-created_at',
       'test_suite__isnull': true,  // 只查询单独执行的用例，排除套件执行记录
+      'batch_report__isnull': true, // 批量执行的子报告只在批次明细中展示
     }
     if (caseProjectFilter.value) params.project = caseProjectFilter.value
     if (caseStatusFilter.value) {

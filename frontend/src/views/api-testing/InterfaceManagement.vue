@@ -32,6 +32,12 @@
             <el-button type="success" size="small" @click="createEmptyRequest" :title="$t('apiTesting.interface.addInterface')">
               <el-icon><Plus /></el-icon>
             </el-button>
+            <el-button size="small" @click="openImportDialog" :title="$t('apiTesting.importExport.import')">
+              <el-icon><Upload /></el-icon>
+            </el-button>
+            <el-button size="small" :disabled="!selectedProject" @click="exportProject" :title="$t('apiTesting.importExport.export')">
+              <el-icon><Download /></el-icon>
+            </el-button>
           </div>
         </div>
 
@@ -857,6 +863,13 @@
       </el-tabs>
     </el-dialog>
 
+    <ImportDialog
+      v-model="showImportDialog"
+      :projects="projects"
+      :current-project-id="selectedProject"
+      @imported="handleImported"
+    />
+
     <!-- CURL导入对话框 -->
     <el-dialog
       v-model="showCurlImportDialog"
@@ -932,9 +945,10 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Folder, Document, MagicStick, Search, Close } from '@element-plus/icons-vue'
+import { Plus, Folder, Document, MagicStick, Search, Close, Upload, Download } from '@element-plus/icons-vue'
 import api from '@/utils/api'
 import KeyValueEditor from './components/KeyValueEditor.vue'
+import ImportDialog from './components/ImportDialog.vue'
 import DataFactorySelector from '@/components/DataFactorySelector.vue'
 import { RequestModelParser } from '@/utils/requestModel'
 import { getVariableFunctions } from '@/api/data-factory'
@@ -994,6 +1008,7 @@ const loading = ref(false)
 // CURL导入相关
 const showCurlImportDialog = ref(false)
 const curlCommand = ref('')
+const showImportDialog = ref(false)
 
 // 代码生成相关
 const showCodeGenerateDialog = ref(false)
@@ -1998,6 +2013,43 @@ const updateCollection = async () => {
   }
 }
 
+const openImportDialog = () => {
+  showImportDialog.value = true
+}
+
+const handleImported = async () => {
+  if (selectedProject.value) {
+    await loadCollections(selectedProject.value)
+  }
+}
+
+const exportProject = async () => {
+  if (!selectedProject.value) {
+    ElMessage.warning(t('apiTesting.importExport.selectProjectFirst'))
+    return
+  }
+
+  try {
+    const response = await api.get(`/api-testing/export/${selectedProject.value}/`, {
+      params: { export_format: 'swagger' },
+      responseType: 'blob'
+    })
+    const blob = response.data instanceof Blob ? response.data : new Blob([response.data])
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `api_project_${selectedProject.value}_swagger.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    ElMessage.success(t('apiTesting.importExport.exportSuccess'))
+  } catch (error) {
+    console.error('导出项目失败:', error)
+    ElMessage.error(t('apiTesting.importExport.exportFailed'))
+  }
+}
+
 const importCurl = () => {
   // 清空上次的 curl 命令
   curlCommand.value = ''
@@ -2492,10 +2544,7 @@ const insertTextAtCursor = (inputRef, textToInsert) => {
 const loadVariableFunctions = async () => {
   try {
     loading.value = true
-    console.log('开始加载变量函数...')
     const apiResponse = await getVariableFunctions()
-    console.log('变量函数响应:', apiResponse)
-    console.log('变量函数响应.data:', apiResponse.data)
     
     // 更灵活地处理响应数据结构
     let functionsData = null
@@ -2516,7 +2565,6 @@ const loadVariableFunctions = async () => {
     
     if (functionsData) {
       const groupedFunctions = functionsData
-      console.log('处理后的 groupedFunctions:', groupedFunctions)
 
       // 后端已经按分类分组了，直接转换为标签页所需的格式
       if (typeof groupedFunctions === 'object' && !Array.isArray(groupedFunctions)) {
@@ -2585,7 +2633,6 @@ const loadVariableFunctions = async () => {
         variableCategories.value = orderedCategories
       }
 
-      console.log('最终变量分类:', variableCategories.value)
     } else {
       console.error('响应数据格式错误，无法找到函数数据')
       console.error('完整响应:', apiResponse)
@@ -2650,7 +2697,6 @@ const useLocalVariableCategories = () => {
       ]
     }
   ]
-  console.log('使用本地变量分类数据:', variableCategories.value)
 }
 </script>
 

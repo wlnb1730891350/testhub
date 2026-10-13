@@ -3,6 +3,7 @@ UI自动化测试执行服务
 支持 Playwright 和 Selenium 测试引擎
 """
 import time
+import logging
 import json
 from datetime import datetime
 from django.utils import timezone
@@ -24,6 +25,10 @@ from .models import (
     TestCaseExecution, Element
 )
 from .variable_resolver import resolve_variables
+from .runtime_flags import coerce_bool
+
+
+logger = logging.getLogger(__name__)
 
 
 class TestExecutor:
@@ -33,7 +38,7 @@ class TestExecutor:
         self.test_suite = test_suite
         self.engine = engine
         self.browser = browser
-        self.headless = headless
+        self.headless = coerce_bool(headless)
         self.executed_by = executed_by
         self.execution = None
         self.test_cases = []
@@ -115,14 +120,14 @@ class TestExecutor:
         """获取测试套件中的所有测试用例"""
         suite_test_cases = self.test_suite.suite_test_cases.select_related('test_case').order_by('order')
         self.test_cases = [stc.test_case for stc in suite_test_cases]
-        print(f"从套件 '{self.test_suite.name}' 获取到 {len(self.test_cases)} 个测试用例")
+        logger.info(f"从套件 '{self.test_suite.name}' 获取到 {len(self.test_cases)} 个测试用例")
         for i, tc in enumerate(self.test_cases, 1):
-            print(f"  {i}. {tc.name} (ID: {tc.id})")
+            logger.info(f"  {i}. {tc.name} (ID: {tc.id})")
         return self.test_cases
 
     def run(self):
         """执行测试套件"""
-        print(f"[TestExecutor] 初始化执行器...")
+        logger.info(f"[TestExecutor] 初始化执行器...")
         try:
             # 设置环境变量，允许在后台线程中使用同步 ORM
             # 这对于 Playwright 执行是必需的
@@ -131,44 +136,44 @@ class TestExecutor:
 
             # 关闭当前线程的数据库连接，避免线程间共享
             connection.close()
-            print(f"[TestExecutor] 数据库连接已重置")
+            logger.info(f"[TestExecutor] 数据库连接已重置")
 
             # 创建执行记录
-            print(f"[TestExecutor] 创建执行记录...")
+            logger.info(f"[TestExecutor] 创建执行记录...")
             self.create_execution_record()
-            print(f"[TestExecutor] 执行记录已创建: ID={self.execution.id}")
+            logger.info(f"[TestExecutor] 执行记录已创建: ID={self.execution.id}")
 
             # 获取测试用例
-            print(f"[TestExecutor] 获取测试用例...")
+            logger.info(f"[TestExecutor] 获取测试用例...")
             self.get_test_cases()
-            print(f"[TestExecutor] 获取到 {len(self.test_cases)} 个测试用例")
+            logger.info(f"[TestExecutor] 获取到 {len(self.test_cases)} 个测试用例")
 
             # 根据引擎选择执行方式
-            print(f"[TestExecutor] 使用引擎: {self.engine}")
+            logger.info(f"[TestExecutor] 使用引擎: {self.engine}")
             if self.engine == 'playwright':
-                print(f"[TestExecutor] 启动 Playwright 执行...")
+                logger.info(f"[TestExecutor] 启动 Playwright 执行...")
                 self.run_with_playwright()
             else:
-                print(f"[TestExecutor] 启动 Selenium 执行...")
+                logger.info(f"[TestExecutor] 启动 Selenium 执行...")
                 self.run_with_selenium()
 
-            print(f"[TestExecutor] 执行完成")
+            logger.info(f"[TestExecutor] 执行完成")
 
         except Exception as e:
-            print(f"[TestExecutor] 测试执行失败: {str(e)}")
+            logger.error(f"[TestExecutor] 测试执行失败: {str(e)}")
             import traceback
-            traceback.print_exc()
+            logger.error('测试执行失败', exc_info=True)
             if self.execution:
-                print(f"[TestExecutor] 更新执行结果为失败...")
+                logger.info(f"[TestExecutor] 更新执行结果为失败...")
                 self.update_execution_result(
                     status='FAILED',
                     error_msg=f"执行失败: {str(e)}\n\n{traceback.format_exc()}"
                 )
         finally:
             # 确保关闭数据库连接
-            print(f"[TestExecutor] 关闭数据库连接...")
+            logger.info(f"[TestExecutor] 关闭数据库连接...")
             connection.close()
-            print(f"[TestExecutor] 执行器已退出")
+            logger.info(f"[TestExecutor] 执行器已退出")
 
     def run_with_playwright(self):
         """使用 Playwright 执行测试（同步版本）"""
@@ -189,7 +194,7 @@ class TestExecutor:
                 "3. Django 服务器在虚拟环境中运行\n\n"
                 f"详细错误: {str(e)}"
             )
-            print(f"❌ {error_msg}")
+            logger.error(f"{error_msg}")
 
             # 更新套件执行状态
             if self.execution:
@@ -271,13 +276,13 @@ class TestExecutor:
             case_executions[case_data['id']] = case_execution
 
         # 执行每个测试用例，为每个用例单独启动和关闭浏览器
-        print(f"准备执行 {len(test_cases_data)} 个测试用例")
+        logger.info(f"准备执行 {len(test_cases_data)} 个测试用例")
 
         with sync_playwright() as p:
             for i, case_data in enumerate(test_cases_data, 1):
-                print(f"\n{'=' * 60}")
-                print(f"正在执行第 {i}/{len(test_cases_data)} 个用例: {case_data['name']}")
-                print(f"{'=' * 60}")
+                logger.info(f"{'=' * 60}")
+                logger.info(f"正在执行第 {i}/{len(test_cases_data)} 个用例: {case_data['name']}")
+                logger.info(f"{'=' * 60}")
 
                 # 记录用例实际开始执行时间
                 case_execution = case_executions[case_data['id']]
@@ -306,7 +311,7 @@ class TestExecutor:
                             args=common_args
                         )
 
-                    print(f"✓ 浏览器已启动")
+                    logger.info("浏览器已启动")
 
                     # 配置上下文（User Agent 和 Viewport）
                     self.context = browser.new_context(
@@ -318,7 +323,7 @@ class TestExecutor:
                     # 导航到项目基础URL
                     if self.test_suite.project.base_url:
                         try:
-                            print(f"正在导航到: {self.test_suite.project.base_url}")
+                            logger.info(f"正在导航到: {self.test_suite.project.base_url}")
 
                             # 检测是否在Linux服务器环境
                             import platform
@@ -333,10 +338,10 @@ class TestExecutor:
                             extra_wait = 3 if is_linux else 2
                             time.sleep(extra_wait)
 
-                            print(
-                                f"✓ 成功导航到: {self.test_suite.project.base_url} (已等待页面加载完成，额外{extra_wait}秒)")
+                            logger.info(
+                                f"成功导航到: {self.test_suite.project.base_url} (已等待页面加载完成，额外{extra_wait}秒)")
                         except Exception as e:
-                            print(f"✗ 导航失败: {str(e)}")
+                            logger.warning(f"导航失败: {str(e)}")
                             # 导航失败，记录错误并继续下一个用例
                             self.results.append({
                                 'test_case_id': case_data['id'],
@@ -350,28 +355,26 @@ class TestExecutor:
                             })
                             failed += 1
                             browser.close()
-                            print(f"✓ 浏览器已关闭")
-                            continue
+                            logger.info("浏览器已关闭")
+                        continue
 
-                    # 执行测试用例（不再传递page参数，使用self.current_page）
+                    # 执行用例
                     case_result = self.execute_test_case_playwright_no_db(case_data)
                     self.results.append(case_result)
-                    print(f"✓ 用例执行完成，状态: {case_result['status']}")
 
-                    # 立即更新该用例的执行记录（包含准确的执行时间）
+                    # 记录结果
                     case_execution = case_executions[case_data['id']]
                     case_execution.status = case_result['status']
                     case_execution.finished_at = timezone.now()
                     case_execution.execution_time = (
-                                case_execution.finished_at - case_execution.started_at).total_seconds()
+                        case_execution.finished_at - case_execution.started_at
+                    ).total_seconds()
                     case_execution.execution_logs = json.dumps(case_result['steps'], ensure_ascii=False)
                     if case_result['error']:
                         case_execution.error_message = case_result['error']
                     if case_result.get('screenshots'):
                         case_execution.screenshots = case_result['screenshots']
                     case_execution.save()
-
-                    print(f"⏱️  执行时长: {case_execution.execution_time:.2f}秒")
 
                     if case_result['status'] == 'passed':
                         passed += 1
@@ -381,8 +384,7 @@ class TestExecutor:
                         skipped += 1
 
                 except Exception as e:
-                    print(f"✗ 用例执行出现异常: {str(e)}")
-                    # 记录异常
+                    logger.error(f"用例执行出现异常: {e}", exc_info=True)
                     self.results.append({
                         'test_case_id': case_data['id'],
                         'test_case_name': case_data['name'],
@@ -394,39 +396,30 @@ class TestExecutor:
                         'screenshots': []
                     })
                     failed += 1
-
-                    # 更新执行记录
                     case_execution = case_executions[case_data['id']]
                     case_execution.status = 'failed'
                     case_execution.finished_at = timezone.now()
                     case_execution.execution_time = (
-                                case_execution.finished_at - case_execution.started_at).total_seconds()
+                        case_execution.finished_at - case_execution.started_at
+                    ).total_seconds()
                     case_execution.error_message = f"用例执行异常: {str(e)}"
                     case_execution.save()
 
                 finally:
-                    # 确保每个用例执行后都关闭浏览器
                     try:
                         browser.close()
-                        print(f"✓ 浏览器已关闭\n")
-                    except:
+                        logger.info("浏览器已关闭")
+                    except Exception:
                         pass
-
-        # 注意：每个用例的执行记录已在执行过程中实时更新，不需要在这里统一更新
 
         duration = time.time() - start_time
         status = 'SUCCESS' if failed == 0 else 'FAILED'
         self.update_execution_result(status, passed, failed, skipped, duration)
 
     def execute_test_case_playwright_no_db(self, case_data):
-        """使用 Playwright 执行单个测试用例（不访问数据库）
+        """Execute one prepared case on the current Playwright page."""
+        import base64
 
-        Args:
-            case_data: 预先准备的用例数据字典，包含id, name, project_id, steps等
-            
-        Note:
-            使用 self.current_page 作为当前活动页面，switchTab会更新这个实例变量
-        """
         result = {
             'test_case_id': case_data['id'],
             'test_case_name': case_data['name'],
@@ -436,188 +429,71 @@ class TestExecutor:
             'start_time': datetime.now().isoformat(),
             'screenshots': []
         }
-
+        just_switched_tab = False
         try:
-            # 遍历预先准备好的步骤数据
-            just_switched_tab = False  # 跟踪是否刚切换了标签页
             for step_data in case_data['steps']:
-                # 如果刚切换了标签页，传递这个信息
                 step_data['_just_switched_tab'] = just_switched_tab
-                just_switched_tab = False  # 重置标志
-
+                just_switched_tab = False
                 step_result = self.execute_step_playwright(step_data)
-                if (not step_result['success']) and self.is_optional_step_failure(step_data, step_result.get('error')):
+                if (not step_result['success']) and self.is_optional_step_failure(
+                    step_data, step_result.get('error')
+                ):
                     step_result = self.mark_optional_step_skipped(step_result, step_data)
-
-                # Debug: Log which page we're using
-                print(f"📄 步骤 {step_data['step_number']} 执行完成")
-                print(f"   使用的page URL: {self.current_page.url}")
-                print(f"   使用的page 标题: {self.current_page.title()}")
-
                 result['steps'].append(step_result)
 
-                # 显式更新self.current_page，确保引用正确
                 if step_result.get('switched_page'):
-                    self.current_page = step_result['switched_page']
-                    print(f"🔄 页面切换确认: {self.current_page.title()}")
-                    print(f"   当前页面URL: {self.current_page.url}")
-                    print(f"   Page ID: {id(self.current_page)}")
-                    del step_result['switched_page']
+                    self.current_page = step_result.pop('switched_page')
                     just_switched_tab = True
+                if step_result['success'] and step_data['action_type'] in {'click', 'fill', 'hover', 'press'}:
+                    self.current_page.wait_for_timeout(800 if step_data['action_type'] == 'click' else 300)
 
-                # 步骤执行完后添加短暂延迟，确保页面状态稳定
-                # 特别是点击操作后，可能触发动画、下拉框展开等
-                if step_result['success'] and step_data['action_type'] in ['click', 'fill', 'hover', 'press']:
-                    import asyncio
-                    import time as sync_time
-                    # 点击操作后等待更长时间（下拉框展开动画）
-                    if step_data['action_type'] == 'click':
-                        self.current_page.wait_for_timeout(800)  # 等待800ms，确保下拉框完全展开
-                    else:
-                        self.current_page.wait_for_timeout(300)  # 其他操作等待300ms
-
-                # 如果步骤失败，捕获失败截图
                 if not step_result['success']:
                     result['status'] = 'failed'
-                    # 使用step的error信息作为case的error
-                    result['error'] = step_result.get('error', f"步骤 {step_data['step_number']} 执行失败")
-
-                    # 捕获失败截图（改进版）
+                    result['error'] = step_result.get(
+                        'error', f"步骤 {step_data['step_number']} 执行失败"
+                    )
                     try:
-                        import base64
-                        # 增加超时设置，避免截图等待时间过长
-                        print(f"🔍 开始捕获失败截图 (步骤 {step_data['step_number']})...")
-                        print(f"   当前page对象URL: {self.current_page.url}")
-                        print(f"   当前page对象标题: {self.current_page.title()}")
-                        screenshot_bytes = self.current_page.screenshot(timeout=5000)  # 5秒超时
-                        print(f"   截图字节大小: {len(screenshot_bytes)} bytes")
-
-                        screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
-                        print(f"   Base64 编码大小: {len(screenshot_base64)} characters")
-
-                        # 验证 base64 编码是否有效
-                        if len(screenshot_base64) < 100:
-                            raise Exception(f"Base64 编码异常短 ({len(screenshot_base64)} chars)，可能截图失败")
-
-                        screenshot_url = f'data:image/png;base64,{screenshot_base64}'
+                        screenshot = self.current_page.screenshot(timeout=5000)
                         result['screenshots'].append({
-                            'url': screenshot_url,
-                            'description': f'步骤 {step_data["step_number"]} 失败截图: {step_data.get("description", "")}',
-                            'step_number': step_data['step_number'],
-                            'timestamp': datetime.now().isoformat()
-                        })
-                        print(f"✓ 失败截图已捕获 (步骤 {step_data['step_number']})")
-                        print(f"   截图 URL 长度: {len(screenshot_url)} characters")
-                    except Exception as screenshot_error:
-                        error_msg = f"捕获失败截图失败: {str(screenshot_error)}"
-                        print(f"⚠️  {error_msg}")
-                        import traceback
-                        print(f"   详细错误:\n{traceback.format_exc()}")
-                        # 记录截图失败的详细信息到结果中
-                        result['screenshots'].append({
-                            'url': None,
-                            'description': f'步骤 {step_data["step_number"]} 截图失败: {str(screenshot_error)}',
+                            'url': f'data:image/png;base64,{base64.b64encode(screenshot).decode()}',
+                            'description': f"步骤 {step_data['step_number']} 失败截图",
                             'step_number': step_data['step_number'],
                             'timestamp': datetime.now().isoformat(),
-                            'error': str(screenshot_error)
                         })
-
+                    except Exception as screenshot_error:
+                        logger.warning(f"失败截图捕获失败: {screenshot_error}")
                     break
-
         except Exception as e:
             result['status'] = 'failed'
             result['error'] = str(e)
-
-            # 捕获异常截图（改进版）
             try:
-                import base64
-                # 增加超时设置，避免截图等待时间过长
-                print(f"🔍 开始捕获异常截图...")
-                screenshot_bytes = self.current_page.screenshot(timeout=5000)  # 5秒超时
-                print(f"   截图字节大小: {len(screenshot_bytes)} bytes")
-
-                screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
-                print(f"   Base64 编码大小: {len(screenshot_base64)} characters")
-
-                # 验证 base64 编码是否有效
-                if len(screenshot_base64) < 100:
-                    raise Exception(f"Base64 编码异常短 ({len(screenshot_base64)} chars)，可能截图失败")
-
-                screenshot_url = f'data:image/png;base64,{screenshot_base64}'
+                screenshot = self.current_page.screenshot(timeout=5000)
                 result['screenshots'].append({
-                    'url': screenshot_url,
-                    'description': f'异常截图: {str(e)}',
-                    'step_number': None,
-                    'timestamp': datetime.now().isoformat()
-                })
-                print(f"✓ 异常截图已捕获")
-                print(f"   截图 URL 长度: {len(screenshot_url)} characters")
-            except Exception as screenshot_error:
-                error_msg = f"捕获异常截图失败: {str(screenshot_error)}"
-                print(f"⚠️  {error_msg}")
-                import traceback
-                print(f"   详细错误:\n{traceback.format_exc()}")
-                # 记录截图失败的详细信息到结果中
-                result['screenshots'].append({
-                    'url': None,
-                    'description': f'异常截图失败: {str(screenshot_error)}',
+                    'url': f'data:image/png;base64,{base64.b64encode(screenshot).decode()}',
+                    'description': '异常截图',
                     'step_number': None,
                     'timestamp': datetime.now().isoformat(),
-                    'error': str(screenshot_error)
                 })
+            except Exception as screenshot_error:
+                logger.warning(f"异常截图捕获失败: {screenshot_error}")
 
         if result['status'] == 'passed' and result['steps']:
             try:
-                import base64
-                final_step = result['steps'][-1]
-                screenshot_bytes = self.current_page.screenshot(timeout=5000)
-                screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
+                screenshot = self.current_page.screenshot(timeout=5000)
                 result['screenshots'].append({
-                    'url': f'data:image/png;base64,{screenshot_base64}',
-                    'description': f'最终成功截图: 步骤 {final_step.get("step_number")} {final_step.get("description", "")}',
-                    'step_number': final_step.get('step_number'),
-                    'timestamp': datetime.now().isoformat()
+                    'url': f'data:image/png;base64,{base64.b64encode(screenshot).decode()}',
+                    'description': '最终成功截图',
+                    'step_number': result['steps'][-1].get('step_number'),
+                    'timestamp': datetime.now().isoformat(),
                 })
             except Exception as screenshot_error:
-                print(f"Capture final success screenshot failed: {str(screenshot_error)}")
-
-        if result['status'] == 'passed' and result['steps']:
-            try:
-                import base64
-                final_step = result['steps'][-1]
-                screenshot_bytes = driver.get_screenshot_as_png()
-                screenshot_base64 = base64.b64encode(screenshot_bytes).decode()
-                result['screenshots'].append({
-                    'url': f'data:image/png;base64,{screenshot_base64}',
-                    'description': f'最终成功截图: 步骤 {final_step.get("step_number")} {final_step.get("description", "")}',
-                    'step_number': final_step.get('step_number'),
-                    'timestamp': datetime.now().isoformat()
-                })
-            except Exception as screenshot_error:
-                print(f"Capture final success screenshot failed: {str(screenshot_error)}")
-
+                logger.warning(f"成功截图捕获失败: {screenshot_error}")
         result['end_time'] = datetime.now().isoformat()
         return result
 
     def execute_test_case_playwright(self, page, case_data):
+        """Backward-compatible wrapper that also persists a case execution."""
         self.current_page = page
-        """使用 Playwright 执行单个测试用例（同步版本） - 已弃用，保留用于向后兼容
-
-        Args:
-            page: Playwright page对象
-            case_data: 预先准备的用例数据字典，包含id, name, project_id, steps等
-        """
-        result = {
-            'test_case_id': case_data['id'],
-            'test_case_name': case_data['name'],
-            'status': 'passed',
-            'steps': [],
-            'error': None,
-            'start_time': datetime.now().isoformat(),
-            'screenshots': []
-        }
-
-        # 创建用例执行记录
         case_execution = TestCaseExecution.objects.create(
             test_case_id=case_data['id'],
             project_id=case_data['project_id'],
@@ -626,40 +502,15 @@ class TestExecutor:
             created_by=self.executed_by,
             started_at=timezone.now()
         )
-
-        try:
-            # 遍历预先准备好的步骤数据
-            for step_data in case_data['steps']:
-                step_result = self.execute_step_playwright(step_data)
-                if (not step_result['success']) and self.is_optional_step_failure(step_data, step_result.get('error')):
-                    step_result = self.mark_optional_step_skipped(step_result, step_data)
-                result['steps'].append(step_result)
-
-                if not step_result['success']:
-                    result['status'] = 'failed'
-                    # 使用step的error信息作为case的error
-                    result['error'] = step_result.get('error', f"步骤 {step_data['step_number']} 执行失败")
-                    break
-
-            # 更新用例执行记录
-            case_execution.status = result['status']
-            case_execution.finished_at = timezone.now()
-            case_execution.execution_time = (case_execution.finished_at - case_execution.started_at).total_seconds()
-            case_execution.execution_logs = json.dumps(result['steps'], ensure_ascii=False)
-            if result['error']:
-                case_execution.error_message = result['error']
-            case_execution.save()
-
-        except Exception as e:
-            result['status'] = 'failed'
-            result['error'] = str(e)
-
-            case_execution.status = 'error'
-            case_execution.error_message = str(e)
-            case_execution.finished_at = timezone.now()
-            case_execution.save()
-
-        result['end_time'] = datetime.now().isoformat()
+        result = self.execute_test_case_playwright_no_db(case_data)
+        case_execution.status = result['status']
+        case_execution.finished_at = timezone.now()
+        case_execution.execution_time = (
+            case_execution.finished_at - case_execution.started_at
+        ).total_seconds()
+        case_execution.execution_logs = json.dumps(result['steps'], ensure_ascii=False)
+        case_execution.error_message = result.get('error') or ''
+        case_execution.save()
         return result
 
     def execute_step_playwright(self, step_data):
@@ -715,7 +566,7 @@ class TestExecutor:
 
                     # 对于原生HTML select的option，使用select_option方法
                     if is_native_select_option:
-                        print(f"[Playwright-调试] 检测到原生HTML select元素，使用select_option方法...")
+                        logger.debug("[Playwright] 检测到原生HTML select元素，使用select_option方法...")
 
                         # 提取option的value值
                         import re
@@ -735,7 +586,7 @@ class TestExecutor:
                         select_locator_value = re.sub(r'\s+option\[.*?\]', '', select_locator_value)
                         select_locator_value = re.sub(r'//option\[.*?\]', '', select_locator_value)
 
-                        print(f"[Playwright-调试] Select定位器: {select_locator_value}, Option值: {option_value}")
+                        logger.debug(f"[Playwright] Select定位器: {select_locator_value}, Option值: {option_value}")
 
                         try:
                             # 构造select元素的locator
@@ -754,11 +605,11 @@ class TestExecutor:
 
                             execution_time = round(time.time() - start_time, 2)
                             step_result['success'] = True
-                            print(f"✓ 选择下拉框选项成功 (select_option方法)")
+                            logger.info("选择下拉框选项成功 (select_option方法)")
                             # 成功处理select，跳过后续逻辑
                             native_select_handled = True
                         except Exception as e:
-                            print(f"✗ select_option失败: {e}")
+                            logger.warning(f"select_option失败: {e}")
                             # 如果失败，继续尝试普通点击
                             native_select_handled = False
                     else:
@@ -850,7 +701,7 @@ class TestExecutor:
                             # 之前使用 JS click() 可能无法触发 Element Plus 的事件监听
                             self.current_page.wait_for_timeout(800)  # 等待下拉框展开
 
-                            print(f"[Playwright-调试] 下拉框选项处理: {locator_strategy}={locator_value}")
+                            logger.debug(f"[Playwright] 下拉框选项处理: {locator_strategy}={locator_value}")
 
                             # 构造基础定位器（移除 Playwright 特有的伪类，因为我们要手动遍历）
                             base_locator_value = locator_value.replace(' >> visible=true', '')
@@ -869,7 +720,7 @@ class TestExecutor:
 
                                 # 获取匹配元素数量
                                 count = candidates.count()
-                                print(f"[Playwright-调试] 找到 {count} 个匹配元素")
+                                logger.debug(f"[Playwright] 找到 {count} 个匹配元素")
 
                                 found_visible = False
                                 last_error = None
@@ -878,15 +729,15 @@ class TestExecutor:
                                     try:
                                         candidate = candidates.nth(i)
                                         if candidate.is_visible():
-                                            print(f"[Playwright-调试] 第 {i} 个元素可见，尝试点击...")
+                                            logger.debug(f"[Playwright] 第 {i} 个元素可见，尝试点击...")
                                             # 使用 Playwright 的 click，它会触发完整的鼠标事件链
                                             candidate.click(timeout=2000)
                                             found_visible = True
                                             step_result['success'] = True
-                                            print(f"[Playwright-调试] 点击成功")
+                                            logger.debug("[Playwright] 点击成功")
                                             break
                                     except Exception as e:
-                                        print(f"[Playwright-调试] 点击第 {i} 个元素失败: {e}")
+                                        logger.debug(f"[Playwright] 点击第 {i} 个元素失败: {e}")
                                         last_error = e
 
                                 if not found_visible:
@@ -907,7 +758,7 @@ class TestExecutor:
                                         # 点击空白处关闭
                                         self.current_page.click('body', position={'x': 10, 'y': 10}, timeout=3000)
                                         self.current_page.wait_for_timeout(500)
-                                except:
+                                except Exception:
                                     pass
 
                             # 已移除调试面板代码
@@ -915,23 +766,23 @@ class TestExecutor:
                             # 普通元素：正常点击
                             # 如果刚切换了标签页，增加超时时间并滚动到元素
                             if step_data.get('_just_switched_tab'):
-                                print(f"  ⚠️  刚切换标签页，增加元素等待时间和滚动")
+                                logger.warning("刚切换标签页，增加元素等待时间和滚动")
 
                                 # 关键修复：确保页面保持在前台！
                                 self.current_page.bring_to_front()
-                                print(f"  ✓ 页面已置于前台")
+                                logger.info("页面已置于前台")
 
                                 # 先尝试滚动到元素（确保元素在视口内）
                                 try:
                                     self.current_page.locator(selector).scroll_into_view_if_needed(timeout=5000)
-                                    print(f"  ✓ 元素已滚动到视口")
+                                    logger.info("元素已滚动到视口")
                                 except Exception as e:
-                                    print(f"  ⚠️  滚动失败: {str(e)[:50]}")
+                                    logger.warning(f"滚动失败: {str(e)[:50]}")
 
                                 # 使用更长的超时时间（至少10秒）
                                 extended_timeout = max(step_data['wait_time'], 10000)
                                 self.current_page.click(selector, timeout=extended_timeout)
-                                print(f"  ✓ 点击成功（超时: {extended_timeout}ms）")
+                                logger.info(f"点击成功（超时: {extended_timeout}ms）")
                             else:
                                 self.current_page.click(selector, timeout=step_data['wait_time'])
                             step_result['success'] = True
@@ -953,7 +804,7 @@ class TestExecutor:
                     # 记录解析后的值（用于调试）
                     if resolved_value != step_data['input_value']:
                         step_result['resolved_value'] = resolved_value
-                        print(f"  ✓ 变量解析: {step_data['input_value']} -> {resolved_value}")
+                        logger.info(f"变量解析: {step_data['input_value']} -> {resolved_value}")
 
 
                 elif step_data['action_type'] == 'press':
@@ -972,7 +823,7 @@ class TestExecutor:
                     step_result['success'] = True
                     if resolved_value != step_data.get('input_value'):
                         step_result['resolved_value'] = resolved_value
-                        print(f"  Key resolved: {step_data.get('input_value')} -> {resolved_value}")
+                        logger.debug(f"Key resolved: {step_data.get('input_value')} -> {resolved_value}")
 
                 elif step_data['action_type'] == 'getText':
                     text = self.current_page.text_content(selector, timeout=step_data['wait_time'])
@@ -1016,7 +867,7 @@ class TestExecutor:
                     # 解析断言值中的变量
                     resolved_assert_value = resolve_variables(step_data['assert_value'])
                     if resolved_assert_value != step_data['assert_value']:
-                        print(f"  ✓ 断言变量解析: {step_data['assert_value']} -> {resolved_assert_value}")
+                        logger.info(f"断言变量解析: {step_data['assert_value']} -> {resolved_assert_value}")
 
                     # 执行断言
                     if step_data['assert_type'] == 'textContains':
@@ -1065,7 +916,7 @@ class TestExecutor:
                     else:
                         timeout = 5.0
 
-                    print(f"🔄 开始执行切换标签页 (超时: {timeout}s)...")
+                    logger.info(f"开始执行切换标签页 (超时: {timeout}s)...")
                     start_wait = sync_time.time()
                     current_page = self.current_page
                     target_index = -1
@@ -1078,13 +929,13 @@ class TestExecutor:
                         should_switch = False
 
                         # 调试日志：打印当前页面状态
-                        print(f"  [Debug] 当前页面列表 (数量: {len(pages)}):")
+                        logger.debug(f"当前页面列表 (数量: {len(pages)}):")
                         for idx, p in enumerate(pages):
                             is_current = " (Current)" if p == current_page else ""
                             try:
-                                print(f"    {idx}: {p.url} - {p.title()}{is_current}")
+                                logger.debug(f"    {idx}: {p.url} - {p.title()}{is_current}")
                             except Exception as e:
-                                print(f"    {idx}: [Error getting info] {str(e)}")
+                                logger.debug(f"    {idx}: [Error getting info] {str(e)}")
 
                         if step_data['input_value'] and str(step_data['input_value']).isdigit():
                             # 指定索引的情况
@@ -1144,31 +995,31 @@ class TestExecutor:
                     try:
                         # 等待网络空闲状态（页面加载完成）
                         target_page.wait_for_load_state('networkidle', timeout=10000)  # 增加到10秒
-                        print(f"  - 页面加载状态: networkidle")
+                        logger.debug("页面加载状态: networkidle")
                     except Exception as e:
                         # 如果networkidle超时，至少等待domcontentloaded
                         try:
                             target_page.wait_for_load_state('domcontentloaded', timeout=5000)  # 增加到5秒
-                            print(f"  - 页面加载状态: domcontentloaded")
+                            logger.debug("页面加载状态: domcontentloaded")
                         except Exception as e2:
-                            print(f"  - 页面加载状态: 超时，继续执行 ({str(e2)[:50]})")
+                            logger.debug(f"页面加载状态: 超时，继续执行 ({str(e2)[:50]})")
 
                     # 额外等待一小段时间，确保页面完全稳定
                     target_page.wait_for_timeout(1500)  # 使用 wait_for_timeout 代替 sleep
 
                     # 验证页面确实已切换
-                    print(f"  - 当前活动页面URL: {target_page.url}")
-                    print(f"  - 页面是否可见: {target_page.is_visible('body') if target_page else 'Unknown'}")
+                    logger.debug(f"当前活动页面URL: {target_page.url}")
+                    logger.debug(f"页面是否可见: {target_page.is_visible('body') if target_page else 'Unknown'}")
 
                     # 关键修复：直接更新实例变量！
                     self.current_page = target_page
                     step_result['switched_page'] = target_page
                     step_result['success'] = True
 
-                    print(f"✓ 切换标签页成功")
-                    print(f"  - 目标索引: {final_target_index}")
-                    print(f"  - 页面标题: {self.current_page.title()}")
-                    print(f"  - self.current_page已更新为新页面")
+                    logger.info("切换标签页成功")
+                    logger.debug(f"目标索引: {final_target_index}")
+                    logger.debug(f"页面标题: {self.current_page.title()}")
+                    logger.debug("self.current_page已更新为新页面")
 
                 else:
                     step_result['error'] = f'⚠ 未知的操作类型: {step_data["action_type"]}'
@@ -1191,7 +1042,7 @@ class TestExecutor:
                     else:
                         timeout = 5.0
 
-                    print(f"🔄 开始执行切换标签页 (超时: {timeout}s)...")
+                    logger.info(f"开始执行切换标签页 (超时: {timeout}s)...")
                     start_wait = sync_time.time()
                     current_page = self.current_page
                     target_index = -1
@@ -1204,13 +1055,13 @@ class TestExecutor:
                         should_switch = False
 
                         # 调试日志：打印当前页面状态
-                        print(f"  [Debug] 当前页面列表 (数量: {len(pages)}):")
+                        logger.debug(f"当前页面列表 (数量: {len(pages)}):")
                         for idx, p in enumerate(pages):
                             is_current = " (Current)" if p == current_page else ""
                             try:
-                                print(f"    {idx}: {p.url} - {p.title()}{is_current}")
+                                logger.debug(f"    {idx}: {p.url} - {p.title()}{is_current}")
                             except Exception as e:
-                                print(f"    {idx}: [Error getting info] {str(e)}")
+                                logger.debug(f"    {idx}: [Error getting info] {str(e)}")
 
                         if step_data['input_value'] and str(step_data['input_value']).isdigit():
                             # 指定索引的情况
@@ -1268,31 +1119,31 @@ class TestExecutor:
                     try:
                         # 等待网络空闲状态（页面加载完成）
                         target_page.wait_for_load_state('networkidle', timeout=10000)  # 增加到10秒
-                        print(f"  - 页面加载状态: networkidle")
+                        logger.debug("页面加载状态: networkidle")
                     except Exception as e:
                         # 如果networkidle超时，至少等待domcontentloaded
                         try:
                             target_page.wait_for_load_state('domcontentloaded', timeout=5000)  # 增加到5秒
-                            print(f"  - 页面加载状态: domcontentloaded")
+                            logger.debug("页面加载状态: domcontentloaded")
                         except Exception as e2:
-                            print(f"  - 页面加载状态: 超时，继续执行 ({str(e2)[:50]})")
+                            logger.debug(f"页面加载状态: 超时，继续执行 ({str(e2)[:50]})")
 
                     # 额外等待一小段时间，确保页面完全稳定
                     target_page.wait_for_timeout(1500)  # 使用 wait_for_timeout 代替 sleep
 
                     # 验证页面确实已切换
-                    print(f"  - 当前活动页面URL: {target_page.url}")
-                    print(f"  - 页面是否可见: {target_page.is_visible('body') if target_page else 'Unknown'}")
+                    logger.debug(f"当前活动页面URL: {target_page.url}")
+                    logger.debug(f"页面是否可见: {target_page.is_visible('body') if target_page else 'Unknown'}")
 
                     # 关键修复：直接更新实例变量！
                     self.current_page = target_page
                     step_result['switched_page'] = target_page
                     step_result['success'] = True
 
-                    print(f"✓ 切换标签页成功")
-                    print(f"  - 目标索引: {final_target_index}")
-                    print(f"  - 页面标题: {self.current_page.title()}")
-                    print(f"  - self.current_page已更新为新页面")
+                    logger.info("切换标签页成功")
+                    logger.debug(f"目标索引: {final_target_index}")
+                    logger.debug(f"页面标题: {self.current_page.title()}")
+                    logger.debug("self.current_page已更新为新页面")
 
         except Exception as e:
             # 格式化为详细的错误信息，与playwright_engine.py保持一致
@@ -1310,7 +1161,7 @@ class TestExecutor:
                 # TimeoutError 通常有更详细的描述
                 elif hasattr(e, 'args') and e.args:
                     error_str = str(e.args[0]) if len(e.args) > 0 else error_str
-            except:
+            except Exception:
                 pass  # 如果提取失败，使用原始 error_str
 
             # 添加异常类型信息（如果还没有）
@@ -1342,9 +1193,9 @@ class TestExecutor:
                 step_result['error'] = log
 
             # 打印详细日志便于调试
-            print(f"❌ Playwright 步骤执行失败:")
-            print(f"   异常类型: {error_type}")
-            print(f"   错误信息: {error_str[:500]}")  # 限制长度避免刷屏
+            logger.error("Playwright 步骤执行失败:")
+            logger.error(f"   异常类型: {error_type}")
+            logger.error(f"   错误信息: {error_str[:500]}")  # 限制长度避免刷屏
 
         return step_result
 
@@ -1414,7 +1265,7 @@ class TestExecutor:
 
         # 优化：整个测试套件共用一个浏览器实例，避免频繁启动/关闭
         # 注意：Safari 不支持浏览器复用（会话管理问题），需要每个用例独立启动
-        print(f"准备执行 {len(test_cases_data)} 个测试用例")
+        logger.info(f"准备执行 {len(test_cases_data)} 个测试用例")
 
         # Safari 需要独立浏览器实例，其他浏览器可以复用
         use_browser_reuse = self.browser != 'safari'
@@ -1424,9 +1275,9 @@ class TestExecutor:
             driver = None
             try:
                 driver = self.create_selenium_driver()
-                print(f"✓ 浏览器已启动（将复用于所有用例）\n")
+                logger.info("浏览器已启动（将复用于所有用例）")
             except Exception as e:
-                print(f"✗ 浏览器启动失败: {str(e)}")
+                logger.error(f"浏览器启动失败: {str(e)}")
                 # 标记所有用例为失败
                 for case_data in test_cases_data:
                     self.results.append({
@@ -1454,13 +1305,13 @@ class TestExecutor:
         else:
             # Safari：不预先启动浏览器，每个用例独立启动
             driver = None
-            print(f"ℹ️  Safari 浏览器将为每个用例独立启动（Safari 不支持浏览器复用）\n")
+            logger.info("Safari 浏览器将为每个用例独立启动（Safari 不支持浏览器复用）")
 
         # 执行所有测试用例
         for i, case_data in enumerate(test_cases_data, 1):
-            print(f"\n{'=' * 60}")
-            print(f"正在执行第 {i}/{len(test_cases_data)} 个用例: {case_data['name']}")
-            print(f"{'=' * 60}")
+            logger.info(f"{'=' * 60}")
+            logger.info(f"正在执行第 {i}/{len(test_cases_data)} 个用例: {case_data['name']}")
+            logger.info(f"{'=' * 60}")
 
             # 记录用例实际开始执行时间
             case_execution = case_executions[case_data['id']]
@@ -1472,9 +1323,9 @@ class TestExecutor:
             if not use_browser_reuse:
                 try:
                     driver = self.create_selenium_driver()
-                    print(f"✓ Safari 浏览器已启动")
+                    logger.info("Safari 浏览器已启动")
                 except Exception as e:
-                    print(f"✗ Safari 浏览器启动失败: {str(e)}")
+                    logger.error(f"Safari 浏览器启动失败: {str(e)}")
                     self.results.append({
                         'test_case_id': case_data['id'],
                         'test_case_name': case_data['name'],
@@ -1500,21 +1351,21 @@ class TestExecutor:
                 # 第1个用例浏览器刚启动，无需清理；从第2个用例开始才需要清理
                 if use_browser_reuse and i > 1:
                     try:
-                        print(f"🧹 清理浏览器状态...")
+                        logger.info("清理浏览器状态...")
                         # 清除所有 Cookie
                         driver.delete_all_cookies()
                         # 清除 localStorage 和 sessionStorage
                         driver.execute_script("window.localStorage.clear();")
                         driver.execute_script("window.sessionStorage.clear();")
-                        print(f"✓ 浏览器状态已清理")
+                        logger.info("浏览器状态已清理")
                     except Exception as clean_error:
-                        print(f"⚠️  清理浏览器状态失败: {str(clean_error)}，继续执行...")
+                        logger.warning(f"清理浏览器状态失败: {str(clean_error)}，继续执行...")
                         pass  # 如果清理失败，继续执行
 
                 # 导航到项目基础URL
                 if self.test_suite.project.base_url:
                     try:
-                        print(f"正在导航到: {self.test_suite.project.base_url}")
+                        logger.info(f"正在导航到: {self.test_suite.project.base_url}")
 
                         # 检测是否在Linux服务器环境
                         import platform
@@ -1529,17 +1380,17 @@ class TestExecutor:
                             WebDriverWait(driver, 15 if is_linux else 10).until(
                                 lambda d: d.execute_script("return document.readyState") == "complete"
                             )
-                        except:
+                        except Exception:
                             pass  # 即使超时也继续执行
 
                         # 额外等待，确保动态内容加载（Vue/React等SPA应用）
                         extra_wait = 3 if is_linux else 2
                         time.sleep(extra_wait)
 
-                        print(
-                            f"✓ 成功导航到: {self.test_suite.project.base_url} (已等待页面加载完成，额外{extra_wait}秒)")
+                        logger.info(
+                            f"成功导航到: {self.test_suite.project.base_url} (已等待页面加载完成，额外{extra_wait}秒)")
                     except Exception as e:
-                        print(f"✗ 导航失败: {str(e)}")
+                        logger.warning(f"导航失败: {str(e)}")
                         # 导航失败，记录错误并继续下一个用例
                         self.results.append({
                             'test_case_id': case_data['id'],
@@ -1557,7 +1408,7 @@ class TestExecutor:
                 # 执行测试用例
                 case_result = self.execute_test_case_selenium_no_db(driver, case_data)
                 self.results.append(case_result)
-                print(f"✓ 用例执行完成，状态: {case_result['status']}")
+                logger.info(f"用例执行完成，状态: {case_result['status']}")
 
                 # 立即更新该用例的执行记录（包含准确的执行时间）
                 case_execution = case_executions[case_data['id']]
@@ -1571,7 +1422,7 @@ class TestExecutor:
                     case_execution.screenshots = case_result['screenshots']
                 case_execution.save()
 
-                print(f"⏱️  执行时长: {case_execution.execution_time:.2f}秒")
+                logger.info(f"执行时长: {case_execution.execution_time:.2f}秒")
 
                 if case_result['status'] == 'passed':
                     passed += 1
@@ -1581,7 +1432,7 @@ class TestExecutor:
                     skipped += 1
 
             except Exception as e:
-                print(f"✗ 用例执行出现异常: {str(e)}")
+                logger.error(f"用例执行出现异常: {str(e)}")
                 # 记录异常
                 self.results.append({
                     'test_case_id': case_data['id'],
@@ -1608,21 +1459,21 @@ class TestExecutor:
                 if not use_browser_reuse and driver:
                     try:
                         driver.quit()
-                        print(f"✓ Safari 浏览器已关闭\n")
+                        logger.info("Safari 浏览器已关闭")
                     except Exception as e:
-                        print(f"✗ 关闭 Safari 浏览器时出错: {str(e)}\n")
+                        logger.error(f"关闭 Safari 浏览器时出错: {str(e)}")
                     driver = None
 
         # 所有用例执行完毕后，关闭浏览器（仅对复用浏览器的情况）
         if use_browser_reuse and driver:
             try:
-                print(f"\n{'=' * 60}")
-                print(f"正在关闭浏览器...")
+                logger.info(f"{'=' * 60}")
+                logger.info("正在关闭浏览器...")
                 driver.quit()
-                print(f"✓ 浏览器已关闭")
-                print(f"{'=' * 60}\n")
+                logger.info("浏览器已关闭")
+                logger.info(f"{'=' * 60}")
             except Exception as e:
-                print(f"✗ 关闭浏览器时出错: {str(e)}")
+                logger.error(f"关闭浏览器时出错: {str(e)}")
 
         # 注意：每个用例的执行记录已在执行过程中实时更新，不需要在这里统一更新
 
@@ -1866,7 +1717,7 @@ class TestExecutor:
                             'timestamp': datetime.now().isoformat()
                         })
                     except Exception as screenshot_error:
-                        print(f"捕获失败截图失败: {str(screenshot_error)}")
+                        logger.error(f"捕获失败截图失败: {str(screenshot_error)}")
 
                     break
 
@@ -1886,7 +1737,7 @@ class TestExecutor:
                     'timestamp': datetime.now().isoformat()
                 })
             except Exception as screenshot_error:
-                print(f"捕获异常截图失败: {str(screenshot_error)}")
+                logger.error(f"捕获异常截图失败: {str(screenshot_error)}")
 
         result['end_time'] = datetime.now().isoformat()
         return result
@@ -2020,7 +1871,7 @@ class TestExecutor:
                     # 对于原生HTML select的option，使用Selenium的select类
                     if is_native_select_option:
                         from selenium.webdriver.support.ui import Select
-                        print(f"[Selenium-调试] 检测到原生HTML select元素，使用Select类...")
+                        logger.debug("检测到原生HTML select元素，使用Select类...")
 
                         # 提取option的value值
                         import re
@@ -2040,7 +1891,7 @@ class TestExecutor:
                         select_locator_value = re.sub(r'\s+option\[.*?\]', '', select_locator_value)
                         select_locator_value = re.sub(r'//option\[.*?\]', '', select_locator_value)
 
-                        print(f"[Selenium-调试] Select定位器: {select_locator_value}, Option值: {option_value}")
+                        logger.debug(f"Select定位器: {select_locator_value}, Option值: {option_value}")
 
                         try:
                             # 查找select元素
@@ -2051,11 +1902,11 @@ class TestExecutor:
                             select_obj.select_by_value(option_value)
 
                             step_result['success'] = True
-                            print(f"✓ 选择下拉框选项成功 (Select.select_by_value)")
+                            logger.info("选择下拉框选项成功 (Select.select_by_value)")
                             # 成功处理select，跳过后续逻辑
                             native_select_handled = True
                         except Exception as e:
-                            print(f"✗ Select类失败: {e}")
+                            logger.error(f"Select类失败: {e}")
                             # 如果失败，继续尝试普通点击
                             native_select_handled = False
                     else:
@@ -2077,7 +1928,7 @@ class TestExecutor:
 
                         if is_dropdown_option:
                             # 下拉框选项：特殊处理，遍历所有匹配元素找到可见的那个
-                            print(f"  检测到下拉框选项（定位器匹配），尝试查找可见元素...")
+                            logger.debug("检测到下拉框选项（定位器匹配），尝试查找可见元素...")
 
                             # 自定义等待逻辑：轮询查找可见元素
                             end_time = time.time() + (step_data['wait_time'] / 1000)
@@ -2091,19 +1942,19 @@ class TestExecutor:
                                         if el.is_displayed():
                                             element_obj = el
                                             found_visible = True
-                                            print(f"  ✓ 找到可见的下拉框选项")
+                                            logger.info("找到可见的下拉框选项")
                                             break
 
                                     if found_visible:
                                         break
 
                                     time.sleep(0.5)
-                                except:
+                                except Exception:
                                     time.sleep(0.5)
 
                             if not found_visible:
                                 # 如果没找到可见元素，回退到默认行为（可能会抛出超时）
-                                print(f"  ⚠️ 未找到可见的下拉框选项，尝试默认等待...")
+                                logger.warning("未找到可见的下拉框选项，尝试默认等待...")
                                 element_obj = wait.until(EC.visibility_of_element_located((by, locator_value)))
                         else:
                             element_obj = wait.until(EC.element_to_be_clickable((by, locator_value)))
@@ -2116,10 +1967,10 @@ class TestExecutor:
                         try:
                             # 每次重试都重新查找元素（解决stale element问题）
                             if attempt > 0:
-                                print(f"⚠️  重新查找元素（Stale Element 重试）... (尝试 {attempt + 1}/{max_retries})")
+                                logger.warning(f"重新查找元素（Stale Element 重试）... (尝试 {attempt + 1}/{max_retries})")
                                 # 增加等待时间，让页面 DOM 稳定（对于 Vue/React 应用很重要）
                                 wait_time = 1.0 if attempt == 1 else 1.5  # 第一次重试等1秒，第二次重试等1.5秒
-                                print(f"等待 {wait_time}秒 让页面稳定...")
+                                logger.debug(f"等待 {wait_time}秒 让页面稳定...")
                                 time.sleep(wait_time)
                                 # 重新定位元素
                                 if is_dropdown_option:
@@ -2128,15 +1979,14 @@ class TestExecutor:
                                     element_obj = wait.until(EC.element_to_be_clickable((by, locator_value)))
                                 # 等待元素状态稳定
                                 time.sleep(0.3)
-                                print(f"✓ 元素重新定位成功")
-
+                                logger.info("元素重新定位成功")
                             # 对于下拉框选项，先滚动到可视区域
                             if 'dropdown' in locator_value.lower() or 'el-select' in locator_value.lower() or '下拉' in element_name or '选项' in element_name:
                                 try:
                                     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});",
                                                           element_obj)
                                     time.sleep(0.3)  # 等待滚动完成
-                                except:
+                                except Exception:
                                     pass
 
                             # 如果是 el-select 容器，尝试点击内部的可点击区域
@@ -2146,7 +1996,7 @@ class TestExecutor:
                                     # 尝试找到并点击内部的 input 或 wrapper
                                     clickable = element_obj.find_element(By.CSS_SELECTOR, '.el-select__wrapper, input')
                                     clickable.click()
-                                except:
+                                except Exception:
                                     # 如果找不到，直接点击容器
                                     element_obj.click()
                             else:
@@ -2156,7 +2006,7 @@ class TestExecutor:
                             break
                         except StaleElementReferenceException:
                             if attempt < max_retries - 1:
-                                print(f"⚠️  元素过期，正在重试... ({attempt + 1}/{max_retries})")
+                                logger.warning(f"元素过期，正在重试... ({attempt + 1}/{max_retries})")
                                 # 继续下一次循环，会重新查找元素
                                 continue
                             else:
@@ -2166,12 +2016,12 @@ class TestExecutor:
                             if attempt < max_retries - 1 and (
                                     'not visible' in str(click_error).lower() or 'not interactable' in str(
                                     click_error).lower()):
-                                print(f"⚠️  元素不可交互，尝试使用 JavaScript 点击... ({attempt + 1}/{max_retries})")
+                                logger.warning(f"元素不可交互，尝试使用 JavaScript 点击... ({attempt + 1}/{max_retries})")
                                 try:
                                     driver.execute_script("arguments[0].click();", element_obj)
                                     step_result['success'] = True
                                     break
-                                except:
+                                except Exception:
                                     if attempt < max_retries - 1:
                                         time.sleep(0.5)
                                         # 重新定位
@@ -2201,19 +2051,19 @@ class TestExecutor:
                             # 记录解析后的值（用于调试）
                             if resolved_value != step_data['input_value']:
                                 step_result['resolved_value'] = resolved_value
-                                print(f"  ✓ 变量解析: {step_data['input_value']} -> {resolved_value}")
+                            logger.info(f"变量解析: {step_data['input_value']} -> {resolved_value}")
 
                             break
                         except StaleElementReferenceException:
                             if attempt < max_retries - 1:
-                                print(f"⚠️  元素过期（Stale Element），正在重试... (尝试 {attempt + 2}/{max_retries})")
+                                logger.warning(f"元素过期（Stale Element），正在重试... (尝试 {attempt + 2}/{max_retries})")
                                 # 增加等待时间，让页面 DOM 稳定
                                 wait_time = 1.0 if attempt == 0 else 1.5
-                                print(f"等待 {wait_time}秒 让页面稳定...")
+                                logger.debug(f"等待 {wait_time}秒 让页面稳定...")
                                 time.sleep(wait_time)
                                 element_obj = wait.until(EC.presence_of_element_located((by, locator_value)))
                                 time.sleep(0.3)  # 确保元素状态稳定
-                                print(f"✓ 元素重新定位成功")
+                                logger.info("元素重新定位成功")
                             else:
                                 raise
 
@@ -2229,14 +2079,14 @@ class TestExecutor:
                             break
                         except StaleElementReferenceException:
                             if attempt < max_retries - 1:
-                                print(f"⚠️  元素过期（Stale Element），正在重试... (尝试 {attempt + 2}/{max_retries})")
+                                logger.warning(f"元素过期（Stale Element），正在重试... (尝试 {attempt + 2}/{max_retries})")
                                 # 增加等待时间，让页面 DOM 稳定
                                 wait_time = 1.0 if attempt == 0 else 1.5
-                                print(f"等待 {wait_time}秒 让页面稳定...")
+                                logger.debug(f"等待 {wait_time}秒 让页面稳定...")
                                 time.sleep(wait_time)
                                 element_obj = wait.until(EC.presence_of_element_located((by, locator_value)))
                                 time.sleep(0.3)  # 确保元素状态稳定
-                                print(f"✓ 元素重新定位成功")
+                                logger.info("元素重新定位成功")
                             else:
                                 raise
 
@@ -2266,7 +2116,7 @@ class TestExecutor:
                     step_result['success'] = True
                     if resolved_value != step_data.get('input_value'):
                         step_result['resolved_value'] = resolved_value
-                        print(f"  Key resolved: {step_data.get('input_value')} -> {resolved_value}")
+                        logger.debug(f"Key resolved: {step_data.get('input_value')} -> {resolved_value}")
 
                 elif step_data['action_type'] == 'hover':
                     # 先定位元素
@@ -2280,14 +2130,14 @@ class TestExecutor:
                             break
                         except StaleElementReferenceException:
                             if attempt < max_retries - 1:
-                                print(f"⚠️  元素过期（Stale Element），正在重试... (尝试 {attempt + 2}/{max_retries})")
+                                logger.warning(f"元素过期（Stale Element），正在重试... (尝试 {attempt + 2}/{max_retries})")
                                 # 增加等待时间，让页面 DOM 稳定
                                 wait_time = 1.0 if attempt == 0 else 1.5
-                                print(f"等待 {wait_time}秒 让页面稳定...")
+                                logger.debug(f"等待 {wait_time}秒 让页面稳定...")
                                 time.sleep(wait_time)
                                 element_obj = wait.until(EC.presence_of_element_located((by, locator_value)))
                                 time.sleep(0.3)  # 确保元素状态稳定
-                                print(f"✓ 元素重新定位成功")
+                                logger.info("元素重新定位成功")
                             else:
                                 raise
 
@@ -2304,7 +2154,7 @@ class TestExecutor:
                     # 解析断言值中的变量
                     resolved_assert_value = resolve_variables(step_data['assert_value'])
                     if resolved_assert_value != step_data['assert_value']:
-                        print(f"  ✓ 断言变量解析: {step_data['assert_value']} -> {resolved_assert_value}")
+                        logger.info(f"断言变量解析: {step_data['assert_value']} -> {resolved_assert_value}")
 
                     if step_data['assert_type'] == 'textContains':
                         text = element_obj.text
@@ -2357,7 +2207,7 @@ class TestExecutor:
                             driver.switch_to.window(handles[-1])
 
                         step_result['success'] = True
-                        print(f"✓ Selenium 切换标签页成功 (Handle Count: {len(handles)})")
+                        logger.info(f"Selenium 切换标签页成功 (Handle Count: {len(handles)})")
                     except Exception as e:
                         step_result['error'] = f"切换标签页失败: {str(e)}"
                         step_result['success'] = False
@@ -2427,7 +2277,7 @@ class TestExecutor:
 
                         error_parts.append(f"\n等待条件: {wait_condition}")
                         error_parts.append(f"\n调用堆栈:\n{tb_str}")
-            except:
+            except Exception:
                 pass
 
             # 5. 如果仍然没有有用信息，提供操作类型相关的提示
@@ -2466,23 +2316,23 @@ class TestExecutor:
             error_msg = ""
 
             # 🔍 调试：打印异常对象的所有信息
-            print(f"=" * 60)
-            print(f"🔍 Selenium 异常调试信息 (test_executor):")
-            print(f"  异常类型: {error_type}")
-            print(f"  str(e): {repr(str(e))}")
-            print(f"  hasattr msg: {hasattr(e, 'msg')}")
+            logger.debug("=" * 60)
+            logger.debug("Selenium 异常调试信息 (test_executor):")
+            logger.debug(f"  异常类型: {error_type}")
+            logger.debug(f"  str(e): {repr(str(e))}")
+            logger.debug(f"  hasattr msg: {hasattr(e, 'msg')}")
             if hasattr(e, 'msg'):
-                print(f"  e.msg 值: {repr(e.msg)}")
-                print(f"  e.msg 类型: {type(e.msg)}")
-            print(f"  hasattr args: {hasattr(e, 'args')}")
+                logger.debug(f"  e.msg 值: {repr(e.msg)}")
+                logger.debug(f"  e.msg 类型: {type(e.msg)}")
+            logger.debug(f"  hasattr args: {hasattr(e, 'args')}")
             if hasattr(e, 'args'):
-                print(f"  e.args 长度: {len(e.args)}")
-                print(f"  e.args 内容: {e.args}")
-            print(f"  hasattr stacktrace: {hasattr(e, 'stacktrace')}")
+                logger.debug(f"  e.args 长度: {len(e.args)}")
+                logger.debug(f"  e.args 内容: {e.args}")
+            logger.debug(f"  hasattr stacktrace: {hasattr(e, 'stacktrace')}")
             if hasattr(e, 'stacktrace'):
-                print(f"  e.stacktrace 前200字符: {str(e.stacktrace)[:200]}")
-            print(f"  dir(e): {[attr for attr in dir(e) if not attr.startswith('_')]}")
-            print(f"=" * 60)
+                logger.debug(f"  e.stacktrace 前200字符: {str(e.stacktrace)[:200]}")
+            logger.debug(f"  dir(e): {[attr for attr in dir(e) if not attr.startswith('_')]}")
+            logger.debug("=" * 60)
 
             # 定义无意义的错误信息列表
             meaningless_messages = ['', 'Message', 'Message:', 'Message: ', 'Message:\n']
@@ -2494,26 +2344,26 @@ class TestExecutor:
                     temp = str(e.msg).strip()
                     if temp not in meaningless_messages:
                         error_msg = temp
-                        print(f"✓ 从 e.msg 提取到错误: {error_msg[:100]}")
+                        logger.debug(f"从 e.msg 提取到错误: {error_msg[:100]}")
 
                 # 优先级2: 从 args 获取
                 if not error_msg and hasattr(e, 'args') and len(e.args) > 0 and e.args[0]:
                     temp = str(e.args[0]).strip()
                     if temp not in meaningless_messages:
                         error_msg = temp
-                        print(f"✓ 从 e.args[0] 提取到错误: {error_msg[:100]}")
+                        logger.debug(f"从 e.args[0] 提取到错误: {error_msg[:100]}")
 
                 # 优先级3: 使用 str(e)，但排除无意义的值
                 if not error_msg:
                     temp = str(e).strip()
                     if temp not in meaningless_messages:
                         error_msg = temp
-                        print(f"✓ 从 str(e) 提取到错误: {error_msg[:100]}")
+                        logger.debug(f"从 str(e) 提取到错误: {error_msg[:100]}")
 
                 # 优先级4: 从 stacktrace 提取
                 if not error_msg and hasattr(e, 'stacktrace') and e.stacktrace:
                     error_msg = f"详细堆栈:\n{e.stacktrace[:300]}"
-                    print(f"✓ 从 e.stacktrace 提取到错误")
+                    logger.debug("从 e.stacktrace 提取到错误")
 
                 # 优先级5: 从 __dict__ 提取有用信息
                 if not error_msg and hasattr(e, '__dict__'):
@@ -2522,15 +2372,15 @@ class TestExecutor:
                                     v is not None and not k.startswith('_') and k not in ['msg', 'args', 'stacktrace']}
                     if useful_attrs:
                         error_msg = f"异常属性: {useful_attrs}"
-                        print(f"✓ 从 e.__dict__ 提取到错误")
+                        logger.debug("从 e.__dict__ 提取到错误")
 
                 # 如果还是没有，使用默认信息
                 if not error_msg:
                     error_msg = f"未知错误 (异常类型: {error_type})"
-                    print(f"⚠️ 无法提取任何有用信息，使用默认错误消息")
+                    logger.warning("无法提取任何有用信息，使用默认错误消息")
 
             except Exception as extract_error:
-                print(f"⚠️  提取错误信息时出错: {extract_error}")
+                logger.warning(f"提取错误信息时出错: {extract_error}")
                 error_msg = f"无法提取详细错误信息 (异常类型: {error_type})"
 
             # 添加异常类型前缀（如果还没有）
@@ -2545,8 +2395,8 @@ class TestExecutor:
             step_result['error'] = log
 
             # 打印详细日志便于调试
-            print(f"❌ Selenium 步骤执行失败:")
-            print(f"   异常类型: {error_type}")
-            print(f"   错误信息: {error_msg[:500]}")  # 限制长度避免刷屏
+            logger.error("Selenium 步骤执行失败:")
+            logger.error(f"   异常类型: {error_type}")
+            logger.error(f"   错误信息: {error_msg[:500]}")  # 限制长度避免刷屏
 
         return step_result

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="task-detail">
     <div class="page-header">
       <div class="header-left">
@@ -1299,8 +1299,6 @@ export default {
      */
     startProgressPolling() {
       if (this.progressTimer) return
-      console.log('[Progress] 启动生成进度轮询')
-      // 棣栨绔嬪嵆鏌ヨ涓€娆?
       this.fetchTaskProgress()
       // 涔嬪悗姣?1.5 绉掕疆璇竴娆?
       this.progressTimer = setInterval(() => {
@@ -1315,7 +1313,6 @@ export default {
       if (this.progressTimer) {
         clearInterval(this.progressTimer)
         this.progressTimer = null
-        console.log('[Progress] 已停止进度轮询')
       }
     },
 
@@ -1466,7 +1463,6 @@ export default {
       } catch (error) {
         // 鐢ㄦ埛涓诲姩鍙栨秷锛堣烦杩囨緞娓咃級鏄甯歌涓猴紝闈欓粯澶勭悊
         if (axios.isCancel(error)) {
-          console.log('[Clarification] Request canceled by user (skip clarification)')
           return
         }
         console.error('Failed to start clarification:', error)

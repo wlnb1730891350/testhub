@@ -86,25 +86,59 @@
                 <el-icon><Check /></el-icon>
                 {{ t('uiAutomation.testCase.saveTestCase') }}
               </el-button>
-              <el-select v-model="selectedEngine" :placeholder="t('uiAutomation.testCase.selectEngine')" size="small" style="width: 130px; margin-right: 10px">
+              <el-select
+                v-model="selectedEngine"
+                :placeholder="t('uiAutomation.testCase.selectEngine')"
+                size="small"
+                style="width: 130px; margin-right: 10px"
+              >
                 <el-option label="Playwright" value="playwright" />
                 <el-option label="Selenium" value="selenium" />
+                <el-option label="AI" value="ai" />
               </el-select>
-              <el-select v-model="selectedBrowser" :placeholder="t('uiAutomation.testCase.selectBrowser')" size="small" style="width: 120px; margin-right: 10px">
+              <el-select
+                v-if="selectedEngine !== 'ai'"
+                v-model="selectedBrowser"
+                :placeholder="t('uiAutomation.testCase.selectBrowser')"
+                size="small"
+                style="width: 120px; margin-right: 10px"
+              >
                 <el-option label="Chrome" value="chrome" />
                 <el-option label="Firefox" value="firefox" />
                 <el-option label="Safari" value="safari" />
                 <el-option label="Edge" value="edge" />
               </el-select>
-              <el-select v-model="headlessMode" :placeholder="t('uiAutomation.testCase.runModeLabel')" size="small" style="width: 110px; margin-right: 10px">
+              <el-select
+                v-if="selectedEngine !== 'ai'"
+                v-model="headlessMode"
+                :placeholder="t('uiAutomation.testCase.runModeLabel')"
+                size="small"
+                style="width: 110px; margin-right: 10px"
+              >
                 <el-option :label="t('uiAutomation.testCase.headedMode')" :value="false" />
                 <el-option :label="t('uiAutomation.testCase.headlessMode')" :value="true" />
               </el-select>
-              <el-button size="small" type="success" @click="runTestCase(selectedTestCase)" :loading="isRunning">
+              <el-button
+                v-if="selectedEngine !== 'ai'"
+                size="small"
+                type="success"
+                @click="runTestCase(selectedTestCase)"
+                :loading="isRunning"
+              >
                 <el-icon v-if="!isRunning"><CaretRight /></el-icon>
                 {{ isRunning ? t('uiAutomation.testCase.running') : t('uiAutomation.testCase.runLabel') }}
               </el-button>
-              <el-button size="small" v-if="executionResult" @click="toggleView">
+              <el-button
+                v-else
+                size="small"
+                type="warning"
+                @click="runAITestCase(selectedTestCase)"
+                :loading="isRunning"
+              >
+                <el-icon v-if="!isRunning"><MagicStick /></el-icon>
+                {{ isRunning ? t('uiAutomation.testCase.aiRunning') : t('uiAutomation.testCase.aiRunLabel') }}
+              </el-button>
+              <el-button size="small" v-if="executionResult && !showSteps" @click="toggleView">
                 <el-icon><component :is="showSteps ? 'View' : 'Edit'" /></el-icon>
                 {{ showSteps ? t('uiAutomation.testCase.viewResult') : t('uiAutomation.testCase.editSteps') }}
               </el-button>
@@ -112,11 +146,28 @@
                 size="small"
                 v-if="executionResult && !showSteps"
                 type="success"
-                @click="runTestCase(selectedTestCase)"
+                @click="rerunTestCase"
                 :loading="isRunning"
               >
                 <el-icon v-if="!isRunning"><Refresh /></el-icon>
                 {{ t('uiAutomation.testCase.rerun') }}
+              </el-button>
+              <el-button
+                v-if="latestAIExecution && latestAIExecution.status === 'passed'"
+                size="small"
+                type="primary"
+                @click="acceptAILocators(latestAIExecution)"
+              >
+                <el-icon><Check /></el-icon>
+                {{ t('uiAutomation.testCase.acceptAiLocators') }}
+              </el-button>
+              <el-button
+                v-if="latestAIExecution"
+                size="small"
+                @click="openAIExecutionDialog"
+              >
+                <el-icon><List /></el-icon>
+                {{ t('uiAutomation.testCase.aiExecutionRecords') }}
               </el-button>
             </div>
           </div>
@@ -279,6 +330,24 @@
                             size="small"
                           />
                         </div>
+                        <!-- 可跳过选项 -->
+                        <div class="step-param">
+                          <label>{{ t('uiAutomation.testCase.skipOption') }}</label>
+                          <div style="display: flex; align-items: center; gap: 8px; flex: 1">
+                            <el-switch
+                              v-model="element.is_optional"
+                              active-text="找不到时跳过"
+                              size="small"
+                            />
+                            <el-input
+                              v-if="element.is_optional"
+                              v-model="element.optional_note"
+                              :placeholder="t('uiAutomation.testCase.skipNotePlaceholder')"
+                              size="small"
+                              style="width: 200px"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </template>
@@ -317,7 +386,7 @@
                     <el-empty :description="t('uiAutomation.testCase.noLogs')" />
                   </div>
                 </el-tab-pane>
-                <el-tab-pane :label="t('uiAutomation.testCase.failedScreenshots')" name="screenshots" v-if="executionResult.screenshots && executionResult.screenshots.length > 0">
+                <el-tab-pane :label="t('uiAutomation.testCase.executionScreenshots')" name="screenshots" v-if="executionResult.screenshots && executionResult.screenshots.length > 0">
                   <div class="screenshots-container">
                     <div
                       v-for="(screenshot, index) in executionResult.screenshots"
@@ -509,6 +578,7 @@
     :project-id="projectId"
     :current-test-case-id="selectedTestCase?.id || ''"
     :current-test-case-name="selectedTestCase?.name || ''"
+    :current-test-case-step-count="currentSteps.length"
     @saved="onRecordSaved"
   />
 </template>
@@ -517,7 +587,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Search, Plus, Edit, Delete, Check, CaretRight, ArrowUp, ArrowDown, Rank, Picture, Warning, View, ZoomIn, Refresh, WarningFilled, MagicStick, VideoCamera
+  Search, Plus, Edit, Delete, Check, CaretRight, ArrowUp, ArrowDown, Rank, Picture, Warning, View, ZoomIn, Refresh, WarningFilled, MagicStick, VideoCamera, List
 } from '@element-plus/icons-vue'
 import draggable from 'vuedraggable'
 import DataFactorySelector from '@/components/DataFactorySelector.vue'
@@ -535,7 +605,10 @@ import {
   getTestCases,
   runTestCase as runTestCaseApi,
   copyTestCase as copyTestCaseApi,
-  getLocatorStrategies
+  getLocatorStrategies,
+  runAITestCase as runAITestCaseApi,
+  acceptAILocators as acceptAILocatorsApi,
+  getTestCaseExecutions as getTestCaseExecutionsApi
 } from '@/api/ui_automation'
 import { getVariableFunctions } from '@/api/data-factory'
 
@@ -569,6 +642,10 @@ const currentStepForDataFactory = ref(null)
 const currentFieldForDataFactory = ref('')
 const variableCategories = ref([])
 const loading = ref(false)
+const latestAIExecution = ref(null)
+const aiExecutionRecords = ref([])
+const showAIExecutionDialog = ref(false)
+const aiExecutionLoading = ref(false)
 
 
 
@@ -666,17 +743,16 @@ const loadElements = async () => {
 }
 
 const onRecordSaved = async (payload = {}) => {
+  const savedData = payload?.data || payload || {}
   await loadTestCases()
 
-  const targetId = payload?.test_case_id || selectedTestCase.value?.id
+  const targetId = savedData.test_case_id || selectedTestCase.value?.id
   if (targetId) {
     const refreshedTestCase = testCases.value.find(tc => tc.id === targetId)
     if (refreshedTestCase) {
       selectTestCase(refreshedTestCase, { force: true })
     }
   }
-
-  ElMessage.success('???????')
 }
 
 const onProjectChange = async () => {
@@ -724,6 +800,8 @@ const addStep = () => {
     assert_type: 'textContains',
     assert_value: '',
     description: '',
+    is_optional: false,
+    optional_note: '',
     expanded: true
   }
   currentSteps.value.push(newStep)
@@ -735,7 +813,6 @@ const removeStep = (index) => {
 
 const onStepsReorder = () => {
   // 步骤重新排序后的处理
-  console.log('步骤已重新排序')
 }
 
 const onActionTypeChange = (step) => {
@@ -815,8 +892,23 @@ const saveTestCase = async () => {
 }
 
 const runTestCase = async (testCase) => {
+  if (selectedEngine.value === 'ai') {
+    await handleRunAI(testCase)
+    return
+  }
+
   isRunning.value = true
   try {
+    // 自动保存当前编辑的步骤，避免运行旧版本
+    if (selectedTestCase.value && currentSteps.value.length > 0) {
+      try {
+        await saveTestCase()
+      } catch (saveError) {
+        console.warn('运行前自动保存失败，已取消运行:', saveError)
+        ElMessage.error(t('uiAutomation.testCase.save.failed'))
+        return
+      }
+    }
     const modeText = headlessMode.value ? t('uiAutomation.testCase.runMode.headless') : t('uiAutomation.testCase.runMode.headed')
     ElMessage.info(t('uiAutomation.testCase.run.start', { engine: selectedEngine.value.toUpperCase(), browser: selectedBrowser.value.toUpperCase(), mode: modeText }))
 
@@ -835,10 +927,10 @@ const runTestCase = async (testCase) => {
       ElMessage.success(t('uiAutomation.testCase.run.success'))
     } else {
       ElMessage.error(t('uiAutomation.testCase.run.failed'))
-      // 如果有截图，自动切换到截图标签页
-      if (response.data.screenshots && response.data.screenshots.length > 0) {
-        resultActiveTab.value = 'screenshots'
-      }
+    }
+    // 有截图时自动切换到截图标签页
+    if (response.data.screenshots && response.data.screenshots.length > 0) {
+      resultActiveTab.value = 'screenshots'
     }
   } catch (error) {
     console.error('执行测试用例失败:', error)
@@ -875,6 +967,123 @@ const runTestCase = async (testCase) => {
 
 const toggleView = () => {
   showSteps.value = !showSteps.value
+}
+
+const rerunTestCase = async () => {
+  if (!selectedTestCase.value) {
+    return
+  }
+  if (selectedEngine.value === 'ai') {
+    await runAITestCase(selectedTestCase.value)
+    return
+  }
+  await runTestCase(selectedTestCase.value)
+}
+
+const handleRunAI = async (testCase) => {
+  if (!testCase || isRunning.value) return
+
+  isRunning.value = true
+  try {
+    if (selectedTestCase.value && currentSteps.value.length > 0) {
+      try {
+        await saveTestCase()
+      } catch (saveError) {
+        console.warn('AI运行前自动保存失败:', saveError)
+        ElMessage.error(t('uiAutomation.testCase.save.failed'))
+        return
+      }
+    }
+
+    ElMessage.info(t('uiAutomation.testCase.aiRun.start'))
+
+    const response = await runAITestCaseApi(testCase.id, {
+      headless: false
+    })
+
+    const data = response.data
+    executionResult.value = {
+      success: data.status === 'passed' || data.status === 'running',
+      logs: data.logs || 'AI执行已启动',
+      screenshots: [],
+      execution_time: data.duration || 0,
+      errors: data.message ? [{ message: data.message }] : [],
+      raw: data
+    }
+
+    resultActiveTab.value = 'logs'
+    showSteps.value = false
+
+    const executionId = data.execution_id
+    if (executionId) {
+      await loadAIExecutions()
+      latestAIExecution.value = (aiExecutionRecords.value || []).find(item => item.id === executionId) || null
+    }
+  } catch (error) {
+    console.error('AI执行测试用例失败:', error)
+    const errorMessage = error.response?.data?.message || error.message || 'AI执行失败'
+    executionResult.value = {
+      success: false,
+      logs: error.response?.data?.logs || `AI执行失败: ${errorMessage}`,
+      screenshots: [],
+      execution_time: 0,
+      errors: error.response?.data?.errors || [{ message: errorMessage }],
+      raw: error.response?.data || {}
+    }
+    resultActiveTab.value = 'logs'
+    showSteps.value = false
+    ElMessage.error(t('uiAutomation.testCase.run.failed'))
+  } finally {
+    isRunning.value = false
+  }
+}
+
+const acceptAILocators = async (execution) => {
+  if (!execution) return
+  try {
+    await ElMessageBox.confirm(
+      t('uiAutomation.testCase.acceptAiLocators.confirm'),
+      t('uiAutomation.testCase.acceptAiLocators'),
+      {
+        confirmButtonText: t('uiAutomation.common.confirm'),
+        cancelButtonText: t('uiAutomation.common.cancel'),
+        type: 'warning'
+      }
+    )
+
+    const executionId = execution.id
+    await acceptAILocatorsApi(executionId)
+    ElMessage.success(t('uiAutomation.testCase.acceptAiLocators.success'))
+    await loadTestCases()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('接受AI定位器失败:', error)
+      ElMessage.error(t('uiAutomation.testCase.acceptAiLocators.failed'))
+    }
+  }
+}
+
+const loadAIExecutions = async () => {
+  if (!selectedTestCase.value) {
+    aiExecutionRecords.value = []
+    latestAIExecution.value = null
+    return
+  }
+  aiExecutionLoading.value = true
+  try {
+    const response = await getTestCaseExecutionsApi({ test_case: selectedTestCase.value.id, page_size: 20 })
+    aiExecutionRecords.value = response.data.results || response.data || []
+    latestAIExecution.value = aiExecutionRecords.value[0] || null
+  } catch (error) {
+    console.error('加载AI执行记录失败:', error)
+  } finally {
+    aiExecutionLoading.value = false
+  }
+}
+
+const openAIExecutionDialog = async () => {
+  await loadAIExecutions()
+  showAIExecutionDialog.value = true
 }
 
 const editTestCase = (testCase) => {
@@ -956,10 +1165,7 @@ const copyTestCase = async (testCase) => {
 const loadVariableFunctions = async () => {
   try {
     loading.value = true
-    console.log('开始加载变量函数...')
     const apiResponse = await getVariableFunctions()
-    console.log('变量函数响应:', apiResponse)
-    console.log('变量函数响应.data:', apiResponse.data)
     
     // 检查不同可能的数据结构
     let functionsData = []
@@ -975,8 +1181,6 @@ const loadVariableFunctions = async () => {
         functionsData = apiResponse.data
       }
     }
-    
-    console.log('处理后的函数数据:', functionsData)
     
     // 处理函数数据，按分类组织
     const grouped = {}
@@ -1009,8 +1213,6 @@ const loadVariableFunctions = async () => {
       }
     }
     
-    console.log('按分类组织后的函数:', grouped)
-    
     // 定义固定的分类顺序
     const categoryOrder = ['随机数', '测试数据', '字符串', '编码转换', '加密', '时间日期', 'Crontab', '未分类']
     
@@ -1034,7 +1236,6 @@ const loadVariableFunctions = async () => {
       })
     }
     
-    console.log('最终的分类列表:', orderedCategories)
     variableCategories.value = orderedCategories
   } catch (error) {
     console.error('加载变量函数失败:', error)
@@ -1075,13 +1276,9 @@ const variableCategoriesComputed = computed(() => {
 })
 
 const openVariableHelper = (step, field) => {
-  console.log('TestCaseManager openVariableHelper 被调用, step:', step, 'field:', field)
-  console.log('variableCategories.value:', variableCategories.value)
-  console.log('variableCategories.value.length:', variableCategories.value.length)
   currentEditingStep.value = step
   currentEditingField.value = field
   showVariableHelper.value = true
-  console.log('showVariableHelper.value:', showVariableHelper.value)
 }
 
 const openDataFactorySelector = (step, field) => {
@@ -1264,11 +1461,8 @@ const previewScreenshot = (screenshot) => {
 
 // 组件挂载
 onMounted(async () => {
-  console.log('TestCaseManager onMounted 开始执行...')
   await loadProjects()
-  console.log('loadProjects 完成，准备加载变量函数...')
   await loadVariableFunctions()
-  console.log('loadVariableFunctions 完成')
 
   if (projects.value.length > 0) {
     projectId.value = projects.value[0].id

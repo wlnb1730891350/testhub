@@ -14,6 +14,7 @@ from .models import (
     AppTestSuite,
     AppTestSuiteCase,
     AppTestExecution,
+    AppTestBatchReport,
     AppScheduledTask,
     AppNotificationLog,
 )
@@ -194,6 +195,25 @@ class AppTestExecutionSerializer(serializers.ModelSerializer):
         model = AppTestExecution
         fields = '__all__'
         read_only_fields = ('created_at', 'updated_at', 'started_at', 'finished_at', 'duration')
+
+
+class AppTestBatchReportSerializer(serializers.ModelSerializer):
+    """APP 批次汇总报告序列化器。"""
+    device_name = serializers.CharField(source='device.device_id', read_only=True, allow_null=True)
+    user_name = serializers.CharField(source='user.username', read_only=True, allow_null=True)
+    suite_name = serializers.CharField(source='test_suite.name', read_only=True, allow_null=True)
+    pass_rate = serializers.FloatField(read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    result_display = serializers.CharField(source='get_result_display', read_only=True, default=None)
+
+    class Meta:
+        model = AppTestBatchReport
+        fields = '__all__'
+        read_only_fields = (
+            'batch_id', 'created_at', 'updated_at', 'started_at', 'finished_at', 'duration',
+            'total_cases', 'passed_cases', 'failed_cases', 'error_cases', 'skipped_cases',
+            'status', 'result', 'report_path', 'error_message',
+        )
 
 
 class AppComponentSerializer(serializers.ModelSerializer):

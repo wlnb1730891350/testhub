@@ -1,22 +1,13 @@
 <template>
   <div class="report-center page-container">
-    <section class="report-hero">
-      <div>
-        <p class="hero-kicker">{{ copy.kicker }}</p>
-        <h1>{{ copy.title }}</h1>
-        <p>{{ copy.description }}</p>
-      </div>
-      <div class="hero-actions">
-        <el-button type="primary" size="large" @click="go('/workspace/command-center')">
-          {{ copy.backAction }}
-        </el-button>
-      </div>
-    </section>
+    <header class="page-header">
+      <h1>{{ copy.title }}</h1>
+      <el-button :loading="loading" @click="loadReports">{{ copy.refresh }}</el-button>
+    </header>
 
     <section class="report-summary card-container">
       <div class="section-header">
         <div>
-          <p>{{ copy.summaryEyebrow }}</p>
           <h2>{{ copy.summaryTitle }}</h2>
         </div>
         <span v-if="loading">{{ copy.loading }}</span>
@@ -27,7 +18,6 @@
         <article v-for="item in channels" :key="item.key" class="summary-card" @click="go(item.route)">
           <span>{{ item.label }}</span>
           <strong>{{ item.count }}</strong>
-          <p>{{ channelDescription(item.key) }}</p>
         </article>
       </div>
     </section>
@@ -35,7 +25,6 @@
     <section class="report-activity card-container">
       <div class="section-header">
         <div>
-          <p>{{ copy.activityEyebrow }}</p>
           <h2>{{ copy.activityTitle }}</h2>
         </div>
       </div>
@@ -80,13 +69,9 @@ const isChinese = computed(() => appStore.language === 'zh-cn')
 const copy = computed(() =>
   isChinese.value
     ? {
-        kicker: 'Unified Reporting',
         title: '统一报告中心',
-        description: '从平台层统一查看 API、UI、APP 和手工执行结果，再进入各模块做深入排查和分析。',
-        backAction: '返回平台工作台',
-        summaryEyebrow: 'Summary',
+        refresh: '刷新',
         summaryTitle: '报告通道总览',
-        activityEyebrow: 'Recent Reports',
         activityTitle: '最近结果与执行动态',
         loading: '正在加载报告汇总',
         loadError: '汇总加载失败，稍后重试',
@@ -97,13 +82,9 @@ const copy = computed(() =>
         empty: '当前暂无可展示的报告动态。'
       }
     : {
-        kicker: 'Unified Reporting',
         title: 'Unified Report Center',
-        description: 'View API, UI, APP and manual execution outcomes in one place, then jump into each module for deeper analysis.',
-        backAction: 'Back to command center',
-        summaryEyebrow: 'Summary',
+        refresh: 'Refresh',
         summaryTitle: 'Reporting channels overview',
-        activityEyebrow: 'Recent Reports',
         activityTitle: 'Latest results and execution activity',
         loading: 'Loading report aggregation',
         loadError: 'Aggregation failed to load',
@@ -130,25 +111,6 @@ const loadReports = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const channelDescription = (key) => {
-  const descriptions = isChinese.value
-    ? {
-        manual: '手工/通用测试报告沉淀',
-        api: '接口测试执行与 Allure 输出',
-        ui: 'UI 自动化执行报告',
-        app: 'APP 自动化执行结果',
-        execution: '手工执行计划与进度'
-      }
-    : {
-        manual: 'Manual and general testing reports',
-        api: 'API executions and Allure output',
-        ui: 'UI automation reporting',
-        app: 'APP automation results',
-        execution: 'Manual execution plans and progress'
-      }
-  return descriptions[key] || key
 }
 
 const formatTime = (value) => (value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '')
@@ -204,46 +166,30 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .report-center {
-  gap: 24px;
+  gap: 16px;
 }
 
-.report-hero,
 .card-container {
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.14), transparent 32%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
-  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+  border: 1px solid #dfe3e8;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
-.report-hero {
+.page-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 28px;
+  padding: 2px 0;
 }
 
-.hero-kicker,
-.section-header p {
-  margin: 0 0 10px;
-  color: #0f766e;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.report-hero h1,
+.page-header h1,
 .section-header h2,
 .activity-card h3 {
   margin: 0;
   color: #0f172a;
 }
 
-.report-hero p:last-child,
 .activity-card p {
   margin: 14px 0 0;
   color: #475569;
@@ -251,7 +197,7 @@ onMounted(() => {
 }
 
 .card-container {
-  padding: 26px;
+  padding: 18px;
 }
 
 .section-header {
@@ -259,7 +205,7 @@ onMounted(() => {
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 22px;
+  margin-bottom: 14px;
 }
 
 .section-header span {
@@ -269,7 +215,7 @@ onMounted(() => {
 .summary-grid,
 .activity-grid {
   display: grid;
-  gap: 18px;
+  gap: 10px;
 }
 
 .summary-grid {
@@ -282,21 +228,20 @@ onMounted(() => {
 
 .summary-card,
 .activity-card {
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: #ffffff;
 }
 
 .summary-card {
   padding: 20px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.15s ease;
 }
 
 .summary-card:hover,
 .activity-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+  background: #f8fafc;
 }
 
 .summary-card span,
@@ -310,12 +255,6 @@ onMounted(() => {
   margin-top: 10px;
   color: #0f172a;
   font-size: 1.6rem;
-}
-
-.summary-card p {
-  margin: 10px 0 0;
-  color: #475569;
-  line-height: 1.6;
 }
 
 .activity-card {
@@ -338,8 +277,8 @@ onMounted(() => {
 
 .empty-state {
   padding: 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.76);
+  border-radius: 4px;
+  background: #f8fafc;
   color: #64748b;
 }
 
@@ -350,22 +289,14 @@ onMounted(() => {
 }
 
 @media (max-width: 900px) {
-  .report-hero,
   .activity-grid {
     grid-template-columns: 1fr;
-  }
-
-  .report-hero {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
 
 @media (max-width: 640px) {
-  .report-hero,
   .card-container {
-    padding: 18px;
-    border-radius: 22px;
+    padding: 14px;
   }
 
   .summary-grid,

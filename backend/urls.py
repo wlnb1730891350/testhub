@@ -25,8 +25,9 @@ urlpatterns = [
     path('api/reviews/', include('apps.reviews.urls')),
     path('api/versions/', include('apps.versions.urls')),
     path('api/assistant/', include('apps.assistant.urls')),
-    path('api/users/', include('apps.users.urls')),
     path('api/requirement-analysis/', include('apps.requirement_analysis.urls')),
+    path('api/performance-testing/', include('apps.performance_testing.urls')),
+    path('api/ocr/', include('apps.ocr_service.urls')),
     path('api/ui-automation/', include('apps.ui_automation.urls')),
     path('api/app-automation/', include('apps.app_automation.urls')),
     path('api/', include('apps.api_testing.urls')),
@@ -38,17 +39,17 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_FILES_URL, document_root=settings.STATIC_FILES_ROOT)
 
-# APP自动化 Template 目录静态访问（暂禁用）
-# import os
-# urlpatterns += [
-#     path('app-automation-templates/<path:path>', 
-#          serve, 
-#          {'document_root': os.path.join(settings.BASE_DIR, 'apps', 'app_automation', 'Template')}),
-# ]
+# APP自动化 Template 目录静态访问
+import os
+urlpatterns += [
+    path('app-automation-templates/<path:path>', 
+         serve, 
+         {'document_root': os.path.join(settings.BASE_DIR, 'apps', 'app_automation', 'Template')}),
+]
 
-# APP自动化 Allure 报告访问（暂禁用）
-# urlpatterns += [
-#     path('app-automation-reports/<path:path>', 
-#          serve, 
-#          {'document_root': os.path.join(settings.MEDIA_ROOT, 'app-automation', 'allure-reports')}),
-# ]
+# APP自动化 Allure 报告访问
+urlpatterns += [
+    path('app-automation-reports/<path:path>', 
+         serve, 
+         {'document_root': os.path.join(settings.MEDIA_ROOT, 'app-automation', 'allure-reports')}),
+]

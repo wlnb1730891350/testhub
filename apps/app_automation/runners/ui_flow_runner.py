@@ -432,12 +432,19 @@ class UiFlowRunner:
                 )
             except Exception:
                 logger.exception("Allure JSON 附件写入失败")
+
         path = self._capture_screenshot(name)
         if path:
             try:
                 allure.attach.file(path, name=name, attachment_type=allure.attachment_type.PNG)
             except Exception:
                 logger.exception("Allure 截图附件写入失败: %s", path)
+
+    def capture_final_evidence(self) -> Optional[str]:
+        """Capture the settled final screen as the source report evidence."""
+        # Allow the application to finish its final layout and animation frame.
+        time.sleep(1.5)
+        return self._capture_screenshot('final_state')
     
     def _resolve_selector(self, step: Dict[str, Any]) -> Any:
         """

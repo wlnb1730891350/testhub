@@ -15,12 +15,6 @@
         </div>
       </button>
 
-      <div v-if="moduleName" class="layout-module-card">
-        <span>{{ moduleCard.eyebrow }}</span>
-        <strong>{{ moduleName }}</strong>
-        <p>{{ moduleCard.description }}</p>
-      </div>
-
       <el-scrollbar class="layout-menu-scroll">
         <el-menu
           :default-active="activeMenuPath"
@@ -64,7 +58,6 @@
               <span class="module-chip">{{ moduleName || shellCopy.workspace }}</span>
               <span class="header-title__path">{{ breadcrumbTitle }}</span>
             </div>
-            <strong>{{ headerDescription }}</strong>
           </div>
         </div>
 
@@ -137,7 +130,6 @@ import {
   Aim,
   Edit,
   Cpu,
-  Promotion,
   ArrowDown,
   Cellphone,
   Connection,
@@ -145,7 +137,8 @@ import {
   UserFilled,
   Operation,
   House,
-  VideoCamera
+  VideoCamera,
+  TrendCharts
 } from '@element-plus/icons-vue'
 import logoImage from '@/assets/images/logo_home.png'
 
@@ -186,6 +179,7 @@ const moduleKey = computed(() => {
   if (route.path.startsWith('/workspace')) return 'workspace'
   if (route.path.startsWith('/ai-generation')) return 'ai-generation'
   if (route.path.startsWith('/api-testing')) return 'api-testing'
+  if (route.path.startsWith('/performance-testing')) return 'performance-testing'
   if (route.path.startsWith('/ui-automation')) return 'ui-automation'
   if (route.path.startsWith('/app-automation')) return 'app-automation'
   if (route.path.startsWith('/ai-intelligent-mode')) return 'ai-intelligent-mode'
@@ -199,6 +193,7 @@ const moduleName = computed(() => {
     'ai-generation': t('modules.aiGeneration'),
     workspace: isChinese.value ? '平台工作台' : 'Platform Workspace',
     'api-testing': t('modules.apiTesting'),
+    'performance-testing': isChinese.value ? '性能测试' : 'Performance Testing',
     'ui-automation': t('modules.uiAutomation'),
     'app-automation': isChinese.value ? 'APP 自动化测试' : 'APP Automation Testing',
     'ai-intelligent-mode': t('modules.aiIntelligentMode'),
@@ -209,64 +204,8 @@ const moduleName = computed(() => {
   return names[moduleKey.value] || ''
 })
 
-const moduleCard = computed(() => {
-  const cards = {
-    'ai-generation': {
-      eyebrow: 'Requirement to Cases',
-      description: isChinese.value
-        ? '围绕需求分析、评审、用例和计划组织测试设计入口。'
-        : 'Organize requirement analysis, reviews, cases and plans in one design flow.'
-    },
-    workspace: {
-      eyebrow: 'Platform Center',
-      description: isChinese.value
-        ? '从统一指挥台进入平台，理解优先级、流程和下一步动作。'
-        : 'Start from a unified command center to understand priorities, flow and next actions.'
-    },
-    'api-testing': {
-      eyebrow: 'API Operations',
-      description: isChinese.value
-        ? '统一处理接口、环境、自动化任务、历史记录和报告。'
-        : 'Handle interfaces, environments, automation, history and reports together.'
-    },
-    'ui-automation': {
-      eyebrow: 'UI Delivery',
-      description: isChinese.value
-        ? '连接元素、脚本、套件、执行记录和报告视图。'
-        : 'Connect elements, scripts, suites, execution records and reporting.'
-    },
-    'app-automation': {
-      eyebrow: 'Mobile Coverage',
-      description: isChinese.value
-        ? '围绕设备、场景、测试包和执行记录构建移动端自动化。'
-        : 'Drive mobile automation with devices, scenarios, app packages and run history.'
-    },
-    'ai-intelligent-mode': {
-      eyebrow: 'AI Mode',
-      description: isChinese.value
-        ? '聚焦 AI 驱动执行、案例管理和过程追踪。'
-        : 'Focus on AI-driven execution, case management and operational tracking.'
-    },
-    configuration: {
-      eyebrow: 'Control Center',
-      description: isChinese.value
-        ? '集中管理模型、环境、调度、通知和平台策略。'
-        : 'Manage models, environments, schedules, notifications and platform setup.'
-    },
-    'data-factory': {
-      eyebrow: 'Data Enablement',
-      description: isChinese.value
-        ? '统一构造与分发测试数据，支撑多模块协同。'
-        : 'Create and distribute shared testing data across modules.'
-    }
-  }
-
-  return cards[moduleKey.value] || { eyebrow: shellCopy.value.workspace, description: '' }
-})
-
 const menuByModule = computed(() => ({
   workspace: [
-    { index: '/workspace/command-center', label: isChinese.value ? '平台指挥台' : 'Command Center', icon: Promotion },
     { index: '/workspace/report-center', label: isChinese.value ? '统一报告中心' : 'Unified Reports', icon: DataAnalysis },
     { index: '/workspace/scheduler-center', label: isChinese.value ? '统一调度中心' : 'Unified Scheduler', icon: AlarmClock }
   ],
@@ -305,6 +244,13 @@ const menuByModule = computed(() => ({
     { index: '/api-testing/reports', label: t('menu.testReport'), icon: DataAnalysis },
     { index: '/api-testing/scheduled-tasks', label: t('menu.scheduledTasks'), icon: AlarmClock },
     { index: '/api-testing/notification-logs', label: t('menu.notificationList'), icon: Bell }
+  ],
+  'performance-testing': [
+    { index: '/performance-testing/dashboard', label: isChinese.value ? '概览' : 'Dashboard', icon: Odometer },
+    { index: '/performance-testing/projects', label: isChinese.value ? '性能项目' : 'Projects', icon: Folder },
+    { index: '/performance-testing/scripts', label: isChinese.value ? '脚本编排' : 'Script Builder', icon: Edit },
+    { index: '/performance-testing/executions', label: isChinese.value ? '执行记录' : 'Executions', icon: VideoPlay },
+    { index: '/performance-testing/reports', label: isChinese.value ? '性能报告' : 'Reports', icon: TrendCharts }
   ],
   'ui-automation': [
     { index: '/ui-automation/dashboard', label: t('menu.dashboard'), icon: Odometer },
@@ -353,6 +299,7 @@ const menuByModule = computed(() => ({
     { index: '/configuration/app-env', label: isChinese.value ? 'APP 环境配置' : 'APP Environment', icon: Cellphone },
     { index: '/configuration/ai-mode', label: t('menu.aiModeConfig'), icon: Cpu },
     { index: '/configuration/scheduled-task', label: t('menu.scheduledTaskConfig'), icon: Timer },
+    { index: '/configuration/ocr', label: isChinese.value ? 'OCR 配置' : 'OCR Configuration', icon: Aim },
     { index: '/configuration/dify', label: t('menu.difyConfig'), icon: ChatDotRound }
   ],
   'data-factory': []
@@ -377,8 +324,6 @@ const breadcrumbTitle = computed(() => {
   const routeName = route.name ? String(route.name) : ''
   return route.meta.title || routeName || route.path
 })
-
-const headerDescription = computed(() => moduleCard.value.description || shellCopy.value.defaultHeader)
 
 const updateViewportWidth = () => {
   viewportWidth.value = window.innerWidth
@@ -440,11 +385,9 @@ function flattenMenu(items) {
 <style lang="scss" scoped>
 .layout-shell {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(14, 165, 233, 0.08), transparent 18%),
-    linear-gradient(180deg, #f8fafc, #eef2f7);
+  background: #f5f7fa;
 }
 
 .layout-overlay {
@@ -461,41 +404,38 @@ function flattenMenu(items) {
   z-index: 50;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   height: 100vh;
-  padding: 20px 18px;
-  border-right: 1px solid rgba(148, 163, 184, 0.12);
-  background:
-    radial-gradient(circle at top, rgba(20, 184, 166, 0.16), transparent 28%),
-    linear-gradient(180deg, #0f172a, #111827 54%, #0b1220);
-  box-shadow: 18px 0 44px rgba(15, 23, 42, 0.16);
+  padding: 14px 12px;
+  border-right: 1px solid #1f2937;
+  background: #111827;
 }
 
 .layout-logo {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   width: 100%;
-  padding: 12px;
+  padding: 8px;
   border: 0;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  background: transparent;
   color: white;
   text-align: left;
   cursor: pointer;
 }
 
 .layout-logo__mark {
-  width: 52px;
-  height: 52px;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: #1f2937;
 
   img {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
   }
 }
 
@@ -511,34 +451,6 @@ function flattenMenu(items) {
   span {
     color: rgba(226, 232, 240, 0.78);
     font-size: 0.82rem;
-  }
-}
-
-.layout-module-card {
-  padding: 18px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(15, 118, 110, 0.38), rgba(14, 116, 144, 0.14));
-  color: white;
-
-  span {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(226, 232, 240, 0.8);
-  }
-
-  strong {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 1.12rem;
-  }
-
-  p {
-    margin: 0;
-    color: rgba(226, 232, 240, 0.82);
-    line-height: 1.65;
   }
 }
 
@@ -559,9 +471,9 @@ function flattenMenu(items) {
 
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
-    height: 46px;
-    margin-bottom: 6px;
-    border-radius: 14px;
+    height: 40px;
+    margin-bottom: 3px;
+    border-radius: 6px;
     color: rgba(226, 232, 240, 0.84);
   }
 
@@ -573,7 +485,7 @@ function flattenMenu(items) {
 
   :deep(.el-menu-item.is-active) {
     color: white;
-    background: linear-gradient(90deg, rgba(20, 184, 166, 0.28), rgba(59, 130, 246, 0.18));
+    background: #2563eb;
   }
 }
 
@@ -592,10 +504,10 @@ function flattenMenu(items) {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 24px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(248, 250, 252, 0.84);
-  backdrop-filter: blur(14px);
+  min-height: 56px;
+  padding: 0 20px;
+  border-bottom: 1px solid #dfe3e8;
+  background: #ffffff;
 }
 
 .layout-header__left,
@@ -620,23 +532,23 @@ function flattenMenu(items) {
 
 .icon-button,
 .header-pill {
-  min-height: 42px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(255, 255, 255, 0.82);
+  min-height: 34px;
+  border: 1px solid #d8dde5;
+  background: #ffffff;
   color: #0f172a;
   cursor: pointer;
 }
 
 .icon-button {
-  width: 42px;
+  width: 34px;
   justify-content: center;
-  border-radius: 14px;
+  border-radius: 6px;
 }
 
 .header-pill {
   gap: 10px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: 6px;
 }
 
 .header-title {
@@ -661,10 +573,10 @@ function flattenMenu(items) {
 
 .module-chip {
   flex-shrink: 0;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(15, 118, 110, 0.1);
-  color: #0f766e;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #eef2ff;
+  color: #3730a3;
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -680,7 +592,7 @@ function flattenMenu(items) {
 .layout-content {
   flex: 1;
   min-width: 0;
-  padding: 24px;
+  padding: 20px;
 }
 
 .mobile-only {

@@ -278,33 +278,26 @@ export default {
 
   methods: {
     openAddModal() {
-      console.log('openAddModal clicked')
       this.resetForm()
       this.isEditing = false
       this.showAddModal = true
-      console.log('showAddModal set to:', this.showAddModal)
     },
 
     async loadConfigs() {
       try {
-        console.log('Loading prompt configs...')
         const response = await api.get('/requirement-analysis/prompts/')
-        console.log('Prompts API response:', response.data)
         
         // 处理分页API响应格式
         if (response.data && response.data.results && Array.isArray(response.data.results)) {
           this.configs = response.data.results
-          console.log('Loaded configs from results:', this.configs)
         } else if (response.data && Array.isArray(response.data)) {
           // 直接数组格式的fallback
           this.configs = response.data
-          console.log('Loaded configs from direct array:', this.configs)
         } else {
           console.warn('Unexpected API response format:', response.data)
           this.configs = []
         }
-        
-        console.log('Final configs count:', this.configs.length)
+      
       } catch (error) {
         console.error(this.$t('promptConfig.loadConfigsFailed'), error)
         this.configs = [] // 确保configs始终是数组
@@ -318,13 +311,10 @@ export default {
     },
 
     async loadDefaultPrompts() {
-      console.log('loadDefaultPrompts clicked')
       try {
         const response = await api.get('/requirement-analysis/prompts/load_defaults/')
-        console.log('Default prompts response:', response.data)
         this.defaultPrompts = response.data.defaults
         this.showDefaultsModal = true
-        console.log('showDefaultsModal set to:', this.showDefaultsModal)
       } catch (error) {
         console.error(this.$t('promptConfig.loadDefaultsFailed'), error)
         ElMessage.error(this.$t('promptConfig.loadDefaultsFailed') + ': ' + (error.response?.data?.error || error.message))

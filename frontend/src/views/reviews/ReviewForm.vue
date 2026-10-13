@@ -233,7 +233,6 @@ const fetchProjectUsers = async () => {
   try {
     const response = await api.get('/auth/users/')
     projectUsers.value = response.data.results || response.data || []
-    console.log('All users:', projectUsers.value)
   } catch (error) {
     console.error('Fetch users failed:', error)
     ElMessage.error(t('reviewForm.fetchUsersFailed'))

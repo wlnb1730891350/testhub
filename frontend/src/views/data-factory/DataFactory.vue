@@ -1580,7 +1580,6 @@ const executeTool = async () => {
   executing.value = true
   try {
     const input_data = buildInputData()
-    console.log('Executing tool:', currentTool.value.name, 'with input:', input_data)
     const response = await axios.post('/api/data-factory/', {
       tool_name: currentTool.value.name,
       tool_category: currentCategory.value,
@@ -1590,7 +1589,6 @@ const executeTool = async () => {
       tags: toolForm.value.tags ? toolForm.value.tags.split(',') : []
     })
 
-    console.log('Tool execution result:', response.data)
     toolResult.value = response.data
     ElMessage.success(t('dataFactory.messages.executeSuccess'))
   } catch (error) {
@@ -2106,7 +2104,6 @@ const fetchStatistics = async () => {
 
 const deleteRecord = async (record) => {
   try {
-    console.log('Delete record:', record)
     if (!record || !record.id) {
       ElMessage.error('记录ID不存在')
       return

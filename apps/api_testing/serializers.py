@@ -103,7 +103,7 @@ class ApiRequestSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'request_type', 'method', 'url',
             'headers', 'params', 'body', 'auth', 'pre_request_script',
-            'post_request_script', 'assertions', 'collection', 'order', 'created_by',
+            'post_request_script', 'assertions', 'extractors', 'collection', 'order', 'created_by',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
@@ -171,10 +171,18 @@ class RequestHistorySerializer(serializers.ModelSerializer):
 
 class TestSuiteRequestSerializer(serializers.ModelSerializer):
     request = ApiRequestSerializer(read_only=True)
+    request_id = serializers.IntegerField(source='request.id', read_only=True)
+    extractors = serializers.JSONField(required=False, allow_null=True, default=list)
+    extract_variables = serializers.JSONField(required=False, allow_null=True, default=list)
+    assertions = serializers.JSONField(required=False, allow_null=True, default=list)
+    request_overrides = serializers.JSONField(required=False, allow_null=True, default=dict)
 
     class Meta:
         model = TestSuiteRequest
-        fields = ['id', 'request', 'order', 'assertions', 'enabled']
+        fields = [
+            'id', 'request', 'request_id', 'display_name', 'order', 'assertions',
+            'extractors', 'enabled', 'extract_variables', 'skip_condition', 'request_overrides'
+        ]
 
 
 class TestSuiteSerializer(serializers.ModelSerializer):
@@ -249,7 +257,7 @@ class ScheduledTaskSerializer(serializers.ModelSerializer):
             notification_setting = obj.notification_settings.first()
             if notification_setting:
                 return notification_setting.get_notification_type_display()
-        except:
+        except Exception:
             pass
         return "-"
 
@@ -259,7 +267,7 @@ class ScheduledTaskSerializer(serializers.ModelSerializer):
             notification_setting = obj.notification_settings.first()
             if notification_setting:
                 return notification_setting.notification_type
-        except:
+        except Exception:
             pass
         return "email"  # 默认值
 
@@ -474,7 +482,7 @@ class NotificationLogSerializer(serializers.ModelSerializer):
                 notification_setting = obj.task.notification_settings.first()
                 if notification_setting:
                     return notification_setting.get_notification_type_display()
-            except:
+            except Exception:
                 pass
         # 回退到原始的通知类型显示
         return obj.get_notification_type_display()
@@ -582,7 +590,7 @@ class NotificationLogDetailSerializer(serializers.ModelSerializer):
                 notification_setting = obj.task.notification_settings.first()
                 if notification_setting:
                     return notification_setting.get_notification_type_display()
-            except:
+            except Exception:
                 pass
         # 回退到原始的通知类型显示
         return obj.get_notification_type_display()
@@ -658,7 +666,7 @@ class NotificationLogDetailSerializer(serializers.ModelSerializer):
                 notification_setting = obj.task.notification_settings.first()
                 if notification_setting and notification_setting.notification_type in ['webhook', 'both']:
                     return obj.webhook_bot_info or {}
-            except:
+            except Exception:
                 pass
         return None
 
