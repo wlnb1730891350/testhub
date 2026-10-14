@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [ValidateSet('all', 'check', 'test', 'build')]
-    [string]$Stage = 'all'
+    [string]$Stage = 'all',
+    [switch]$SkipInstall
 )
 
 $ErrorActionPreference = 'Stop'
@@ -11,6 +12,7 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $artifactRoot = Join-Path $repoRoot 'ci-artifacts'
 $junitPath = Join-Path $artifactRoot 'backend-junit.xml'
 $summaryPath = Join-Path $artifactRoot 'ci-summary.json'
+$pytestTemp = Join-Path $artifactRoot 'pytest-temp'
 
 function Write-Step([string]$message) {
     Write-Host "[TestHub CI] $message"
@@ -51,8 +53,13 @@ if (-not $env:DEBUG) { $env:DEBUG = 'False' }
 
 Push-Location $repoRoot
 try {
-    Write-Step 'Installing backend dependencies'
-    Invoke-Checked 'python' @('-m', 'pip', 'install', '-r', 'requirements.txt')
+    if ($SkipInstall) {
+        Write-Step 'Skipping backend dependency installation (--SkipInstall)'
+    }
+    else {
+        Write-Step 'Installing backend dependencies'
+        Invoke-Checked 'python' @('-m', 'pip', 'install', '-r', 'requirements.txt')
+    }
 
     if ($Stage -in @('all', 'check')) {
         Write-Step 'Running Django system checks'
@@ -65,14 +72,20 @@ try {
             'apps/ui_automation/tests',
             'apps/api_testing/tests'
         )
-        Invoke-Checked 'python' @('-m', 'pytest') + $testPaths + @('-q', "--junitxml=$junitPath")
+        New-Item -ItemType Directory -Force -Path $pytestTemp | Out-Null
+        Invoke-Checked 'python' @('-m', 'pytest') + $testPaths + @('-q', "--basetemp=$pytestTemp", "--junitxml=$junitPath")
     }
 
     if ($Stage -in @('all', 'build')) {
         Write-Step 'Installing frontend dependencies'
         Push-Location (Join-Path $repoRoot 'frontend')
         try {
-            Invoke-Checked 'npm' @('ci', '--no-audit', '--no-fund')
+            if ($SkipInstall) {
+                Write-Step 'Skipping frontend dependency installation (--SkipInstall)'
+            }
+            else {
+                Invoke-Checked 'npm' @('ci', '--no-audit', '--no-fund')
+            }
             Write-Step 'Building frontend'
             Invoke-Checked 'npm' @('run', 'build')
         }

@@ -395,7 +395,7 @@ def _extract_failure_reason(record):
     """Return actionable failure evidence, never recording/GIF housekeeping logs."""
     if not record:
         return ''
-    if record.status == 'stopped':
+    if getattr(record, 'status', None) == 'stopped':
         for line in reversed(str(getattr(record, 'logs', '') or '').splitlines()):
             text = str(line).strip()
             if text and ('停止' in text or '未被旧后端调度' in text):
@@ -408,15 +408,6 @@ def _extract_failure_reason(record):
         if error:
             return f'步骤 {index}：{error[:180]}'
 
-    ignored_markers = ('录制完成', 'gif录制已生成', '截图', '==========')
-    lines = [str(line).strip() for line in str(getattr(record, 'logs', '') or '').splitlines() if str(line).strip()]
-    for line in reversed(lines):
-        lowered = line.lower()
-        if any(marker in lowered for marker in ignored_markers):
-            continue
-        if any(marker in lowered for marker in ('业务动作失败', '操作超时', '执行失败', '执行出错', '错误', '异常', 'timeout', 'error', 'failed', 'exception')):
-            return line[:200]
-
     failed_tasks = [
         task for task in (getattr(record, 'planned_tasks', None) or [])
         if str(task.get('status') or '').lower() in {'failed', 'error', 'stopped'}
@@ -426,6 +417,16 @@ def _extract_failure_reason(record):
         description = str(task.get('display_description') or task.get('description') or '').strip()
         if description:
             return f'失败步骤：{description[:180]}'
+
+    ignored_markers = ('录制完成', 'gif录制已生成', '截图', '==========')
+    lines = [str(line).strip() for line in str(getattr(record, 'logs', '') or '').splitlines() if str(line).strip()]
+    for line in reversed(lines):
+        lowered = line.lower()
+        if any(marker in lowered for marker in ignored_markers):
+            continue
+        if any(marker in lowered for marker in ('业务动作失败', '操作超时', '执行失败', '执行出错', '错误', '异常', 'timeout', 'error', 'failed', 'exception')):
+            return line[:200]
+
     return '执行失败，未记录到具体错误信息。'
 
 
@@ -499,6 +500,16 @@ def _build_ai_batch_report(batch_id, records):
     finished_count = len(records) - status_counts['running'] - status_counts['pending']
     passed_count = status_counts['passed']
     failed_count = status_counts['failed'] + status_counts['error']
+    summary = {
+        'total': len(records),
+        'passed': passed_count,
+        'failed': failed_count,
+        'running': status_counts['running'],
+        'pending': status_counts['pending'],
+        'completion_rate': round(passed_count / len(records) * 100, 2) if records else 0,
+    }
+    if status_counts['stopped']:
+        summary['stopped'] = status_counts['stopped']
     return {
         'batch': {
             'id': str(batch_id),
@@ -508,15 +519,7 @@ def _build_ai_batch_report(batch_id, records):
             'duration': total_duration,
             'is_complete': finished_count == len(records),
         },
-        'summary': {
-            'total': len(records),
-            'passed': passed_count,
-            'failed': failed_count,
-            'stopped': status_counts['stopped'],
-            'running': status_counts['running'],
-            'pending': status_counts['pending'],
-            'completion_rate': round(passed_count / len(records) * 100, 2) if records else 0,
-        },
+        'summary': summary,
         'cases': [
             {
                 'id': record.id,
