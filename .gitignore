@@ -62,6 +62,7 @@ frontend/node_modules/
 frontend/.DS_Store
 frontend/*.log
 frontend/dist/
+ci-artifacts/
 node_modules/
 *.log
 *.sqlite3
