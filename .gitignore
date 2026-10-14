@@ -20,10 +20,7 @@ logs/*/*
 .sql
 static_files/img/
 .bak
-# 忽略所有 app/*/migrations/ 目录下的所有内容 (包括文件和子目录)
-apps/*/migrations/*
-# 使用否定模式，例外地跟踪 __init__.py 文件
-!apps/*/migrations/__init__.py
+# 迁移文件是真实源码，必须纳入版本控制（历史上此处的忽略规则导致新克隆缺失全部迁移文件）
 
 # 忽略 allure-static 下的所有文件（运行时生成）
 media/allure-static/*
@@ -72,7 +69,11 @@ fix_*.py
 check_*.py
 tmp_*.py
 _db_update_*.py
+# 下划线开头的临时脚本统一忽略，但真实源码必须例外：
+# __init__.py（包初始化）与私有模块 _helpers.py 曾被 _*.py 误杀，导致新克隆 ImportError
 _*.py
+!__init__.py
+!apps/ui_automation/views/_helpers.py
 !manage.py
 screenshot.png
 media/requirement_doc_images/
