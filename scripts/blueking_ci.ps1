@@ -73,7 +73,15 @@ try {
             'apps/api_testing/tests'
         )
         New-Item -ItemType Directory -Force -Path $pytestTemp | Out-Null
-        Invoke-Checked 'python' @('-m', 'pytest') + $testPaths + @('-q', "--basetemp=$pytestTemp", "--junitxml=$junitPath")
+        $env:TMP = $pytestTemp
+        $env:TEMP = $pytestTemp
+        $env:PYTEST_DEBUG_TEMPROOT = $pytestTemp
+        $pytestArguments = @('-m', 'pytest') + $testPaths + @(
+            '-q',
+            "--basetemp=$pytestTemp",
+            "--junitxml=$junitPath"
+        )
+        Invoke-Checked 'python' $pytestArguments
     }
 
     if ($Stage -in @('all', 'build')) {
