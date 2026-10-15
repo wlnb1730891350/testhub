@@ -1,8 +1,12 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('all', 'check', 'test', 'build')]
+    [ValidateSet('all', 'check', 'test', 'build', 'web')]
     [string]$Stage = 'all',
-    [switch]$SkipInstall
+    [switch]$SkipInstall,
+    [ValidateRange(0, 1000)]
+    [int]$WebCaseLimit = 3,
+    [string]$WebCaseIds = '',
+    [switch]$SkipArticles
 )
 
 $ErrorActionPreference = 'Stop'
@@ -75,6 +79,9 @@ function Get-GitValue([string[]]$arguments) {
 New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 if (Test-Path $ciLogPath) { Remove-Item -Force $ciLogPath }
 Write-Step "CI script started: Stage=$Stage SkipInstall=$SkipInstall"
+if ($Stage -eq 'web') {
+    Write-Step "Web debug selection: limit=$WebCaseLimit case_ids=$WebCaseIds skip_articles=$SkipArticles"
+}
 
 Require-Command 'git' 'Git is required to verify the checked-out revision.'
 Require-Command 'python' 'Install Python 3.12+ and expose it in PATH.'
@@ -231,6 +238,21 @@ try {
         finally {
             Pop-Location
         }
+    }
+
+    if ($Stage -eq 'web') {
+        $webArguments = @('scripts/run_all_web_ai_cases.py')
+        if ($WebCaseIds.Trim()) {
+            $webArguments += @('--case-ids', $WebCaseIds.Trim())
+        }
+        else {
+            $webArguments += @('--limit', [string]$WebCaseLimit)
+        }
+        if ($SkipArticles) {
+            $webArguments += '--skip-articles'
+        }
+        Write-Step 'Running selected Web AI cases only (desktop cases are excluded)'
+        Invoke-Checked 'python' $webArguments
     }
 
     $summary = [ordered]@{

@@ -40,9 +40,13 @@ def is_article_case(case: AICase) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--case-ids', default='', help='Comma-separated AI case IDs. Defaults to all web-capable cases.')
+    parser.add_argument('--limit', type=int, default=0, help='Maximum number of selected web cases. 0 means no limit.')
     parser.add_argument('--skip-articles', action='store_true')
     parser.add_argument('--article-delay', type=float, default=20.0, help='Delay between article cases to reduce site rate limiting.')
     args = parser.parse_args()
+
+    if args.limit < 0:
+        parser.error('--limit must be 0 or greater')
 
     requested_ids = [int(value) for value in args.case_ids.split(',') if value.strip()]
     cases = AICase.objects.filter(execution_target__in=['web', 'dual']).order_by('id')
@@ -51,6 +55,8 @@ def main() -> int:
     cases = list(cases.select_related('setup_template', 'project'))
     if args.skip_articles:
         cases = [case for case in cases if not is_article_case(case)]
+    if args.limit:
+        cases = cases[:args.limit]
 
     # A full run gets its normal database reports, but should not send one
     # enterprise-WeChat notification for every individual case.
