@@ -39,7 +39,8 @@ Require-Command 'npm' 'Install Node.js 20+ and expose npm in PATH.'
 $pythonVersion = (& python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')").Trim()
 $nodeVersion = (& node --version).Trim()
 $npmVersion = (& npm --version).Trim()
-Write-Step "Python $pythonVersion / Node $nodeVersion / npm $npmVersion"
+$gitRevision = (& git rev-parse --short HEAD 2>$null).Trim()
+Write-Step "Git $gitRevision / Python $pythonVersion / Node $nodeVersion / npm $npmVersion"
 
 $env:DJANGO_SETTINGS_MODULE = 'backend.settings'
 $env:PYTHONPATH = "$repoRoot;$($env:PYTHONPATH)"
@@ -50,6 +51,9 @@ $env:TESTHUB_CI = '1'
 # the pipeline and let a dedicated integration environment provide MySQL later.
 if (-not $env:SECRET_KEY) { $env:SECRET_KEY = 'testhub-blueking-ci-only' }
 if (-not $env:DEBUG) { $env:DEBUG = 'False' }
+
+$dbInfo = (& python -c "import django; django.setup(); from django.conf import settings; db=settings.DATABASES['default']; print(db['ENGINE']+' / name='+str(db['NAME'])+' / host='+str(db['HOST'])+' / port='+str(db['PORT']))").Trim()
+Write-Step "Django database $dbInfo"
 
 Push-Location $repoRoot
 try {
