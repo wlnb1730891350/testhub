@@ -38,11 +38,15 @@ New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
 Require-Command 'python' 'Install Python 3.12+ and expose it in PATH.'
 Require-Command 'npm' 'Install Node.js 20+ and expose npm in PATH.'
 
-$pythonVersion = (& python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')").Trim()
+$pythonVersion = (& python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')").Trim()
+$pytestVersion = (& python -m pytest --version).Trim()
+$djangoVersion = (& python -c "import django; print(django.get_version())").Trim()
 $nodeVersion = (& node --version).Trim()
 $npmVersion = (& npm --version).Trim()
-$gitRevision = (& git rev-parse --short HEAD 2>$null).Trim()
-Write-Step "Git $gitRevision / Python $pythonVersion / Node $nodeVersion / npm $npmVersion"
+$gitRevision = (& git rev-parse HEAD 2>$null).Trim()
+$runnerIdentity = (& whoami 2>$null).Trim()
+Write-Step "Git $gitRevision / Python $pythonVersion / pytest $pytestVersion / Django $djangoVersion / Node $nodeVersion / npm $npmVersion"
+Write-Step "Runner $runnerIdentity / Workspace $repoRoot"
 
 $env:DJANGO_SETTINGS_MODULE = 'backend.settings'
 $env:PYTHONPATH = "$repoRoot;$($env:PYTHONPATH)"
@@ -85,6 +89,8 @@ try {
         if (Test-Path $failurePath) { Remove-Item -Force $failurePath }
         $pytestArguments = @('-m', 'pytest') + $testPaths + @(
             '-q',
+            '--tb=long',
+            '--show-capture=all',
             "--basetemp=$pytestTemp",
             "--junitxml=$junitPath"
         )
