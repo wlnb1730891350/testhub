@@ -19,9 +19,21 @@ $pytestTemp = Join-Path $artifactRoot 'pytest-temp'
 
 function Write-Step([string]$message) {
     $line = "[TestHub CI] $message"
-    Add-Content -Path $ciLogPath -Value $line -Encoding UTF8
-    # BlueKing Batch Script reliably collects stdout; Write-Host may only go to
-    # the PowerShell host/information stream and appear as an empty log panel.
+    Write-CapturedLine $line @($ciLogPath)
+}
+
+function Write-CapturedLine([object]$value, [string[]]$paths) {
+    if ($value -is [System.Management.Automation.ErrorRecord]) {
+        $line = $value.Exception.Message
+    }
+    else {
+        $line = [string]$value
+    }
+    foreach ($path in $paths) {
+        Add-Content -Path $path -Value $line -Encoding UTF8
+    }
+    # BlueKing Batch Script reliably collects stdout; keep the same text in
+    # the archived UTF-8 log without relying on Tee-Object's UTF-16 default.
     Write-Output $line
     [Console]::Out.Flush()
 }
@@ -40,7 +52,7 @@ function Invoke-Checked([string]$file, [string[]]$arguments) {
         # ErrorActionPreference=Stop, harmless warnings can abort the CI step.
         $ErrorActionPreference = 'Continue'
         & $file @arguments 2>&1 |
-            Tee-Object -FilePath $ciLogPath -Append
+            ForEach-Object { Write-CapturedLine $_ @($ciLogPath) }
         $exitCode = $LASTEXITCODE
     }
     finally {
@@ -164,8 +176,7 @@ try {
             try {
                 $ErrorActionPreference = 'Continue'
                 & python @pytestArguments 2>&1 |
-                    Tee-Object -FilePath $pytestLogPath |
-                    Tee-Object -FilePath $ciLogPath -Append
+                    ForEach-Object { Write-CapturedLine $_ @($pytestLogPath, $ciLogPath) }
                 $pytestExitCode = $LASTEXITCODE
             }
             finally {
