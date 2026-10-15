@@ -57,6 +57,7 @@ $env:TESTHUB_CI = '1'
 # the pipeline and let a dedicated integration environment provide MySQL later.
 if (-not $env:SECRET_KEY) { $env:SECRET_KEY = 'testhub-blueking-ci-only' }
 if (-not $env:DEBUG) { $env:DEBUG = 'False' }
+if (-not $env:ALLOWED_HOSTS) { $env:ALLOWED_HOSTS = 'testserver,localhost,127.0.0.1' }
 
 $dbInfo = (& python -c "import django; django.setup(); from django.conf import settings; db=settings.DATABASES['default']; print(db['ENGINE']+' / name='+str(db['NAME'])+' / host='+str(db['HOST'])+' / port='+str(db['PORT']))").Trim()
 Write-Step "Django database $dbInfo"
