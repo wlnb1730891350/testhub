@@ -22,6 +22,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 os.environ.setdefault('DJANGO_ALLOW_ASYNC_UNSAFE', 'true')
 django.setup()
 
+from django.utils import timezone
+
 from apps.ui_automation.desktop_engine import run_desktop_case
 from apps.ui_automation.models import AICase, AIExecutionRecord
 from apps.ui_automation.views.ai import _default_nn_cdp_config
@@ -47,40 +49,51 @@ def main() -> int:
     # exactly one batch summary to every opted-in webhook bot once the whole
     # batch settles (see ai_notifications.send_ai_batch_execution_notification
     # at the end). Per-case notifications are disabled at module import (see
-    # the note next to the imports): records here are created lazily, so
-    # delegating to the batch notifier per case would ship a premature
-    # "共 1 条" summary and lock out the real end-of-run report.
+    # the note next to the imports): delegating to the batch notifier per case
+    # would ship a premature "共 1 条" summary and lock out the real report.
     batch_id = uuid.uuid4()
+    batch_started_at = timezone.now()
     cases = list(AICase.objects.filter(
         execution_target__in=['desktop', 'dual'],
         desktop_app_profile__isnull=False,
     ).order_by('id'))
+
+    # Pre-create every member record up front so the AI report page lists the
+    # whole batch (as 等待中) from the first second. Creating them lazily made
+    # the batch row read "批量执行（1 条用例）" and grow one case at a time,
+    # which looked like the run was stuck on its first case. Each executor
+    # resets start_time/status when its case really begins (see
+    # desktop_engine.run_desktop_case), so durations stay exact.
+    records = [
+        AIExecutionRecord.objects.create(
+            project=case.project,
+            ai_case=case,
+            case_name=case.name,
+            task_description=(
+                case.desktop_task_description
+                if case.execution_target == 'dual'
+                else case.task_description
+            ),
+            execution_target='desktop',
+            batch_id=batch_id,
+            batch_started_at=batch_started_at,
+            batch_run_mode='sequential',
+            status='pending',
+            logs='等待执行...\n',
+        )
+        for case in cases
+    ]
+
     emit({'event': 'started', 'batch_id': str(batch_id), 'total': len(cases)})
 
     totals = {'passed': 0, 'failed': 0, 'stopped': 0}
-    for index, case in enumerate(cases, 1):
-        task_description = (
-            case.desktop_task_description
-            if case.execution_target == 'dual'
-            else case.task_description
-        )
+    for index, (case, record) in enumerate(zip(cases, records), 1):
         profile_config = case.desktop_app_profile.to_execution_config()
         config = {
             **profile_config,
             **_default_nn_cdp_config(case, profile_config),
             **(case.desktop_config or {}),
         }
-        record = AIExecutionRecord.objects.create(
-            project=case.project,
-            ai_case=case,
-            case_name=case.name,
-            task_description=task_description,
-            execution_target='desktop',
-            batch_id=batch_id,
-            batch_run_mode='sequential',
-            status='running',
-            logs='Full Windows regression started.\n',
-        )
         emit({'event': 'case_started', 'index': index, 'total': len(cases), 'case_id': case.id, 'record_id': record.id, 'name': case.name})
         try:
             run_desktop_case(record, config, should_stop=lambda: False)
