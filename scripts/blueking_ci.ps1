@@ -12,6 +12,7 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $artifactRoot = Join-Path $repoRoot 'ci-artifacts'
 $junitPath = Join-Path $artifactRoot 'backend-junit.xml'
 $failurePath = Join-Path $artifactRoot 'backend-failures.txt'
+$pytestLogPath = Join-Path $artifactRoot 'backend-pytest.log'
 $summaryPath = Join-Path $artifactRoot 'ci-summary.json'
 $pytestTemp = Join-Path $artifactRoot 'pytest-temp'
 
@@ -88,7 +89,10 @@ try {
             "--junitxml=$junitPath"
         )
         try {
-            Invoke-Checked 'python' $pytestArguments
+            & python @pytestArguments 2>&1 | Tee-Object -FilePath $pytestLogPath
+            if ($LASTEXITCODE -ne 0) {
+                throw "Command failed with exit code $LASTEXITCODE`: python $($pytestArguments -join ' ')"
+            }
         }
         catch {
             $failureLines = @(
@@ -146,6 +150,7 @@ try {
         artifacts = @(
             'ci-artifacts/backend-junit.xml',
             'ci-artifacts/backend-failures.txt',
+            'ci-artifacts/backend-pytest.log',
             'frontend/dist'
         )
     }
@@ -153,6 +158,10 @@ try {
     Write-Step 'Pipeline completed successfully'
 }
 catch {
+    if (Test-Path $pytestLogPath) {
+        Write-Host '[TestHub CI] Pytest log tail:'
+        Get-Content -Path $pytestLogPath -Tail 120 | ForEach-Object { Write-Host "[TestHub CI] $_" }
+    }
     if (Test-Path $junitPath) {
         try {
             $junit = [xml](Get-Content -Raw -Path $junitPath)
