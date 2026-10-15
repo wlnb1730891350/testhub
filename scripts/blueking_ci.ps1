@@ -241,6 +241,23 @@ try {
     }
 
     if ($Stage -eq 'web') {
+        # Preflight: confirm an opted-in webhook bot for AI testing exists, so the
+        # run never silently skips the enterprise-WeChat/Feishu/DingTalk summary.
+        # Uses the same predicate the notifier itself uses (_enabled_ai_bots).
+        Write-Step 'Preflight: checking opted-in webhook bot config for AI testing'
+        $preflight = & python -c "import django; django.setup(); from apps.ui_automation.ai_notifications import _enabled_ai_bots; print(len(_enabled_ai_bots()))" 2>&1
+        $preflightExit = $LASTEXITCODE
+        $preflightCount = 0
+        if ($preflightExit -eq 0 -and ($preflight -match '^\d+$')) {
+            $preflightCount = [int]$preflight
+        }
+        if ($preflightCount -gt 0) {
+            Write-Step "Preflight OK: $preflightCount opted-in webhook bot(s) found; AI run will send summary notifications."
+        }
+        else {
+            Write-Step "WARNING: no opted-in webhook bot for AI testing (raw='$preflight', exit=$preflightExit). The run will proceed, but NO summary notification will be sent. Configure UnifiedNotificationConfig (config_type in webhook_wechat/webhook_feishu/webhook_dingtalk, is_active=True, bot enabled + enable_ai_testing=True + webhook_url) in the CI database."
+        }
+
         $webArguments = @('scripts/run_all_web_ai_cases.py')
         if ($WebCaseIds.Trim()) {
             $webArguments += @('--case-ids', $WebCaseIds.Trim())
