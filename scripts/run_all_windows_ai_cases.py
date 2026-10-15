@@ -28,6 +28,16 @@ from apps.ui_automation.views.ai import _default_nn_cdp_config
 import apps.ui_automation.ai_notifications as ai_notifications
 
 
+# This runner owns exactly ONE batch summary, which is sent explicitly at the
+# end of main(). Records are created lazily (one per loop iteration), so the
+# shared per-case notifier would be fooled into thinking the batch is finished
+# the moment the first case ends: it filters by batch_id, finds a single
+# terminal record, and reports "共 1 条" while burning the per-batch cache lock
+# that then blocks the real summary. Disable per-case notifications for this
+# process; the explicit batch call below is unaffected.
+ai_notifications.send_ai_execution_notification = lambda _record: []
+
+
 def emit(payload: dict) -> None:
     print(json.dumps(payload, ensure_ascii=False), flush=True)
 
@@ -36,8 +46,10 @@ def main() -> int:
     # A full sequential regression writes its own database reports and emits
     # exactly one batch summary to every opted-in webhook bot once the whole
     # batch settles (see ai_notifications.send_ai_batch_execution_notification
-    # at the end). Per-case spam is avoided because that notifier only fires
-    # after every AIExecutionRecord under the same batch_id is terminal.
+    # at the end). Per-case notifications are disabled at module import (see
+    # the note next to the imports): records here are created lazily, so
+    # delegating to the batch notifier per case would ship a premature
+    # "共 1 条" summary and lock out the real end-of-run report.
     batch_id = uuid.uuid4()
     cases = list(AICase.objects.filter(
         execution_target__in=['desktop', 'dual'],
