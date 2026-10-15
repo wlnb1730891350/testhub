@@ -33,10 +33,11 @@ def emit(payload: dict) -> None:
 
 
 def main() -> int:
-    # A full sequential regression must not emit one enterprise-WeChat message
-    # per case. The normal batch-report path remains responsible for summary
-    # notification after the run is reviewed.
-    ai_notifications.send_ai_execution_notification = lambda _record: None
+    # A full sequential regression writes its own database reports and emits
+    # exactly one batch summary to every opted-in webhook bot once the whole
+    # batch settles (see ai_notifications.send_ai_batch_execution_notification
+    # at the end). Per-case spam is avoided because that notifier only fires
+    # after every AIExecutionRecord under the same batch_id is terminal.
     batch_id = uuid.uuid4()
     cases = list(AICase.objects.filter(
         execution_target__in=['desktop', 'dual'],
@@ -81,6 +82,17 @@ def main() -> int:
         emit({'event': 'case_finished', 'index': index, 'total': len(cases), 'case_id': case.id, 'record_id': record.id, 'name': case.name, 'status': status})
 
     emit({'event': 'finished', 'batch_id': str(batch_id), 'total': len(cases), **totals})
+
+    # Fire a single batch summary to every opted-in webhook bot now that all
+    # records under batch_id are terminal. Wrapped so a notification failure can
+    # never fail the pipeline itself.
+    try:
+        notify_results = ai_notifications.send_ai_batch_execution_notification(batch_id)
+        notify_results = list(notify_results) if notify_results else []
+        emit({'event': 'notification', 'batch_id': str(batch_id), 'results': notify_results})
+    except Exception as notify_error:
+        emit({'event': 'notification_error', 'batch_id': str(batch_id), 'error': str(notify_error)})
+
     return 0 if not totals['failed'] and not totals['stopped'] else 1
 
 
