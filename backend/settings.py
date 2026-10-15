@@ -421,6 +421,9 @@ SIMPLEUI_LOGIN_PARTICLES = True
 # SIMPLEUI_HOME_ICON = 'fa fa-gauge'
 # 设置simpleui 点击首页图标跳转的地址
 SIMPLEUI_INDEX = 'http://localhost:3000'
+# 企微/飞书/钉钉 测试报告链接的基准地址。可被环境变量 FRONTEND_URL 覆盖，
+# 当平台通过 LAN IP 或域名（而非 localhost）对外可达时，在蓝盾流水线里设该变量即可。
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 # 自定义后台的Logo
 SIMPLEUI_LOGO = 'https://static.djangoproject.com/img/favicon.6dbf28c0650e.ico'
 # 是否显示首页信息
