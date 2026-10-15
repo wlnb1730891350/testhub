@@ -1584,7 +1584,14 @@ class AIExecutionRecordViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError, AttributeError):
             return Response({'error': 'batch_id 格式错误'}, status=status.HTTP_400_BAD_REQUEST)
 
-        records = list(self.get_queryset().filter(batch_id=batch_id).order_by('start_time', 'id'))
+        # Order by creation id, i.e. the batch's planned execution order. Batch
+        # members are pre-created up front (scripts and batch_record alike), so
+        # id order matches case order. Ordering by start_time instead pushed the
+        # running case to the bottom: each executor resets start_time the moment
+        # its case really begins, while not-yet-started members keep the earlier
+        # creation timestamp, so the only running row sank below every pending
+        # one and looked like "everything is still waiting".
+        records = list(self.get_queryset().filter(batch_id=batch_id).order_by('id'))
         if not records:
             return Response({'error': '未找到该批量执行记录或没有权限'}, status=status.HTTP_404_NOT_FOUND)
 
