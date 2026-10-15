@@ -11,6 +11,7 @@ $ProgressPreference = 'SilentlyContinue'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $artifactRoot = Join-Path $repoRoot 'ci-artifacts'
 $junitPath = Join-Path $artifactRoot 'backend-junit.xml'
+$failurePath = Join-Path $artifactRoot 'backend-failures.txt'
 $summaryPath = Join-Path $artifactRoot 'ci-summary.json'
 $pytestTemp = Join-Path $artifactRoot 'pytest-temp'
 
@@ -80,12 +81,41 @@ try {
         $env:TMP = $pytestTemp
         $env:TEMP = $pytestTemp
         $env:PYTEST_DEBUG_TEMPROOT = $pytestTemp
+        if (Test-Path $failurePath) { Remove-Item -Force $failurePath }
         $pytestArguments = @('-m', 'pytest') + $testPaths + @(
             '-q',
             "--basetemp=$pytestTemp",
             "--junitxml=$junitPath"
         )
-        Invoke-Checked 'python' $pytestArguments
+        try {
+            Invoke-Checked 'python' $pytestArguments
+        }
+        catch {
+            $failureLines = @(
+                "Pytest command failed: $($_.Exception.Message)",
+                "Git revision: $gitRevision",
+                "Python: $pythonVersion",
+                "Database: $dbInfo"
+            )
+            if (Test-Path $junitPath) {
+                try {
+                    $junit = [xml](Get-Content -Raw -Path $junitPath)
+                    $failedCases = @($junit.testsuites.testsuite.testcase | Where-Object { $_.failure -or $_.error })
+                    if ($failedCases.Count -gt 0) {
+                        $failureLines += 'Failed test cases:'
+                        foreach ($case in $failedCases) {
+                            $detail = if ($case.failure) { $case.failure.InnerText } else { $case.error.InnerText }
+                            $failureLines += ("{0}.{1}: {2}" -f $case.classname, $case.name, (($detail -replace '\s+', ' ').Trim()))
+                        }
+                    }
+                }
+                catch {
+                    $failureLines += "Could not parse pytest JUnit report: $($_.Exception.Message)"
+                }
+            }
+            $failureLines | Set-Content -Path $failurePath -Encoding UTF8
+            throw
+        }
     }
 
     if ($Stage -in @('all', 'build')) {
@@ -115,6 +145,7 @@ try {
         npm = $npmVersion
         artifacts = @(
             'ci-artifacts/backend-junit.xml',
+            'ci-artifacts/backend-failures.txt',
             'frontend/dist'
         )
     }
@@ -128,10 +159,14 @@ catch {
             $failedCases = @($junit.testsuites.testsuite.testcase | Where-Object { $_.failure -or $_.error })
             if ($failedCases.Count -gt 0) {
                 Write-Host '[TestHub CI] Pytest failure details:'
-                foreach ($case in $failedCases | Select-Object -First 20) {
+                $failureLines = @('Pytest failure details:')
+                foreach ($case in $failedCases) {
                     $detail = if ($case.failure) { $case.failure.InnerText } else { $case.error.InnerText }
-                    Write-Host ("[TestHub CI] {0}.{1}: {2}" -f $case.classname, $case.name, (($detail -replace '\s+', ' ').Trim()))
+                    $line = ("{0}.{1}: {2}" -f $case.classname, $case.name, (($detail -replace '\s+', ' ').Trim()))
+                    Write-Host "[TestHub CI] $line"
+                    $failureLines += $line
                 }
+                $failureLines | Set-Content -Path $failurePath -Encoding UTF8
             }
         }
         catch {
