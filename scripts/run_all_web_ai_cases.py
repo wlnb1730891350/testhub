@@ -58,9 +58,11 @@ def main() -> int:
     if args.limit:
         cases = cases[:args.limit]
 
-    # A full run gets its normal database reports, but should not send one
-    # enterprise-WeChat notification for every individual case.
-    ai_notifications.send_ai_execution_notification = lambda _record: None
+    # A full run writes its own database reports and emits exactly one batch
+    # summary to every opted-in webhook bot once the whole batch settles
+    # (see ai_notifications.send_ai_batch_execution_notification at the end).
+    # Per-case spam is avoided because that notifier only fires after every
+    # AIExecutionRecord under the same batch_id reaches a terminal status.
     batch_id = uuid.uuid4()
     totals = {'passed': 0, 'failed': 0, 'stopped': 0}
     emit({'event': 'started', 'batch_id': str(batch_id), 'target': 'web', 'total': len(cases)})
@@ -97,6 +99,17 @@ def main() -> int:
         emit({'event': 'case_finished', 'index': index, 'total': len(cases), 'case_id': case.id, 'record_id': record.id, 'name': case.name, 'status': status})
 
     emit({'event': 'finished', 'batch_id': str(batch_id), 'target': 'web', 'total': len(cases), **totals})
+
+    # Fire a single batch summary to every opted-in webhook bot now that all
+    # records under batch_id are terminal. Wrapped so a notification failure can
+    # never fail the pipeline itself.
+    try:
+        notify_results = ai_notifications.send_ai_batch_execution_notification(batch_id)
+        notify_results = list(notify_results) if notify_results else []
+        emit({'event': 'notification', 'batch_id': str(batch_id), 'results': notify_results})
+    except Exception as notify_error:
+        emit({'event': 'notification_error', 'batch_id': str(batch_id), 'error': str(notify_error)})
+
     return 0 if not totals['failed'] and not totals['stopped'] else 1
 
 
