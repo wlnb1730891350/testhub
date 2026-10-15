@@ -13,11 +13,17 @@ $artifactRoot = Join-Path $repoRoot 'ci-artifacts'
 $junitPath = Join-Path $artifactRoot 'backend-junit.xml'
 $failurePath = Join-Path $artifactRoot 'backend-failures.txt'
 $pytestLogPath = Join-Path $artifactRoot 'backend-pytest.log'
+$ciLogPath = Join-Path $artifactRoot 'blueking-ci.log'
 $summaryPath = Join-Path $artifactRoot 'ci-summary.json'
 $pytestTemp = Join-Path $artifactRoot 'pytest-temp'
 
 function Write-Step([string]$message) {
-    Write-Host "[TestHub CI] $message"
+    $line = "[TestHub CI] $message"
+    Add-Content -Path $ciLogPath -Value $line -Encoding UTF8
+    # BlueKing Batch Script reliably collects stdout; Write-Host may only go to
+    # the PowerShell host/information stream and appear as an empty log panel.
+    Write-Output $line
+    [Console]::Out.Flush()
 }
 
 function Require-Command([string]$name, [string]$installHint) {
@@ -27,23 +33,80 @@ function Require-Command([string]$name, [string]$installHint) {
 }
 
 function Invoke-Checked([string]$file, [string[]]$arguments) {
-    & $file @arguments
-    if ($LASTEXITCODE -ne 0) {
-        throw "Command failed with exit code $LASTEXITCODE`: $file $($arguments -join ' ')"
+    Write-Step "Executing: $file $($arguments -join ' ')"
+    $previousErrorAction = $ErrorActionPreference
+    try {
+        # Windows PowerShell turns native stderr into ErrorRecord objects. With
+        # ErrorActionPreference=Stop, harmless warnings can abort the CI step.
+        $ErrorActionPreference = 'Continue'
+        & $file @arguments 2>&1 |
+            Tee-Object -FilePath $ciLogPath -Append
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+    Write-Step "Completed with exit code ${exitCode}: $file"
+    if ($exitCode -ne 0) {
+        throw "Command failed with exit code $exitCode`: $file $($arguments -join ' ')"
     }
 }
 
-New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
+function Get-GitValue([string[]]$arguments) {
+    $value = & git @('-C', $repoRoot) @arguments 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        return ''
+    }
+    return (($value | Out-String).Trim())
+}
 
+New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
+if (Test-Path $ciLogPath) { Remove-Item -Force $ciLogPath }
+Write-Step "CI script started: Stage=$Stage SkipInstall=$SkipInstall"
+
+Require-Command 'git' 'Git is required to verify the checked-out revision.'
 Require-Command 'python' 'Install Python 3.12+ and expose it in PATH.'
 Require-Command 'npm' 'Install Node.js 20+ and expose npm in PATH.'
+
+$gitRevision = Get-GitValue @('rev-parse', 'HEAD')
+if (-not $gitRevision) {
+    throw "The BlueKing workspace is not a Git checkout: $repoRoot"
+}
+$checkoutBranch = Get-GitValue @('symbolic-ref', '--short', '-q', 'HEAD')
+if (-not $checkoutBranch) {
+    $checkoutBranch = '(detached)'
+}
+$expectedBranch = if ($env:BK_CI_BRANCH) { $env:BK_CI_BRANCH } elseif ($env:GIT_BRANCH) { $env:GIT_BRANCH } else { 'user/nn-uicase-auto' }
+$expectedBranch = $expectedBranch -replace '^refs/heads/', ''
+$expectedBranch = $expectedBranch -replace '^origin/', ''
+$gitUpstream = Get-GitValue @('rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}')
+Write-Step "Checkout $gitRevision / Branch $checkoutBranch / Upstream $(if ($gitUpstream) { $gitUpstream } else { '(none)' })"
+
+$remoteName = if ($checkoutBranch -ne '(detached)') { Get-GitValue @('config', '--get', "branch.$checkoutBranch.remote") } else { '' }
+if (-not $remoteName -or $remoteName -eq '.') {
+    $remoteName = 'origin'
+}
+$remoteShaLine = & git -C $repoRoot ls-remote $remoteName "refs/heads/$expectedBranch" 2>$null | Select-Object -First 1
+if ($LASTEXITCODE -eq 0 -and $remoteShaLine) {
+    $remoteSha = (($remoteShaLine -split '\s+')[0]).Trim()
+    Write-Step "Remote $remoteName/$expectedBranch $remoteSha"
+    if ($remoteSha -ne $gitRevision) {
+        throw "Stale checkout detected: workspace has $gitRevision but $remoteName/$expectedBranch is $remoteSha"
+    }
+}
+else {
+    Write-Step "Could not verify remote $remoteName/$expectedBranch; set BK_CI_EXPECTED_SHA to require an exact revision"
+}
+
+if ($env:BK_CI_EXPECTED_SHA -and $gitRevision -ne $env:BK_CI_EXPECTED_SHA.Trim()) {
+    throw "Unexpected checkout revision: expected $($env:BK_CI_EXPECTED_SHA.Trim()) but found $gitRevision"
+}
 
 $pythonVersion = (& python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')").Trim()
 $pytestVersion = (& python -m pytest --version).Trim()
 $djangoVersion = (& python -c "import django; print(django.get_version())").Trim()
 $nodeVersion = (& node --version).Trim()
 $npmVersion = (& npm --version).Trim()
-$gitRevision = (& git rev-parse HEAD 2>$null).Trim()
 $runnerIdentity = (& whoami 2>$null).Trim()
 Write-Step "Git $gitRevision / Python $pythonVersion / pytest $pytestVersion / Django $djangoVersion / Node $nodeVersion / npm $npmVersion"
 Write-Step "Runner $runnerIdentity / Workspace $repoRoot"
@@ -96,9 +159,21 @@ try {
             "--junitxml=$junitPath"
         )
         try {
-            & python @pytestArguments 2>&1 | Tee-Object -FilePath $pytestLogPath
-            if ($LASTEXITCODE -ne 0) {
-                throw "Command failed with exit code $LASTEXITCODE`: python $($pytestArguments -join ' ')"
+            Write-Step "Executing: python $($pytestArguments -join ' ')"
+            $previousErrorAction = $ErrorActionPreference
+            try {
+                $ErrorActionPreference = 'Continue'
+                & python @pytestArguments 2>&1 |
+                    Tee-Object -FilePath $pytestLogPath |
+                    Tee-Object -FilePath $ciLogPath -Append
+                $pytestExitCode = $LASTEXITCODE
+            }
+            finally {
+                $ErrorActionPreference = $previousErrorAction
+            }
+            Write-Step "Completed with exit code ${pytestExitCode}: python pytest"
+            if ($pytestExitCode -ne 0) {
+                throw "Command failed with exit code $pytestExitCode`: python $($pytestArguments -join ' ')"
             }
         }
         catch {
@@ -158,6 +233,7 @@ try {
             'ci-artifacts/backend-junit.xml',
             'ci-artifacts/backend-failures.txt',
             'ci-artifacts/backend-pytest.log',
+            'ci-artifacts/blueking-ci.log',
             'frontend/dist'
         )
     }
