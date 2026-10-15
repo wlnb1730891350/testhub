@@ -26,17 +26,17 @@ from django.utils import timezone
 
 from apps.ui_automation.desktop_engine import run_desktop_case
 from apps.ui_automation.models import AICase, AIExecutionRecord
-from apps.ui_automation.views.ai import _default_nn_cdp_config
+from apps.ui_automation.views.ai import _desktop_execution_config
 import apps.ui_automation.ai_notifications as ai_notifications
 
 
 # This runner owns exactly ONE batch summary, which is sent explicitly at the
-# end of main(). Records are created lazily (one per loop iteration), so the
-# shared per-case notifier would be fooled into thinking the batch is finished
-# the moment the first case ends: it filters by batch_id, finds a single
-# terminal record, and reports "共 1 条" while burning the per-batch cache lock
-# that then blocks the real summary. Disable per-case notifications for this
-# process; the explicit batch call below is unaffected.
+# end of main(). Every batch member is pre-created up front, so the shared
+# per-case notifier would normally find 166 still-pending records and stay
+# quiet; disabling it here keeps the summary single-sourced and immune to
+# future ordering changes (a batch that happened to reach its last case first
+# could otherwise burn the per-batch cache lock with a partial report). The
+# explicit batch call below is unaffected.
 ai_notifications.send_ai_execution_notification = lambda _record: []
 
 
@@ -88,12 +88,13 @@ def main() -> int:
 
     totals = {'passed': 0, 'failed': 0, 'stopped': 0}
     for index, (case, record) in enumerate(zip(cases, records), 1):
-        profile_config = case.desktop_app_profile.to_execution_config()
-        config = {
-            **profile_config,
-            **_default_nn_cdp_config(case, profile_config),
-            **(case.desktop_config or {}),
-        }
+        # Use the platform's own desktop-config builder instead of assembling
+        # profile + cdp defaults by hand. _desktop_execution_config also folds
+        # the case's setup template into cdp_login_credentials; the hand-rolled
+        # dict skipped that step, so every isolated Electron profile started
+        # logged-out and the login-dependent cases (e.g. "登录成功") looped on
+        # the login dialog forever.
+        config = _desktop_execution_config(case)
         emit({'event': 'case_started', 'index': index, 'total': len(cases), 'case_id': case.id, 'record_id': record.id, 'name': case.name})
         try:
             run_desktop_case(record, config, should_stop=lambda: False)
