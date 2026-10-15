@@ -118,6 +118,22 @@ try {
     Write-Step 'Pipeline completed successfully'
 }
 catch {
+    if (Test-Path $junitPath) {
+        try {
+            $junit = [xml](Get-Content -Raw -Path $junitPath)
+            $failedCases = @($junit.testsuites.testsuite.testcase | Where-Object { $_.failure -or $_.error })
+            if ($failedCases.Count -gt 0) {
+                Write-Host '[TestHub CI] Pytest failure details:'
+                foreach ($case in $failedCases | Select-Object -First 20) {
+                    $detail = if ($case.failure) { $case.failure.InnerText } else { $case.error.InnerText }
+                    Write-Host ("[TestHub CI] {0}.{1}: {2}" -f $case.classname, $case.name, (($detail -replace '\s+', ' ').Trim()))
+                }
+            }
+        }
+        catch {
+            Write-Host "[TestHub CI] Could not parse pytest JUnit report: $($_.Exception.Message)"
+        }
+    }
     $summary = [ordered]@{
         status = 'failed'
         stage = $Stage
